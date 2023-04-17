@@ -1,0 +1,1006 @@
+outconn_plain_http:
+  - content_encoding:
+    content_type: ""
+    data_format: json
+    host: http://auth-app.auth-service
+    id: 693
+    is_active: true
+    name: "Auth Service [General] (Internal)"
+    pool_size: 20
+    timeout: 10
+    transport: plain_http
+    url_path: /service/api/v1/customers/{customerUUID}{x}?size=9999
+
+  - content_encoding:
+    content_type: ""
+    data_format: xml
+    host: https://calendar.dev.quext.io
+    id: 697
+    is_active: true
+    name: 'CalendarAppointment (Internal)'
+    pool_size: 20
+    timeout: 10
+    transport: plain_http
+    url_path: /api/v1/appointments
+
+  - content_encoding:
+    content_type: ""
+    data_format: xml
+    host: https://calendar.dev.quext.io
+    id: 695
+    is_active: true
+    name: 'CalendarAvailability (Internal)'
+    pool_size: 20
+    timeout: 10
+    transport: plain_http
+    url_path: /api/v1/time-slots/communities/{communityUUID}/available/{start_date}/{end_date}/{appointment_type}
+
+  - cache_expiry:
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: ""
+    has_rbac: false
+    host: https://api.sightmap.com
+    http_accept:
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: false
+    method:
+    name: 'Engrain Push Transaction Url'
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /v1/assets/{assetId}/multifamily/pricing/{pricingId}/ingest
+
+  - cache_expiry:
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: ""
+    has_rbac: false
+    host: https://api.sightmap.com
+    http_accept:
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: false
+    method:
+    name: 'Engrain Push Transaction Data'
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 120
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /v1/assets/{assetId}/multifamily/pricing/{pricingId}/transactions/{transactionId}/ingest?commit={commit}
+
+  - cache_expiry:
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type:
+    data_format: json
+    has_rbac: false
+    host: https://integration.quext.io
+    http_accept:
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: false
+    method:
+    name: '[Engrain Push] General Communities'
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /api/v1/general/communities
+
+  - cache_expiry:
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type:
+    data_format: json
+    has_rbac: false
+    host: https://api.sightmap.com
+    http_accept:
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: false
+    method:
+    name: '[Engrain Push] List assets'
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /v1/assets
+
+  - cache_expiry:
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type:
+    data_format: json
+    has_rbac: false
+    host: https://api.sightmap.com
+    http_accept:
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: false
+    method:
+    name: '[Engrain Push] Pricing process'
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /v1/assets/{asset_id}/multifamily/pricing
+  - cache_expiry: 0
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: xml
+    has_rbac: false
+    host: https://{subdomain}.entrata.com
+    http_accept:
+    id: 801
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: true
+    method:
+    name: 'Entrata (External)'
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /api/{method}
+
+  - cache_expiry:
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: json
+    has_rbac: false
+    host: https://nestiolistings.com
+    http_accept:
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: false
+    method:
+    name: "[Funnel] Availability Times"
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /api/v2/appointments/group/{group_id}/available-times/?from_date={from_date}&to_date={to_date}
+
+  - cache_expiry:
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: json
+    has_rbac: false
+    host: https://nestiolistings.com
+    http_accept:
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: false
+    method:
+    name: "[Funnel] Schedule Tour"
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /api/v2/appointments/group/{group_id}/book/
+
+  - cache_expiry:
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: json
+    has_rbac: false
+    host: https://nestiolistings.com
+    http_accept:
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: false
+    method:
+    name: "[Funnel] Guest Card"
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /api/v2/clients/
+
+  - cache_expiry:
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: json
+    has_rbac: false
+    host: "$IPS_HOST"
+    http_accept:
+    id: 691
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: false
+    method:
+    name: 'Integrated Partner Storage [ACLs] (Internal)'
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /api/partners/security/{partnerUUID}?redacted=off
+
+  - cache_expiry:
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: json
+    has_rbac: false
+    host: "$IPS_HOST"
+    http_accept:
+    id: 701
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: false
+    method:
+    name: 'Integrated Partners (Internal)'
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /api/community/{communityUUID}/partners
+
+  - cache_expiry:
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: json
+    has_rbac: false
+    host: "https://partner-api.dev.quext.io"
+    http_accept:
+    id: 676
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: false
+    method:
+    name: 'Integrated Partner Storage [Purposes] (Internal)'
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /api/read-configuration/{customerUUID}/{communityUUID}/{purpose}
+
+  - cache_expiry: 0
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: json
+    has_rbac: false
+    host: "$QXT_CALENDAR_TOUR_HOST"
+    http_accept:
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: true
+    method:
+    name: "[Quext Calendar] Availability Times"
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /api/v1/time-slots/public
+
+  - cache_expiry: 0
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: json
+    has_rbac: false
+    host: "$QXT_CALENDAR_TOUR_HOST"
+    http_accept:
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: true
+    method:
+    name: "[Quext Calendar] Schedule Tour"
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /api/v1/appointments/public
+
+  - cache_expiry: 0
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: xml
+    has_rbac: false
+    host: https://api.myresman.com
+    http_accept:
+    id: 695
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: true
+    method:
+    name: 'ResMan (External)'
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /{interface}/{method}
+
+  - cache_expiry:
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: ""
+    has_rbac: false
+    host: https://api.myresman.com
+    http_accept:
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: false
+    method:
+    name: "[Resman] Post Lead Management 4_0"
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /MITS/PostLeadManagement4_0
+
+  - cache_expiry:
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: ""
+    has_rbac: false
+    host: https://api.myresman.com
+    http_accept:
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: false
+    method:
+    name: "[Resman] Search Prospects"
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /MITS/SearchProspects
+
+  - cache_expiry:
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: ""
+    has_rbac: false
+    host: https://api.myresman.com
+    http_accept:
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: false
+    method:
+    name: "[Resman] Get Prospect sources"
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /Leasing/GetProspectSources
+
+  - cache_expiry:
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: json
+    has_rbac: false
+    host: "$TRANS_UNION_AUTHENTICATION"
+    http_accept:
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: false
+    method:
+    name: "[TransUnion] Get Authentication"
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist:
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /api/authentication
+
+  - cache_expiry:
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: json
+    has_rbac: false
+    host: "$TRANS_UNION_IDENTITY_HOST"
+    http_accept:
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: false
+    method:
+    name: "[TransUnion] Verify Resident"
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /Identity/Verify
+
+  - cache_expiry: 0
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: json
+    has_rbac: false
+    host: "$TRANS_UNION_IDENTITY_HOST"
+    http_accept:
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: true
+    method:
+    name: "[TransUnion] Evaluate Resident"
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /Identity/Evaluate
+
+  - cache_expiry:
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: ""
+    has_rbac: false
+    host: "$TRANS_UNION_REPORT_HOST"
+    http_accept:
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: false
+    method:
+    name: "[TransUnion] Screening Report"
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /gateway/creditapp.ashx
+
+  - cache_expiry:
+    cache_id:
+    cache_name:
+    cache_type:
+    connection: outgoing
+    content_encoding:
+    content_type: ""
+    data_format: json
+    has_rbac: false
+    host: "$LEASING_HOST"
+    http_accept:
+    is_active: true
+    is_internal: false
+    is_rate_limit_active: false
+    match_slash: false
+    merge_url_params_req: false
+    method:
+    name: "[Leasing] Get Background Screening Id"
+    params_pri: channel-params-over-msg
+    ping_method: HEAD
+    pool_size: 20
+    rate_limit_check_parent_def: false
+    rate_limit_def:
+    rate_limit_type:
+    sec_def: zato-no-security
+    sec_tls_ca_cert_id:
+    sec_type:
+    sec_use_rbac: false
+    security_id:
+    security_name:
+    serialization_type: string
+    service:
+    service_id:
+    service_name:
+    service_whitelist: ""
+    soap_action: ""
+    soap_version:
+    timeout: 10
+    transport: plain_http
+    url_params_pri: qs-over-path
+    url_path: /api/v1/application/background-screening/find-by-number/{application_number}
