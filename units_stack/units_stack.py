@@ -45,7 +45,7 @@ class UnitsStack(Stack):
 
         # --------------------------------------------------------------------
         # Create lambda function instance
-        guestcard_lambda = lambda_.Function(
+        lambda_function = lambda_.Function(
             self, 
             "Units_Lambda_Function",
             description="Units Lambda is responsible for handling units per community",
@@ -76,7 +76,7 @@ class UnitsStack(Stack):
 
         # -------------------------------------------------------------------- 
         # Add a resource to the base API and configure CORS options for the resource 
-        guestcard_endpoint = base_api.root.add_resource("api").add_resource("v2").add_resource("general").add_resource(
+        general_units_endpoint = base_api.root.add_resource("api").add_resource("v2").add_resource("general").add_resource(
             "units",
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
@@ -86,8 +86,8 @@ class UnitsStack(Stack):
 
         # --------------------------------------------------------------------
         # Create a Lambda integration instance
-        guestcard_endpoint_lambda_integration = apigateway_.LambdaIntegration(
-            guestcard_lambda,
+        endpoint_lambda_integration = apigateway_.LambdaIntegration(
+            lambda_function,
             proxy=False,
             integration_responses=[
                 apigateway_.IntegrationResponse(
@@ -103,9 +103,9 @@ class UnitsStack(Stack):
         # --------------------------------------------------------------------
         # Add a POST method to endpoint
         # TODO: Add a method response for the all endpoint's status code
-        guestcard_endpoint.add_method(
+        general_units_endpoint.add_method(
             'POST', 
-            guestcard_endpoint_lambda_integration,
+            endpoint_lambda_integration,
             method_responses=[
                 apigateway_.MethodResponse(
                     status_code="200",
