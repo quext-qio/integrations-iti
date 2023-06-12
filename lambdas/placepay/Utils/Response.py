@@ -1,7 +1,7 @@
 import json
 
 class Response:
-    def __init__(self, statusCode: str, data: list, errors: list) -> None:
+    def __init__(self, status_code: str, data: list, errors: list) -> None:
         """
         Initializes a new Response object.
 
@@ -10,26 +10,26 @@ class Response:
             data (list): The data to be included in the response.
             errors (list): Any errors or error messages associated with the response.
         """
-        self.statusCode = statusCode
+        self.status_code = status_code
         self.data = data
         self.errors = errors
 
-    def toDict(self) -> str:
+    def toDict(self) -> dict:
         """
         Converts the Response object to a dictionary format.
 
         Returns:
             dict: The Response object represented as a dictionary.
         """
-        return json.dumps({
-            'statusCode': self.statusCode,
-            'body': {
+        return {
+            'statusCode': self.status_code,
+            'body': json.dumps({
                 'data': self.data,
-                'errors': self.errors
-            },
+                'errors': self.errors,
+            }),
             'headers': {
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Origin': '*',  
             },
             'isBase64Encoded': False  
-        })
+        }

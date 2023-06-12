@@ -1,17 +1,16 @@
 import place
+import json
 from Schemas.SchemaRequestPost import SchemaRequestPost
+from Utils.Response import Response
 from Config.Config import config
 
 def lambda_handler(event, context):
-    # return {
-    #     'statusCode': 400,
-    #     'data': ["Sucess"],
-    #     'errors': []
-    # }
-
     return {
-        'statusCode': "400",
-        'body': 'Mensaje de error o información adicional',
+        'statusCode': "500",
+        'body': json.dumps({
+            'data': ["Sucess"],
+            'errors': []
+        }),
         'headers': {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',  

@@ -156,21 +156,7 @@ class PlacepayStack(Stack):
                     response_parameters={
                         'method.response.header.Access-Control-Allow-Origin': "'*'"
                     }
-                ), 
-                apigateway_.IntegrationResponse(
-                    status_code="400",
-                    response_templates={"application/json": ""},
-                    response_parameters={
-                        'method.response.header.Access-Control-Allow-Origin': "'*'"
-                    }
-                ), 
-                apigateway_.IntegrationResponse(
-                    status_code="500",
-                    response_templates={"application/json": ""},
-                    response_parameters={
-                        'method.response.header.Access-Control-Allow-Origin': "'*'"
-                    }
-                ), 
+                ),  
             ],
             
         )
@@ -200,18 +186,6 @@ class PlacepayStack(Stack):
             method_responses=[
                 apigateway_.MethodResponse(
                     status_code="200",
-                    response_parameters={
-                        'method.response.header.Access-Control-Allow-Origin': True
-                    }
-                ),
-                apigateway_.MethodResponse(
-                    status_code="400",
-                    response_parameters={
-                        'method.response.header.Access-Control-Allow-Origin': True
-                    }
-                ),
-                apigateway_.MethodResponse(
-                    status_code="500",
                     response_parameters={
                         'method.response.header.Access-Control-Allow-Origin': True
                     }
