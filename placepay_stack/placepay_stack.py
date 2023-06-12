@@ -148,7 +148,7 @@ class PlacepayStack(Stack):
         # GET
         get_endpoint_lambda_integration = apigateway_.LambdaIntegration(
             get_lambda_function,
-            proxy=False,
+            proxy=True,
             integration_responses=[
                 apigateway_.IntegrationResponse(
                     status_code="200",
@@ -156,8 +156,21 @@ class PlacepayStack(Stack):
                     response_parameters={
                         'method.response.header.Access-Control-Allow-Origin': "'*'"
                     }
-                ),
-                
+                ), 
+                apigateway_.IntegrationResponse(
+                    status_code="400",
+                    response_templates={"application/json": ""},
+                    response_parameters={
+                        'method.response.header.Access-Control-Allow-Origin': "'*'"
+                    }
+                ), 
+                apigateway_.IntegrationResponse(
+                    status_code="500",
+                    response_templates={"application/json": ""},
+                    response_parameters={
+                        'method.response.header.Access-Control-Allow-Origin': "'*'"
+                    }
+                ), 
             ],
             
         )
@@ -190,7 +203,19 @@ class PlacepayStack(Stack):
                     response_parameters={
                         'method.response.header.Access-Control-Allow-Origin': True
                     }
-                )
+                ),
+                apigateway_.MethodResponse(
+                    status_code="400",
+                    response_parameters={
+                        'method.response.header.Access-Control-Allow-Origin': True
+                    }
+                ),
+                apigateway_.MethodResponse(
+                    status_code="500",
+                    response_parameters={
+                        'method.response.header.Access-Control-Allow-Origin': True
+                    }
+                ),
             ]
         )
 

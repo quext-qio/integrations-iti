@@ -9,13 +9,12 @@ def lambda_handler(event, context):
     #     'errors': []
     # }
 
-    response = {
+    return {
         'statusCode': "400",
         'body': 'Mensaje de error o información adicional',
         'headers': {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Origin': '*',  
         },
         'isBase64Encoded': False  
     }
-    return response
