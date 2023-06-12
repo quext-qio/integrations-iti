@@ -4,14 +4,15 @@ from Schemas.SchemaRequestPost import SchemaRequestPost
 from Config.Config import config
 
 def lambda_handler(event, context):
-    is_valid, input_errors = SchemaRequestPost(event).is_valid()
+    input = json.loads(event['body'])
+    is_valid, input_errors = SchemaRequestPost(input).is_valid()
     if is_valid:
         try:
             place.api_key = f"{config['ApiKey']}"
             account = place.Account.create(
-                email = event["email"],
-                full_name = event["fullName"],
-                user_type= event["userType"]
+                email = input["email"],
+                full_name = input["fullName"],
+                user_type= input["userType"]
             )
 
             # Case: Success

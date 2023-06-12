@@ -133,7 +133,7 @@ class PlacepayStack(Stack):
         # POST
         post_endpoint_lambda_integration = apigateway_.LambdaIntegration(
             post_lambda_function,
-            proxy=False,
+            proxy=True,
             integration_responses=[
                 apigateway_.IntegrationResponse(
                     status_code="200",
@@ -166,6 +166,7 @@ class PlacepayStack(Stack):
         post_endpoint.add_method(
             'POST', 
             post_endpoint_lambda_integration,
+            request_parameters={},
             method_responses=[
                 apigateway_.MethodResponse(
                     status_code="200",
