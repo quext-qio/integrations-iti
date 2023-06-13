@@ -6,20 +6,17 @@ from aws_cdk import (
 )
 from constructs import Construct
 
-class IntegrationsItiStack(Stack):
+class GuestcardsStack(Stack):
 
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi , **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
-        # Guestcard 
-        # TODO: load environment from Parameter Store
-        # Constants
+        # Guestcards
         environment={
             "LOG_LEVEL": "INFO",
-            "TEST": "test",
+            "PLACE_PAY_API_KEY": "test_private_key__-yK6oFDnaJFwIrhVcCfI5r",
         }
-        stage_name="dev"
         timeout=Duration.seconds(900)
         allow_methods=['OPTIONS', 'POST']
         
@@ -29,7 +26,7 @@ class IntegrationsItiStack(Stack):
             self, "CerberusLayer",
             layer_version_name="CerberusLayer",
             description="Package documentation: https://docs.python-cerberus.org/en/stable/",
-            code=lambda_.Code.from_asset("./utils/layers/cerberus_layer.zip"),
+            code=lambda_.Code.from_asset("./src/utils/layers/cerberus_layer.zip"),
             compatible_runtimes=[
                 lambda_.Runtime.PYTHON_3_10, 
                 lambda_.Runtime.PYTHON_3_9, 
@@ -44,39 +41,26 @@ class IntegrationsItiStack(Stack):
         )
 
         # --------------------------------------------------------------------
-        # Create lambda function instance
-        guestcard_lambda = lambda_.Function(
+        # Create lambda function instance for (# POST /resman/postleadmanagement4_0)
+        lambda_function = lambda_.Function(
             self, 
-            "Guestcard_Lambda_Function",
-            description="Guestcard Lambda is responsible for handling prospects for various communities and customers",
+            "Resman_Guestcards_Lambda_Function",
+            description="Guestcards Lambda is responsible save prospects information", 
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
             timeout=timeout,
-            code=lambda_.Code.from_asset("./lambdas/guestcards"),
+            code=lambda_.Code.from_asset("./src/lambdas/guestcards"),
             handler="lambda_function.lambda_handler",
             layers=[cerberus_layer],
-            function_name="Guestcard_Lambda_Function",
+            function_name="Resman_Guestcards_Lambda_Function",
         )
 
         # --------------------------------------------------------------------
-        # Create a Rest API instance
-        base_api = apigateway_.RestApi(
-            self, "Integrations_Api", 
-            rest_api_name="Integrations_Api", 
-            description="Base API Gateway for Zato to AWS Migration",
-            deploy_options=apigateway_.StageOptions(
-                stage_name=stage_name, 
-                logging_level=apigateway_.MethodLoggingLevel.INFO,
-                data_trace_enabled=True,
-            ),
-            endpoint_configuration=apigateway_.EndpointConfiguration(
-                types=[apigateway_.EndpointType.REGIONAL]
-            ),
-        )
+        # Add base resource to API Gateway
+        api = api.add_resource("resman")
 
-        # -------------------------------------------------------------------- 
-        # Add a resource to the base API and configure CORS options for the resource 
-        guestcard_endpoint = base_api.root.add_resource("api").add_resource("v1").add_resource("resman").add_resource(
+        # Resource to save prospects (POST)
+        post_endpoint = api.add_resource(
             "postleadmanagement4_0",
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
@@ -86,9 +70,10 @@ class IntegrationsItiStack(Stack):
 
         # --------------------------------------------------------------------
         # Create a Lambda integration instance
-        guestcard_endpoint_lambda_integration = apigateway_.LambdaIntegration(
-            guestcard_lambda,
-            proxy=False,
+        # POST
+        endpoint_lambda_integration = apigateway_.LambdaIntegration(
+            lambda_function,
+            proxy=True,
             integration_responses=[
                 apigateway_.IntegrationResponse(
                     status_code="200",
@@ -96,16 +81,17 @@ class IntegrationsItiStack(Stack):
                     response_parameters={
                         'method.response.header.Access-Control-Allow-Origin': "'*'"
                     }
-                )
+                ),
             ],
         )
 
+
         # --------------------------------------------------------------------
         # Add a POST method to endpoint
-        # TODO: Add a method response for the all endpoint's status code
-        guestcard_endpoint.add_method(
+        post_endpoint.add_method(
             'POST', 
-            guestcard_endpoint_lambda_integration,
+            endpoint_lambda_integration,
+            request_parameters={},
             method_responses=[
                 apigateway_.MethodResponse(
                     status_code="200",
@@ -115,3 +101,5 @@ class IntegrationsItiStack(Stack):
                 )
             ],
         )
+
+        

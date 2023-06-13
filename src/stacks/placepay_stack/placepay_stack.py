@@ -8,7 +8,7 @@ from constructs import Construct
 
 class PlacepayStack(Stack):
 
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi , **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
@@ -17,7 +17,7 @@ class PlacepayStack(Stack):
             "LOG_LEVEL": "INFO",
             "PLACE_PAY_API_KEY": "test_private_key__-yK6oFDnaJFwIrhVcCfI5r",
         }
-        stage_name="dev"
+        #stage_name="dev"
         timeout=Duration.seconds(900)
         allow_methods=['OPTIONS', 'POST']
         
@@ -27,7 +27,7 @@ class PlacepayStack(Stack):
             self, "CerberusLayer",
             layer_version_name="CerberusLayer",
             description="Package documentation: https://docs.python-cerberus.org/en/stable/",
-            code=lambda_.Code.from_asset("./utils/layers/cerberus_layer.zip"),
+            code=lambda_.Code.from_asset("./src/utils/layers/cerberus_layer.zip"),
             compatible_runtimes=[
                 lambda_.Runtime.PYTHON_3_10, 
                 lambda_.Runtime.PYTHON_3_9, 
@@ -46,7 +46,7 @@ class PlacepayStack(Stack):
             self, "PlaceApiLayer",
             layer_version_name="PlaceApiLayer",
             description="Package documentation: https://pypi.org/project/place-api/",
-            code=lambda_.Code.from_asset("./utils/layers/place_layer.zip"),
+            code=lambda_.Code.from_asset("./src/utils/layers/place_layer.zip"),
             compatible_runtimes=[
                 lambda_.Runtime.PYTHON_3_10, 
                 lambda_.Runtime.PYTHON_3_9, 
@@ -69,7 +69,7 @@ class PlacepayStack(Stack):
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
             timeout=timeout,
-            code=lambda_.Code.from_asset("./lambdas/placepay"),
+            code=lambda_.Code.from_asset("./src/lambdas/placepay"),
             handler="post_lambda_function.lambda_handler",
             layers=[cerberus_layer, place_api_layer],
             function_name="Placepay_New_Account_Lambda_Function",
@@ -83,34 +83,17 @@ class PlacepayStack(Stack):
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
             timeout=timeout,
-            code=lambda_.Code.from_asset("./lambdas/placepay"),
+            code=lambda_.Code.from_asset("./src/lambdas/placepay"),
             handler="get_lambda_function.lambda_handler",
             layers=[cerberus_layer, place_api_layer],
             function_name="Placepay_Token_Lambda_Function",
         )
 
         # --------------------------------------------------------------------
-        # Create a Rest API instance
-        base_api = apigateway_.RestApi(
-            self, "Integrations_Api", 
-            rest_api_name="Integrations_Api", 
-            description="Base API Gateway for Zato to AWS Migration",
-            deploy_options=apigateway_.StageOptions(
-                stage_name=stage_name, 
-                logging_level=apigateway_.MethodLoggingLevel.INFO,
-                data_trace_enabled=True,
-            ),
-            endpoint_configuration=apigateway_.EndpointConfiguration(
-                types=[apigateway_.EndpointType.REGIONAL]
-            ),
-        )
+        # Add base resource to API Gateway
+        api = api.add_resource("placepay")
 
-        # -------------------------------------------------------------------- 
-        # Add a resource to the base API and configure CORS options for the resource 
-        # api = /api/v1/placepay
-        api = base_api.root.add_resource("api").add_resource("v1").add_resource("placepay")
-
-        # POST
+        # Resource to create new account (POST)
         post_endpoint = api.add_resource(
             "new-account",
             default_cors_preflight_options=apigateway_.CorsOptions(
@@ -119,7 +102,7 @@ class PlacepayStack(Stack):
             ),    
         )
 
-        # GET
+        # Resource to create new access token (GET)
         get_endpoint = api.add_resource(
             "token",
             default_cors_preflight_options=apigateway_.CorsOptions(
