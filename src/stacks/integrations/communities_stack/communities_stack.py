@@ -15,7 +15,7 @@ class CommunitiesStack(Stack):
         # Constants
         environment={
             "LOG_LEVEL": "INFO",
-           # "PLACE_PAY_API_KEY": "test_private_key__-yK6oFDnaJFwIrhVcCfI5r",
+            "AUTH_HOST": "https://auth-api.dev.quext.io",
         }
         timeout=Duration.seconds(900)
         allow_methods=['OPTIONS', 'POST']

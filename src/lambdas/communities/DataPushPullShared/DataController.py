@@ -1,17 +1,16 @@
 import json
 import requests
-from Config.Config import config
+import os
 
 class DataController:
-    def __init__(self, logger, outgoing_channel):
+    def __init__(self, logger):
         self.logger = logger
-        self.outgoing_channel = outgoing_channel
 
     def get_communities(self, customer_uuid):
         errors = []
-
-        url = f'{config["auth_host"]}service/api/v1/customers/{customer_uuid}/communities'
-
+        auth_host = os.environ.get('AUTH_HOST')
+        url = f'{auth_host}/service/api/v1/customers/{customer_uuid}/communities'
+                
         payload = {}
         headers = {
         'accept': 'application/json'
@@ -19,14 +18,14 @@ class DataController:
         # Lógica para obtener los datos de las comunidades utilizando self.outgoing_channel y customer_uuid
         authChannelResponse = requests.request("GET", url, headers=headers, data=payload)
 
-        # Expect only 200 status codes here, let's do some error handling.
+        # Expect only 200 status codes here, let's do some error handling
+        communities = []
         if authChannelResponse.status_code != 200:
             errors.append({ "status_code": authChannelResponse.status_code, 
                             "status": "error", 
                             "message": authChannelResponse.text })
             response = { "data": { "provenance": [ "auth-service" ], }, "errors": errors }
         else:
-            communities = []
             communityJSON = json.loads(authChannelResponse.text)["content"]
 
             for c in communityJSON:
@@ -77,8 +76,6 @@ class DataController:
             response = { "data": { "provenance": [ "auth-service" ], "communities": communities }, "errors": [] }
 
 
-        # Devuelve los datos de las comunidades y los errores en un formato adecuado
-        communities = []
         response = {
             "data": {
                 "provenance": ["auth-service"],
