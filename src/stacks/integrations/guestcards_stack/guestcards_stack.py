@@ -8,7 +8,7 @@ from constructs import Construct
 
 class GuestcardsStack(Stack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi , **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
@@ -19,26 +19,6 @@ class GuestcardsStack(Stack):
         }
         timeout=Duration.seconds(900)
         allow_methods=['OPTIONS', 'POST']
-        
-        # --------------------------------------------------------------------
-        # Create Cerberus Layers
-        cerberus_layer = lambda_.LayerVersion(
-            self, "CerberusLayer",
-            layer_version_name="CerberusLayer",
-            description="Package documentation: https://docs.python-cerberus.org/en/stable/",
-            code=lambda_.Code.from_asset("./src/utils/layers/cerberus_layer.zip"),
-            compatible_runtimes=[
-                lambda_.Runtime.PYTHON_3_10, 
-                lambda_.Runtime.PYTHON_3_9, 
-                lambda_.Runtime.PYTHON_3_8, 
-                lambda_.Runtime.PYTHON_3_7, 
-                lambda_.Runtime.PYTHON_3_6,
-            ],
-            compatible_architectures=[
-                lambda_.Architecture.ARM_64, 
-                lambda_.Architecture.X86_64,
-            ],
-        )
 
         # --------------------------------------------------------------------
         # Create lambda function instance for (# POST /resman/postleadmanagement4_0)
@@ -51,7 +31,7 @@ class GuestcardsStack(Stack):
             timeout=timeout,
             code=lambda_.Code.from_asset("./src/lambdas/guestcards"),
             handler="lambda_function.lambda_handler",
-            layers=[cerberus_layer],
+            layers=layers,
             function_name="Resman_Guestcards_Lambda_Function",
         )
 
