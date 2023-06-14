@@ -4,6 +4,7 @@ import aws_cdk as cdk
 from src.stacks.integrations.guestcards_stack.guestcards_stack import GuestcardsStack
 from src.stacks.integrations.units_stack.units_stack import UnitsStack
 from src.stacks.integrations.placepay_stack.placepay_stack import PlacepayStack
+from src.stacks.integrations.communities_stack.communities_stack import CommunitiesStack
 from src.stacks.shared.api_stack.api_stack import APIStack
 from src.stacks.shared.layers_stack.layers_stack import LayersStack
 
@@ -57,6 +58,15 @@ UnitsStack(
     "UnitsStack", 
     api=api_v2, 
     layers=[cerberus_layer],
+)
+
+# --------------------------------------------------------------------
+# Stack for communities endpoints
+CommunitiesStack(
+    app, 
+    "CommunitiesStack", 
+    api=api_v1, 
+    layers=[cerberus_layer, requests_layer],
 )
 
 # --------------------------------------------------------------------
