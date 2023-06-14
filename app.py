@@ -5,6 +5,7 @@ from src.stacks.integrations.guestcards_stack.guestcards_stack import Guestcards
 from src.stacks.integrations.units_stack.units_stack import UnitsStack
 from src.stacks.integrations.placepay_stack.placepay_stack import PlacepayStack
 from src.stacks.integrations.communities_stack.communities_stack import CommunitiesStack
+from src.stacks.integrations.customers_stack.customers_stack import CustomersStack
 from src.stacks.shared.api_stack.api_stack import APIStack
 from src.stacks.shared.layers_stack.layers_stack import LayersStack
 
@@ -69,6 +70,12 @@ CommunitiesStack(
     layers=[cerberus_layer, requests_layer],
 )
 
+CustomersStack(
+    app, 
+    "CustomersStack", 
+    api=api_v1, 
+    layers=[cerberus_layer, requests_layer],
+)
 # --------------------------------------------------------------------
 # Synth the app
 app.synth()
