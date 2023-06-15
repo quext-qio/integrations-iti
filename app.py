@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import os
 import aws_cdk as cdk
+
 from src.stacks.integrations.guestcards_stack.guestcards_stack import GuestcardsStack
 from src.stacks.integrations.units_stack.units_stack import UnitsStack
 from src.stacks.integrations.placepay_stack.placepay_stack import PlacepayStack
 from src.stacks.integrations.communities_stack.communities_stack import CommunitiesStack
+from src.stacks.integrations.transunion_stack.transunion_stack import TransUnionStack
 from src.stacks.integrations.customers_stack.customers_stack import CustomersStack
 from src.stacks.integrations.residents_stack.residents_stack import ResidentsStack
 from src.stacks.shared.api_stack.api_stack import APIStack
@@ -30,15 +32,17 @@ api_v2 = api.add_resource("v2")
 
 # --------------------------------------------------------------------
 # Suported third party services v1
-placepay_resourse_v1 = api_v1.add_resource("placepay")
-resman_resourse_v1 = api_v1.add_resource("resman")
-general_resourse_v1 = api_v1.add_resource("general")
+placepay_resource_v1 = api_v1.add_resource("placepay")
+resman_resource_v1 = api_v1.add_resource("resman")
+general_resource_v1 = api_v1.add_resource("general")
+transunion_resource_v1 = api_v1.add_resource("transunion")
 
 # --------------------------------------------------------------------
 # Suported third party services v2
-placepay_resourse_v2 = api_v2.add_resource("placepay")
-resman_resourse_v2 = api_v2.add_resource("resman")
-general_resourse_v2 = api_v2.add_resource("general")
+placepay_resource_v2 = api_v2.add_resource("placepay")
+resman_resource_v2 = api_v2.add_resource("resman")
+general_resource_v2 = api_v2.add_resource("general")
+transunion_resource_v2 = api_v2.add_resource("transunion")
 
 # --------------------------------------------------------------------
 # Load all layers to share between lambda's functions
@@ -52,7 +56,7 @@ requests_layer = layer_stack.get_requests_layer
 PlacepayStack(
     app, 
     "PlacepayStack", 
-    api=placepay_resourse_v1, 
+    api=placepay_resource_v1, 
     layers=[cerberus_layer, place_api_layer],
 )
 
@@ -61,8 +65,17 @@ PlacepayStack(
 GuestcardsStack(
     app, 
     "GuestcardsStack", 
-    api=resman_resourse_v1,
+    api=resman_resource_v1,
     layers=[cerberus_layer],
+)
+
+# --------------------------------------------------------------------
+# Stack for transunion endpoints
+TransUnionStack(
+    app, 
+    "TransUnionStack", 
+    api=transunion_resource_v1, 
+    layers=[cerberus_layer, requests_layer],
 )
 
 # --------------------------------------------------------------------
@@ -70,7 +83,7 @@ GuestcardsStack(
 UnitsStack(
     app, 
     "UnitsStack", 
-    api=general_resourse_v2, 
+    api=general_resource_v2, 
     layers=[cerberus_layer],
 )
 
@@ -79,7 +92,7 @@ UnitsStack(
 CommunitiesStack(
     app, 
     "CommunitiesStack", 
-    api=general_resourse_v1, 
+    api=general_resource_v1, 
     layers=[cerberus_layer, requests_layer],
 )
 
@@ -88,7 +101,7 @@ CommunitiesStack(
 CustomersStack(
     app, 
     "CustomersStack", 
-    api=general_resourse_v1, 
+    api=general_resource_v1, 
     layers=[cerberus_layer, requests_layer],
 )
 
