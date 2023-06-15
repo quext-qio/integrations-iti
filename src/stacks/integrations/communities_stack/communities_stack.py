@@ -38,7 +38,7 @@ class CommunitiesStack(Stack):
         # -------------------------------------------------------------------- 
         # Add a resource to the base API and configure CORS options for the resource 
         # api = /api/v1/general/communities
-        api = api.add_resource("general").add_resource("communities",
+        api = api.add_resource("communities",
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
                 allow_origins=apigateway_.Cors.ALL_ORIGINS

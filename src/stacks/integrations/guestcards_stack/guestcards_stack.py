@@ -37,7 +37,7 @@ class GuestcardsStack(Stack):
 
         # --------------------------------------------------------------------
         # Add base resource to API Gateway
-        api = api.add_resource("resman")
+        #api = api.add_resource("resman")
 
         # Resource to save prospects (POST)
         post_endpoint = api.add_resource(

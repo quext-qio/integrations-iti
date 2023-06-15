@@ -37,7 +37,7 @@ class UnitsStack(Stack):
 
         # -------------------------------------------------------------------- 
         # Add a resource to the base API and configure CORS options for the resource 
-        general_units_endpoint = api.add_resource("general").add_resource(
+        general_units_endpoint = api.add_resource(
             "units",
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,

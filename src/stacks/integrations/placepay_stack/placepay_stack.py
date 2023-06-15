@@ -51,7 +51,7 @@ class PlacepayStack(Stack):
 
         # --------------------------------------------------------------------
         # Add base resource to API Gateway
-        api = api.add_resource("placepay")
+        #api = api.add_resource("placepay")
 
         # Resource to create new account (POST)
         post_endpoint = api.add_resource(

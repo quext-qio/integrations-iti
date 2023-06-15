@@ -27,6 +27,18 @@ api_v1 = api.add_resource("v1")
 api_v2 = api.add_resource("v2")
 
 # --------------------------------------------------------------------
+# Suported third party services v1
+placepay_resourse_v1 = api_v1.add_resource("placepay")
+resman_resourse_v1 = api_v1.add_resource("resman")
+general_resourse_v1 = api_v1.add_resource("general")
+
+# --------------------------------------------------------------------
+# Suported third party services v2
+placepay_resourse_v2 = api_v2.add_resource("placepay")
+resman_resourse_v2 = api_v2.add_resource("resman")
+general_resourse_v2 = api_v2.add_resource("general")
+
+# --------------------------------------------------------------------
 # Load all layers to share between lambda's functions
 layer_stack =  LayersStack(app, "LayersStack")
 cerberus_layer = layer_stack.get_cerberus_layer
@@ -38,7 +50,7 @@ requests_layer = layer_stack.get_requests_layer
 PlacepayStack(
     app, 
     "PlacepayStack", 
-    api=api_v1, 
+    api=placepay_resourse_v1, 
     layers=[cerberus_layer, place_api_layer],
 )
 
@@ -47,7 +59,7 @@ PlacepayStack(
 GuestcardsStack(
     app, 
     "GuestcardsStack", 
-    api=api_v1,
+    api=resman_resourse_v1,
     layers=[cerberus_layer],
 )
 
@@ -56,7 +68,7 @@ GuestcardsStack(
 UnitsStack(
     app, 
     "UnitsStack", 
-    api=api_v2, 
+    api=general_resourse_v2, 
     layers=[cerberus_layer],
 )
 
@@ -65,7 +77,7 @@ UnitsStack(
 CommunitiesStack(
     app, 
     "CommunitiesStack", 
-    api=api_v1, 
+    api=general_resourse_v1, 
     layers=[cerberus_layer, requests_layer],
 )
 
