@@ -45,7 +45,7 @@ class TransUnionStack(Stack):
 
         # Create a Lambda integration instance
         # Identity
-        rental_endpoint_lambda_integration = apigateway_.LambdaIntegration(
+        identity_endpoint_lambda_integration = apigateway_.LambdaIntegration(
             identity_lambda_function,
             proxy=True,
             integration_responses=[
@@ -53,7 +53,7 @@ class TransUnionStack(Stack):
                     status_code="200",
                     response_templates={"application/json": ""},
                     response_parameters={
-                        "method.response.header.Access-Control-Allow-Origin":"*"
+                        "method.response.header.Access-Control-Allow-Origin":"'*'"
                     }
                 ),
             ],
@@ -62,7 +62,7 @@ class TransUnionStack(Stack):
         # Add a POST method to endpoint
         identity_endpoint.add_method(
             "POST", 
-            rental_endpoint_lambda_integration,
+            identity_endpoint_lambda_integration,
             request_parameters={},
             method_responses=[
                 apigateway_.MethodResponse(

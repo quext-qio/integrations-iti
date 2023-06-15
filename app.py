@@ -41,6 +41,7 @@ transunion_resource_v1 = api_v1.add_resource("transunion")
 placepay_resource_v2 = api_v2.add_resource("placepay")
 resman_resource_v2 = api_v2.add_resource("resman")
 general_resource_v2 = api_v2.add_resource("general")
+transunion_resource_v2 = api_v2.add_resource("transunion")
 
 # --------------------------------------------------------------------
 # Load all layers to share between lambda's functions
