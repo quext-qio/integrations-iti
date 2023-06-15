@@ -34,9 +34,6 @@ class TransUnionStack(Stack):
             function_name="TransUnion_Identity_Lambda_Function",
         )
 
-        # Add base resource to API Gateway
-        api = api.add_resource("transunion")
-
         # Identity
         identity_endpoint = api.add_resource(
             "identity",

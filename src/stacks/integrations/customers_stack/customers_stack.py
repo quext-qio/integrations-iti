@@ -6,7 +6,7 @@ from aws_cdk import (
 )
 from constructs import Construct
 
-class CommunitiesStack(Stack):
+class CustomersStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -24,21 +24,22 @@ class CommunitiesStack(Stack):
         # Create lambda function instance for (# POST /placepay/new-account)
         lambda_function = lambda_.Function(
             self, 
-            "Auth_Get_Communities",
-            description="This Lambda is responsible to get a communities list according to a specific customerUUID", 
+            "Auth_Get_Customers",
+            description="This Lambda is responsible customers list, with or without specify custommerUUID", 
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
             timeout=timeout,
-            code=lambda_.Code.from_asset("./src/lambdas/communities"),
+            code=lambda_.Code.from_asset("./src/lambdas/customers"),
             handler="lambda_function.lambda_handler",
             layers=layers,
-            function_name="Auth_Get_Communities",
+            function_name="Auth_Get_Customers",
         )
 
         # -------------------------------------------------------------------- 
         # Add a resource to the base API and configure CORS options for the resource 
-        # api = /api/v1/general/communities
-        api = api.add_resource("communities",
+        # api = /api/v1/general/customers
+        api = api.add_resource(
+            "customers",
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
                 allow_origins=apigateway_.Cors.ALL_ORIGINS
