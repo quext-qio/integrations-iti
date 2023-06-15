@@ -1,14 +1,16 @@
 import json
 from DataPushPullShared.DataController import DataController
-#from cerberus import Validator
 
 def lambda_handler(event, context):
-    input = json.loads(event['body'])
+
+    input = event['body']
+    input = json.loads(input) if input else {}
+    
     data_controller = DataController("info")
     return {
         'statusCode': "500",
         'body': json.dumps({
-            'data': data_controller.get_communities(input["customerUUID"]),
+            'data': data_controller.get_customers(input.get("customerUUID") if "customerUUID" in input else ''),
             'errors': []
         }),
         'headers': {
