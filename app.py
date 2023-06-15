@@ -82,10 +82,12 @@ CommunitiesStack(
     layers=[cerberus_layer, requests_layer],
 )
 
+# --------------------------------------------------------------------
+# Stack for customers endpoints
 CustomersStack(
     app, 
     "CustomersStack", 
-    api=api_v1, 
+    api=general_resourse_v1, 
     layers=[cerberus_layer, requests_layer],
 )
 # --------------------------------------------------------------------

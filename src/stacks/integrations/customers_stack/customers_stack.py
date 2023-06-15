@@ -38,7 +38,8 @@ class CustomersStack(Stack):
         # -------------------------------------------------------------------- 
         # Add a resource to the base API and configure CORS options for the resource 
         # api = /api/v1/general/customers
-        api = api.add_resource("generals").add_resource("customers",
+        api = api.add_resource(
+            "customers",
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
                 allow_origins=apigateway_.Cors.ALL_ORIGINS
