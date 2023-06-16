@@ -49,6 +49,7 @@ layer_stack =  LayersStack(app, "LayersStack")
 cerberus_layer = layer_stack.get_cerberus_layer
 place_api_layer = layer_stack.get_place_api_layer
 requests_layer = layer_stack.get_requests_layer
+xmltodict_layer = layer_stack.get_xmltodict_layer
 
 # --------------------------------------------------------------------
 # Stack for placepay endpoints
@@ -74,7 +75,7 @@ TransUnionStack(
     app, 
     "TransUnionStack", 
     api=transunion_resource_v1, 
-    layers=[cerberus_layer, requests_layer],
+    layers=[cerberus_layer, requests_layer, xmltodict_layer],
 )
 
 # --------------------------------------------------------------------

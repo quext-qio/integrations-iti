@@ -10,7 +10,6 @@ from Utils.Identity import replace_body_content_transunion
 from Utils.Constants import constants
 from schemas.IdentitySchema import IdentitySchema
 
-
 def lambda_handler(event, context):
   parameter_store = json.loads(os.environ.get("parameter_store"))
 
