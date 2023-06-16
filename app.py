@@ -110,7 +110,7 @@ CustomersStack(
 ResidentsStack(
     app, 
     "ResidentsStack", 
-    api=general_resourse_v1, 
+    api=general_resource_v1, 
     layers=[cerberus_layer, requests_layer],
 )
 # --------------------------------------------------------------------

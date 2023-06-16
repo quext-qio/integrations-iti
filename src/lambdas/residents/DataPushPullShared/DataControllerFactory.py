@@ -1,7 +1,7 @@
-from DataController import DataController
-from DataNewCo import DataNewco
-from DataQuext import DataQuext
-from DataResman import DataResman
+from .DataController import DataController as Controller
+from .DataNewCo import DataNewco
+from .DataQuext import DataQuext
+from .DataResman import DataResman
 from Utils.IPSController import IPSController
 
 import json
@@ -9,9 +9,10 @@ import json
 class DataControllerFactory:
 
     def create_data_controller(self, input):
-        ips_response =  IPSController().get_partner(input["communityUUID"],input["customerUUID"],"residents")
+        code, ips_response =  IPSController().get_partner(input["communityUUID"],input["customerUUID"],"residents")
         ips_response = ips_response.text
         partner = ""
+        Controller(partner, [],[]).built_response()
         if "platformData" in ips_response and "platform" in ips_response["platformData"]:
             partner = ips_response["platformData"]["platform"]
         else:
@@ -19,14 +20,13 @@ class DataControllerFactory:
              
         
         if partner == "Newco":
-            newco_data = DataNewco.create_newco_data()
-            return DataController(newco_data)
+            newco_data = DataNewco(ips_response).get_resident_data(None)
+            return Controller("NewCo", newco_data, [])
         elif partner == "Resman":
-            resman_data = DataResman()
-            return DataController(resman_data)
+            resman_data = DataResman(ips_response).get_resident_data(None)
+            return Controller("Resman", resman_data, [])
         elif partner == "Quext":
             quext_data = DataQuext(ips_response).get_resident_data(None)
-            return DataController(quext_data)
+            return Controller("Quext", quext_data, [])
         else:
             raise ValueError("Invalid partner")
-        return DataController()
