@@ -4,6 +4,7 @@ from aws_cdk import (
 )
 from constructs import Construct
 
+
 class LayersStack(Stack):
     @property
     def get_cerberus_layer(self):
@@ -16,6 +17,10 @@ class LayersStack(Stack):
     @property
     def get_requests_layer(self):
         return self.requests_layer
+
+    @property
+    def get_xmltodict_layer(self):
+        return self.xmltodict_layer
     
     @property
     def get_access_control(self):
@@ -88,6 +93,27 @@ class LayersStack(Stack):
         self.requests_layer = requests_layer   
 
         # --------------------------------------------------------------------
+        # Create xml to dict layer
+        xmltodict_layer = lambda_.LayerVersion(
+            self, "XMLToDictLayer",
+            layer_version_name="XMLToDictLayer",
+            description="Package documentation: https://pypi.org/project/xmltodict/",
+            code=lambda_.Code.from_asset("./src/utils/layers/xmltodict_layer.zip"),
+            compatible_runtimes=[
+                lambda_.Runtime.PYTHON_3_10,
+                lambda_.Runtime.PYTHON_3_9,
+                lambda_.Runtime.PYTHON_3_8,
+                lambda_.Runtime.PYTHON_3_7,
+                lambda_.Runtime.PYTHON_3_6,
+            ],
+            compatible_architectures=[
+                lambda_.Architecture.ARM_64,
+                lambda_.Architecture.X86_64,
+            ],
+        )
+        self.xmltodict_layer = xmltodict_layer   
+
+        # --------------------------------------------------------------------
         # Create access control layer
         access_control_layer = lambda_.LayerVersion(
             self, "AccessControlLayer",
@@ -107,6 +133,4 @@ class LayersStack(Stack):
             ],
         )
         self.access_control_layer = access_control_layer   
-
         # --------------------------------------------------------------------
-
