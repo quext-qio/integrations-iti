@@ -8,6 +8,7 @@ from src.stacks.integrations.placepay_stack.placepay_stack import PlacepayStack
 from src.stacks.integrations.communities_stack.communities_stack import CommunitiesStack
 from src.stacks.integrations.transunion_stack.transunion_stack import TransUnionStack
 from src.stacks.integrations.customers_stack.customers_stack import CustomersStack
+from src.stacks.integrations.residents_stack.residents_stack import ResidentsStack
 from src.stacks.shared.api_stack.api_stack import APIStack
 from src.stacks.shared.layers_stack.layers_stack import LayersStack
 
@@ -101,6 +102,15 @@ CommunitiesStack(
 CustomersStack(
     app, 
     "CustomersStack", 
+    api=general_resource_v1, 
+    layers=[cerberus_layer, requests_layer],
+)
+
+# --------------------------------------------------------------------
+# Stack for customers endpoints
+ResidentsStack(
+    app, 
+    "ResidentsStack", 
     api=general_resource_v1, 
     layers=[cerberus_layer, requests_layer],
 )
