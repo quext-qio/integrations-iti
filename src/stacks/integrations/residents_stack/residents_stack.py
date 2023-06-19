@@ -16,7 +16,7 @@ class ResidentsStack(Stack):
         environment={
             "LOG_LEVEL": "INFO",
             "AUTH_HOST": "https://auth-api.dev.quext.io",
-            "IPA_HOST" : "https://partner-api.dev.quext.io"
+            "IPS_HOST" : "https://partner-api.dev.quext.io"
         }
         timeout=Duration.seconds(900)
         allow_methods=['OPTIONS', 'POST']

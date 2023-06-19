@@ -22,10 +22,6 @@ class LayersStack(Stack):
     def get_xmltodict_layer(self):
         return self.xmltodict_layer
     
-    @property
-    def get_access_control(self):
-        return self.access_control_layer
-    
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
@@ -113,24 +109,4 @@ class LayersStack(Stack):
         )
         self.xmltodict_layer = xmltodict_layer   
 
-        # --------------------------------------------------------------------
-        # Create access control layer
-        access_control_layer = lambda_.LayerVersion(
-            self, "AccessControlLayer",
-            layer_version_name="AccessControlLayer",
-            description="",
-            code=lambda_.Code.from_asset("./src/utils/layers/access_control.zip"),
-            compatible_runtimes=[
-                lambda_.Runtime.PYTHON_3_10,
-                lambda_.Runtime.PYTHON_3_9,
-                lambda_.Runtime.PYTHON_3_8,
-                lambda_.Runtime.PYTHON_3_7,
-                lambda_.Runtime.PYTHON_3_6,
-            ],
-            compatible_architectures=[
-                lambda_.Architecture.ARM_64,
-                lambda_.Architecture.X86_64,
-            ],
-        )
-        self.access_control_layer = access_control_layer   
         # --------------------------------------------------------------------
