@@ -59,7 +59,7 @@ PlacepayStack(
     app, 
     "PlacepayStack", 
     api=placepay_resource_v1, 
-    layers=[cerberus_layer, place_api_layer, mysql_layer],
+    layers=[cerberus_layer, place_api_layer],
 )
 
 # --------------------------------------------------------------------
