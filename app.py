@@ -51,6 +51,7 @@ cerberus_layer = layer_stack.get_cerberus_layer
 place_api_layer = layer_stack.get_place_api_layer
 requests_layer = layer_stack.get_requests_layer
 xmltodict_layer = layer_stack.get_xmltodict_layer
+mysql_layer = layer_stack.mysql_layer
 
 # --------------------------------------------------------------------
 # Stack for placepay endpoints
@@ -58,7 +59,7 @@ PlacepayStack(
     app, 
     "PlacepayStack", 
     api=placepay_resource_v1, 
-    layers=[cerberus_layer, place_api_layer],
+    layers=[cerberus_layer, place_api_layer, mysql_layer],
 )
 
 # --------------------------------------------------------------------
