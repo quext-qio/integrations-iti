@@ -86,7 +86,7 @@ UnitsStack(
     app, 
     "UnitsStack", 
     api=general_resource_v2, 
-    layers=[cerberus_layer],
+    layers=[cerberus_layer, mysql_layer],
 )
 
 # --------------------------------------------------------------------
