@@ -22,6 +22,10 @@ class LayersStack(Stack):
     def get_xmltodict_layer(self):
         return self.xmltodict_layer
     
+    @property
+    def get_mysql_layer(self):
+        return self.mysql_layer
+    
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
@@ -108,5 +112,26 @@ class LayersStack(Stack):
             ],
         )
         self.xmltodict_layer = xmltodict_layer   
+
+        # --------------------------------------------------------------------
+        # Create mysql_layer layer
+        mysql_layer = lambda_.LayerVersion(
+            self, "MySQLLayer",
+            layer_version_name="MySQLLayer",
+            description="Package documentation: https://pypi.org/project/",
+            code=lambda_.Code.from_asset("./src/utils/layers/mysql_layer.zip"),
+            compatible_runtimes=[
+                lambda_.Runtime.PYTHON_3_10,
+                lambda_.Runtime.PYTHON_3_9,
+                lambda_.Runtime.PYTHON_3_8,
+                lambda_.Runtime.PYTHON_3_7,
+                lambda_.Runtime.PYTHON_3_6,
+            ],
+            compatible_architectures=[
+                lambda_.Architecture.ARM_64,
+                lambda_.Architecture.X86_64,
+            ],
+        )
+        self.mysql_layer = mysql_layer  
 
         # --------------------------------------------------------------------
