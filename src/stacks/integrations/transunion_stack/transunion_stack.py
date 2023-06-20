@@ -129,3 +129,57 @@ class TransUnionStack(Stack):
             ],
         )
 
+        # ------------- handles the postback lambda ------------- #
+        # Creates lambda function instance for (# POST /transunion/postback)
+        postback_lambda_function = lambda_.Function(
+            self, 
+            "TransUnion_Postback_Lambda_Function",
+            description="Handles the Postback webhook for TransUnion", 
+            environment=environment,
+            runtime=lambda_.Runtime.PYTHON_3_10,
+            timeout=timeout,
+            code=lambda_.Code.from_asset("./src/lambdas/transunion"),
+            handler="postback_lambda_function.lambda_handler",
+            layers=layers,
+            function_name="TransUnion_Postback_Lambda_Function",
+        )
+
+        # Postback webhook
+        postback_endpoint = api.add_resource(
+            "postback",
+            default_cors_preflight_options=apigateway_.CorsOptions(
+                allow_methods=allow_methods,
+                allow_origins=apigateway_.Cors.ALL_ORIGINS
+            ),    
+        )
+
+        # Create a Lambda integration instance
+        postback_endpoint_lambda_integration = apigateway_.LambdaIntegration(
+            postback_lambda_function,
+            proxy=True,
+            integration_responses=[
+                apigateway_.IntegrationResponse(
+                    status_code="200",
+                    response_templates={"application/json": ""},
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin":"'*'"
+                    }
+                ),
+            ],
+        )
+
+        # Add a POST method to endpoint
+        postback_endpoint.add_method(
+            "POST", 
+            postback_endpoint_lambda_integration,
+            request_parameters={},
+            method_responses=[
+                apigateway_.MethodResponse(
+                    status_code="200",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True
+                    }
+                )
+            ],
+        )
+
