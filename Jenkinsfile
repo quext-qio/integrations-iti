@@ -108,7 +108,7 @@ pipeline {
                 script {
                     docker.image("quext/${DEPLOY_ENVIRONMENT}").inside() {
                     sh "cdk synth"
-                    sh "cdk deploy"
+                    sh "cdk deploy -all"
                     }
                 }
             }
