@@ -109,7 +109,7 @@ pipeline {
                     docker.image("quext/${DEPLOY_ENVIRONMENT}").inside() {
                     sh "cdk ls"
                     sh "cdk synth"
-                    sh "cdk deploy --app cdk.out --all --toolkit-stack-name quext-dev-zatoserverless --progress bar --trace true"
+                    sh "cdk deploy --app cdk.out --all --require-approval never --toolkit-stack-name quext-dev-zatoserverless --progress bar --trace true"
                     }
                 }
             }
