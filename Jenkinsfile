@@ -64,6 +64,7 @@ pipeline {
                     env.jenkinsRole = "arn:aws:iam::${accounts.get(DEPLOY_ENVIRONMENT)}:role/jenkins"
                     env.COMMON_CONFIGS = """ aws://${accounts.get(DEPLOY_ENVIRONMENT)}/${defaultRegion}"""//--cloudformation-execution-policies arn:aws:iam::633546161654:role/devops-test-cdk --trust ${shared_services_account_id} --trust-for-lookup ${shared_services_account_id} --cloudformation-execution-policies ${jenkinsRole}"""
                     env.DEPLOY_SCRIPT = """cdk deploy --require-approval=never """
+                    writeFile file: 'AWS', text: "AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}"+"\n"+"AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}"+"\n"+"AWS_SESSION_TOKEN=${env.AWS_SESSION_TOKEN}"
                 }
             }
         }
@@ -92,25 +93,25 @@ pipeline {
             steps {
                 script {
                     docker.image("quext/${DEPLOY_ENVIRONMENT}").inside() {
-                    sh "cdk bootstrap ${env.COMMON_CONFIGS} --tags Team=Integration --tags Service=ZatoServerless"
+                    sh "cdk bootstrap ${env.COMMON_CONFIGS} --template cdk-zatoserverless-template.yaml --tags Team=Integration --tags Service=ZatoServerless"
                     }
                 }
             }
         }
-        stage('CDK synth') {
-            when {
-                expression { 
-                    envs.contains(DEPLOY_ENVIRONMENT) 
-                }
-            }
-            steps {
-                script {
-                    docker.image("quext/${DEPLOY_ENVIRONMENT}").inside() {
-                    sh "cdk synth "
-                    sh "cdk deploy"
-                    }
-                }
-            }
-        }     
+        // stage('CDK synth') {
+        //     when {
+        //         expression { 
+        //             envs.contains(DEPLOY_ENVIRONMENT) 
+        //         }
+        //     }
+        //     steps {
+        //         script {
+        //             docker.image("quext/${DEPLOY_ENVIRONMENT}").inside() {
+        //             sh "cdk synth "
+        //             sh "cdk deploy --require-approval=never devopsTestCDK"
+        //             }
+        //         }
+        //     }
+        // }     
     }
 }
