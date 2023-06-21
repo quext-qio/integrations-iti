@@ -1,7 +1,7 @@
 from Utils.Constants.RealpageConstants import RealpageConstants
 from zeep import Client
 import xmltodict
-import xml.etree.ElementTree as etree
+import xml.etree.ElementTree as e
 import os
 import datetime
 

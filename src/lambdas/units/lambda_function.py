@@ -6,11 +6,11 @@ def lambda_handler(event, context):
     print(event)
 
     # Obtener el resultado de DataControllerFactory().create_data_controller(input, event)
-    #result = DataControllerFactory().create_data_controller(input, event)
+    result = DataControllerFactory().create_data_controller(input, event)
 
     return {
         'statusCode': "200",
-        'body': {"hi":"hi"},  # Convertir el resultado a JSON
+        'body': json.dumps(result),  # Convertir el resultado a JSON
         'headers': {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',

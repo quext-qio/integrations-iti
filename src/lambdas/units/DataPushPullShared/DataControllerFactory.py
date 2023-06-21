@@ -1,7 +1,7 @@
 from .DataController import DataController as Controller
 from .DataNewco import DataNewco
 from .DataQuext import DataQuext
-from .DataResman import DataResman
+from .ResmanData import DataResman
 from Utils.IPSController import IPSController
 from Utils.AccessControl import AccessUtils as AccessControl
 
@@ -29,7 +29,7 @@ class DataControllerFactory:
             response, code = DataNewco.get_unit_availability(ips_response)
             return Controller("NewCo", response, code).built_response()
         elif partner == "ResMan":
-            response, code = [], 200#DataResman.get_unit_availability(ips_response)
+            response, code = DataResman.get_unit_availability(ips_response)
             return Controller("ResMan", response, code).built_response()
         elif partner == "Entrata":
             response, code = None, 200
@@ -41,4 +41,4 @@ class DataControllerFactory:
             code = 400
             errors = "Unknown platform."
             response = { "data": {partner}, "errors": errors }
-            self.logger.info("Unknown platform.")
+            return response, code
