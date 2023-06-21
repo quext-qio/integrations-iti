@@ -26,6 +26,14 @@ class LayersStack(Stack):
     def get_mysql_layer(self):
         return self.mysql_layer
     
+    @property
+    def get_zeep_layer(self):
+        return self.zeep_layer
+    
+    @property
+    def get_lxml_layer(self):
+        return self.lxml_layer
+    
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
@@ -134,4 +142,44 @@ class LayersStack(Stack):
         )
         self.mysql_layer = mysql_layer  
 
+         # --------------------------------------------------------------------
+        # Create mysql_layer layer
+        zeep_layer = lambda_.LayerVersion(
+            self, "ZeepLayer",
+            layer_version_name="ZeepLayer",
+            description="Package documentation: https://pypi.org/project/",
+            code=lambda_.Code.from_asset("./src/utils/layers/zeep_layer.zip"),
+            compatible_runtimes=[
+                lambda_.Runtime.PYTHON_3_10,
+                lambda_.Runtime.PYTHON_3_9,
+                lambda_.Runtime.PYTHON_3_8,
+                lambda_.Runtime.PYTHON_3_7,
+                lambda_.Runtime.PYTHON_3_6,
+            ],
+            compatible_architectures=[
+                lambda_.Architecture.ARM_64,
+                lambda_.Architecture.X86_64,
+            ],
+        )
+        self.zeep_layer = zeep_layer  
+
         # --------------------------------------------------------------------
+          # Create lxml layer
+        lxml_layer = lambda_.LayerVersion(
+            self, "lxmlLayer",
+            layer_version_name="lxmlLayer",
+            description="Package documentation: https://pypi.org/project/",
+            code=lambda_.Code.from_asset("./src/utils/layers/lxml_layer.zip"),
+            compatible_runtimes=[
+                lambda_.Runtime.PYTHON_3_10,
+                lambda_.Runtime.PYTHON_3_9,
+                lambda_.Runtime.PYTHON_3_8,
+                lambda_.Runtime.PYTHON_3_7,
+                lambda_.Runtime.PYTHON_3_6,
+            ],
+            compatible_architectures=[
+                lambda_.Architecture.ARM_64,
+                lambda_.Architecture.X86_64,
+            ],
+        )
+        self.lxml_layer = lxml_layer  

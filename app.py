@@ -70,6 +70,8 @@ place_api_layer = layer_stack.get_place_api_layer
 requests_layer = layer_stack.get_requests_layer
 xmltodict_layer = layer_stack.get_xmltodict_layer
 mysql_layer = layer_stack.get_mysql_layer
+zeep_layer = layer_stack.get_zeep_layer
+lxml_layer = layer_stack.get_lxml_layer
 
 # --------------------------------------------------------------------
 # Stack for placepay endpoints
@@ -105,7 +107,7 @@ UnitsStack(
     app, 
     "UnitsStack", 
     api=general_resource_v2, 
-    layers=[cerberus_layer, mysql_layer],
+    layers=[cerberus_layer, mysql_layer, zeep_layer, lxml_layer, xmltodict_layer],
 )
 
 # --------------------------------------------------------------------
