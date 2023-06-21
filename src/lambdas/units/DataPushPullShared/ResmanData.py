@@ -1,5 +1,5 @@
 from Utils.Constants.RealpageConstants import RealpageConstants
-import zeep.Client as Client
+import zeep
 import xmltodict
 import xml.etree.ElementTree as e
 import os
@@ -17,7 +17,7 @@ class DataResman:
         wsdl = RealpageConstants.WSDL_URL
 
         # Crear una instancia del cliente Zeep
-        client = Client(wsdl=wsdl)
+        client = zeep.Client(wsdl=wsdl)
 
         # Obtener las variables de entorno de AWS Lambda para Autenticación
         pmcid = os.environ.get(RealpageConstants.PMCID)
