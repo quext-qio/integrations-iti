@@ -12,8 +12,8 @@ WORKDIR /app
 # Copy the CDK application code to the container
 COPY . /app
 RUN pip3 install --no-cache --upgrade pip setuptools
-RUN python3 -m venv .env
-RUN source .env/bin/activate
+RUN python3 -m venv /.env
+RUN source /.env/bin/activate
 RUN pip install -r requirements.txt
 RUN pip install --upgrade awscli
 CMD ["/bin/sh"]
