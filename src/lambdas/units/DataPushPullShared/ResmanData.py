@@ -1,5 +1,5 @@
 from Utils.Constants.RealpageConstants import RealpageConstants
-from zeep import Client
+import zeep.Client as Client
 import xmltodict
 import xml.etree.ElementTree as e
 import os
@@ -40,7 +40,7 @@ class DataResman:
         res = client.service.getunitlist(auth=_auth, listCriteria=listcriterion)
 
         # Parsear la respuesta XML a un diccionario
-        response = xmltodict.parse(etree.tostring(res))
+        response = xmltodict.parse(e.tostring(res))
         print(response)
         # Obtener los datos de propiedad, modelos y unidades mediante la función translateRealPage
         property, models, units = self.translateRealPage(response[RealpageConstants.GET_UNIT_LIST][RealpageConstants.UNIT_OBJECTS][RealpageConstants.UNIT_OBJECT], ips_response[RealpageConstants.PLATFORMDATA][RealpageConstants.FOREIGN_COMMUNITY_ID])
