@@ -10,7 +10,7 @@ import json
 class DataControllerFactory:
 
     def create_data_controller(self, input, event):
-        code, ips_response =  IPSController().get_partner(input["communityUUID"],input["customerUUID"],"residents")
+        code, ips_response =  IPSController().get_partner(input["communityUUID"],input["customerUUID"],"units")
         ips_response = json.loads(ips_response.text)
         partner = ""
        
@@ -29,14 +29,14 @@ class DataControllerFactory:
             response, code = DataNewco.get_unit_availability(ips_response)
             return Controller("NewCo", response, code).built_response()
         elif partner == "ResMan":
-            response, code = self.dataFromResman(ips_response)
+            response, code = [], 200#DataResman.get_unit_availability(ips_response)
             return Controller("ResMan", response, code).built_response()
         elif partner == "Entrata":
-            response, code = self.dataFromEntrata(ips_response)
+            response, code = None, 200
         elif partner == "RealPage":
-            response, code = self.dataFromRealPage(ips_response)
+            response, code =  None, 200
         elif partner == "Engrain":
-            response, code = self.dataFromEngrain(ips_response)
+            response, code =  None, 200
         else:
             code = 400
             errors = "Unknown platform."

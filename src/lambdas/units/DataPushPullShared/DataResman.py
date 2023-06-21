@@ -1,13 +1,15 @@
 from Utils.Constants.RealpageConstants import RealpageConstants
 from zeep import Client
 import xmltodict
+import xml.etree.ElementTree as etree
 import os
 import datetime
-from lxml import etree
+
 
 class DataResman:
 
     def get_unit_availability(self, ips_response):
+        print("entra")
         code = 200
         errors = []
 
@@ -39,7 +41,7 @@ class DataResman:
 
         # Parsear la respuesta XML a un diccionario
         response = xmltodict.parse(etree.tostring(res))
-
+        print(response)
         # Obtener los datos de propiedad, modelos y unidades mediante la función translateRealPage
         property, models, units = self.translateRealPage(response[RealpageConstants.GET_UNIT_LIST][RealpageConstants.UNIT_OBJECTS][RealpageConstants.UNIT_OBJECT], ips_response[RealpageConstants.PLATFORMDATA][RealpageConstants.FOREIGN_COMMUNITY_ID])
 
@@ -62,7 +64,7 @@ class DataResman:
         property_id = None
         property = {}
         model_type_list = []
-        for input_dict in vals:
+        for input_dict in unit_objects:
             if not property_id:
                 property_id = input_dict[RealpageConstants.PROPERTY_NUMBER_ID]
                 property = { 
