@@ -93,7 +93,7 @@ pipeline {
             steps {
                 script {
                     docker.image("quext/${DEPLOY_ENVIRONMENT}").inside() {
-                    sh "cdk bootstrap ${env.COMMON_CONFIGS} --template cdk-zatoserverless-template.yaml --tags Team=Integration --tags Service=ZatoServerless"
+                    sh "cdk bootstrap ${env.COMMON_CONFIGS} --template cdk-zatoserverless-template.yaml --toolkit-stack-name quext-dev-zatoserverless --qualifier zatoapi --tags Team=Integration --tags Service=ZatoServerless"
                     }
                 }
             }
