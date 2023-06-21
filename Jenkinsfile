@@ -108,7 +108,7 @@ pipeline {
                 script {
                     docker.image("quext/${DEPLOY_ENVIRONMENT}").inside() {
                     sh "cdk synth"
-                    sh "cdk deploy --all"
+                    sh "cdk deploy --all --role-arn arn:aws:iam::633546161654:role/devops-test-cdk"
                     }
                 }
             }
