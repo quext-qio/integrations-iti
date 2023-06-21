@@ -98,20 +98,20 @@ pipeline {
                 }
             }
         }
-        // stage('CDK synth') {
-        //     when {
-        //         expression { 
-        //             envs.contains(DEPLOY_ENVIRONMENT) 
-        //         }
-        //     }
-        //     steps {
-        //         script {
-        //             docker.image("quext/${DEPLOY_ENVIRONMENT}").inside() {
-        //             sh "cdk synth "
-        //             sh "cdk deploy --require-approval=never devopsTestCDK"
-        //             }
-        //         }
-        //     }
-        // }     
+        stage('CDK synth') {
+            when {
+                expression { 
+                    envs.contains(DEPLOY_ENVIRONMENT) 
+                }
+            }
+            steps {
+                script {
+                    docker.image("quext/${DEPLOY_ENVIRONMENT}").inside() {
+                    sh "cdk synth"
+                    sh "cdk deploy"
+                    }
+                }
+            }
+        }     
     }
 }
