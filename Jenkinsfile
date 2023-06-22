@@ -50,7 +50,7 @@ pipeline {
                     env.CDK_REGION = defaultRegion
                     echo(env.CDK_ACCOUNT)
                     echo(env.CDK_REGION)
-                    jenkinsRole = "arn:aws:iam::633546161654:role/quext-dev-zato-serverless-policy"
+                    jenkinsRole = "arn:aws:iam::633546161654:role/devops-test-cdk"
                     def AWS_KEYS = sh(returnStdout: true, script: """
                         aws sts assume-role --role-arn $jenkinsRole \
                         --role-session-name cdk \
