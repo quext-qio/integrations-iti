@@ -62,7 +62,7 @@ pipeline {
                     env.AWS_SECRET_ACCESS_KEY=AWS_KEYS[1]
                     env.AWS_SESSION_TOKEN=AWS_KEYS[2]
                     env.jenkinsRole = "arn:aws:iam::${accounts.get(DEPLOY_ENVIRONMENT)}:role/jenkins"
-                    env.COMMON_CONFIGS = """ aws://${accounts.get(DEPLOY_ENVIRONMENT)}/${defaultRegion} --cloudformation-execution-policies arn:aws:iam::633546161654:role/devops-test-cdk"""//--cloudformation-execution-policies arn:aws:iam::633546161654:role/devops-test-cdk --trust ${shared_services_account_id} --trust-for-lookup ${shared_services_account_id} --cloudformation-execution-policies ${jenkinsRole}"""
+                    env.COMMON_CONFIGS = """ aws://${accounts.get(DEPLOY_ENVIRONMENT)}/${defaultRegion} --cloudformation-execution-policies arn:aws:iam::633546161654:policy/devops-test-cdk"""//--cloudformation-execution-policies arn:aws:iam::633546161654:role/devops-test-cdk --trust ${shared_services_account_id} --trust-for-lookup ${shared_services_account_id} --cloudformation-execution-policies ${jenkinsRole}"""
                     env.DEPLOY_SCRIPT = """cdk deploy --require-approval=never """
                     writeFile file: 'AWS', text: "AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}"+"\n"+"AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}"+"\n"+"AWS_SESSION_TOKEN=${env.AWS_SESSION_TOKEN}"
                 }
