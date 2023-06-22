@@ -99,6 +99,7 @@ TransUnionStack(
     "TransUnionStack", 
     api=transunion_resource_v1, 
     layers=[cerberus_layer, requests_layer, xmltodict_layer],
+    environment=environment
 )
 
 # --------------------------------------------------------------------

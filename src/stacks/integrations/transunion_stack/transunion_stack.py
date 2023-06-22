@@ -10,13 +10,9 @@ from constructs import Construct
 
 class TransUnionStack(Stack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers: list, environment: dict, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # Constants
-        environment={
-          "parameter_store": ssm.StringParameter.from_string_parameter_attributes(self, "parameter_store", parameter_name="/integrations/aws/migration").string_value
-        }
         timeout=Duration.seconds(900)
         allow_methods=["OPTIONS", "POST"]
 
