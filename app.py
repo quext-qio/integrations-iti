@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import aws_cdk as cdk
-
 from src.stacks.integrations.guestcards_stack.guestcards_stack import GuestcardsStack
 from src.stacks.integrations.units_stack.units_stack import UnitsStack
 from src.stacks.integrations.placepay_stack.placepay_stack import PlacepayStack
@@ -14,16 +13,23 @@ from src.stacks.shared.api_stack.api_stack import APIStack
 from src.stacks.shared.layers_stack.layers_stack import LayersStack
 from src.stacks.shared.env_stack.env_stack import EnvStack
 from src.utils.enums.stage_name import StageName
-import src.utils.shared as shared_folder
 
-
-# --------------------------------------------------------------------
-# Stage to deploy
-stage = StageName.DEV
 
 # --------------------------------------------------------------------
 # Create the app
 app = cdk.App()
+
+# --------------------------------------------------------------------
+stage = StageName.DEV
+
+# --------------------------------------------------------------------
+# Tags for all resources
+tags = {
+    'Environment': stage.value,
+    'Project': 'quext',
+    'Service': 'zato-serverless',
+    'Team': 'integration'
+}
 
 # --------------------------------------------------------------------
 # Environment variables for share with all lambda's functions
@@ -31,6 +37,8 @@ env_stack = EnvStack(
     app, 
     "EnvStack", 
     stage_name=stage,
+    description="Stack load environment variables for all lambda's functions",
+    tags=tags,
 )
 environment=env_stack.get_env
 
@@ -40,6 +48,8 @@ api_stack = APIStack(
     app, 
     "APIStack", 
     stage_name=stage,
+    description="Stack load API Gateway for all lambda's functions",
+    tags=tags,
 )
 api=api_stack.get_api
 
@@ -81,6 +91,8 @@ PlacepayStack(
     api=placepay_resource_v1, 
     layers=[cerberus_layer, place_api_layer],
     environment=environment,
+    description="Stack for placepay endpoints",
+    tags=tags,
 )
 
 # --------------------------------------------------------------------
@@ -90,6 +102,8 @@ GuestcardsStack(
     "GuestcardsStack", 
     api=resman_resource_v1,
     layers=[cerberus_layer],
+    description="Stack for guestcards endpoints",
+    tags=tags,
 )
 
 # --------------------------------------------------------------------
@@ -99,6 +113,8 @@ TransUnionStack(
     "TransUnionStack", 
     api=transunion_resource_v1, 
     layers=[cerberus_layer, requests_layer, xmltodict_layer],
+    description="Stack for transunion endpoints",
+    tags=tags,
 )
 
 # --------------------------------------------------------------------
@@ -108,6 +124,8 @@ UnitsStack(
     "UnitsStack", 
     api=general_resource_v2, 
     layers=[cerberus_layer, mysql_layer, zeep_layer, lxml_layer, xmltodict_layer],
+    description="Stack for units endpoints",
+    tags=tags,
 )
 
 # --------------------------------------------------------------------
@@ -117,6 +135,8 @@ CommunitiesStack(
     "CommunitiesStack", 
     api=general_resource_v1, 
     layers=[cerberus_layer, requests_layer],
+    description="Stack for communities endpoints",
+    tags=tags,
 )
 
 # --------------------------------------------------------------------
@@ -126,6 +146,8 @@ CustomersStack(
     "CustomersStack", 
     api=general_resource_v1, 
     layers=[cerberus_layer, requests_layer],
+    description="Stack for customers endpoints",
+    tags=tags,
 )
 
 # --------------------------------------------------------------------
@@ -135,6 +157,8 @@ ResidentsStack(
     "ResidentsStack", 
     api=general_resource_v1, 
     layers=[cerberus_layer, requests_layer],
+    description="Stack for residents endpoints",
+    tags=tags,
 )
 
 # --------------------------------------------------------------------
@@ -143,6 +167,8 @@ EngrainStack(
     app, 
     "EngrainStack",
     environment=environment,
+    description="Stack for Engrain Job",
+    tags=tags,
 )
 
 # --------------------------------------------------------------------
