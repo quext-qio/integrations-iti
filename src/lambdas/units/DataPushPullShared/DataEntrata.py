@@ -4,7 +4,6 @@ import requests
 class DataEntrata:
 
     def get_unit_availability(self):
-        code = 200
         errors = []
 
         # These get replaced into the url template.
