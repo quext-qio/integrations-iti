@@ -20,10 +20,6 @@ Parameters:
     Description: Empty to create a new key (default), 'AWS_MANAGED_KEY' to use a managed S3 key, or the ID/ARN of an existing key.
     Default: ""
     Type: String
-  ContainerAssetsRepositoryName:
-    Description: A user-provided custom name to use for the container assets ECR repository
-    Default: ""
-    Type: String
   Qualifier:
     Description: An identifier to distinguish multiple bootstrap stacks in the same environment
     Default: hnb659fds
@@ -95,11 +91,6 @@ Conditions:
       - Fn::Equals:
           - ""
           - Ref: InputPermissionsBoundary
-  HasCustomContainerAssetsRepositoryName:
-    Fn::Not:
-      - Fn::Equals:
-          - ""
-          - Ref: ContainerAssetsRepositoryName
   UsePublicAccessBlockConfiguration:
     Fn::Equals:
       - "true"
@@ -225,46 +216,6 @@ Resources:
               Bool:
                 aws:SecureTransport: "false"
             Principal: "*"
-  ContainerAssetsRepository:
-    Type: AWS::ECR::Repository
-    Properties:
-      ImageTagMutability: IMMUTABLE
-      LifecyclePolicy:
-        LifecyclePolicyText: |
-          {
-            "rules": [
-              {
-                "rulePriority": 1,
-                "description": "Untagged images should not exist, but expire any older than one year",
-                "selection": {
-                  "tagStatus": "untagged",
-                  "countType": "sinceImagePushed",
-                  "countUnit": "days",
-                  "countNumber": 365
-                },
-                "action": { "type": "expire" }
-              }
-            ]
-          }
-      RepositoryName:
-        Fn::If:
-          - HasCustomContainerAssetsRepositoryName
-          - Fn::Sub: ${ContainerAssetsRepositoryName}
-          - Fn::Sub: cdk-${Qualifier}-container-assets-${AWS::AccountId}-${AWS::Region}
-      RepositoryPolicyText:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: LambdaECRImageRetrievalPolicy
-            Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action:
-              - ecr:BatchGetImage
-              - ecr:GetDownloadUrlForLayer
-            Condition:
-              StringLike:
-                aws:sourceArn:
-                  Fn::Sub: arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:*
   FilePublishingRole:
     Type: AWS::IAM::Role
     Properties:
@@ -288,29 +239,6 @@ Resources:
       Tags:
         - Key: aws-cdk:bootstrap-role
           Value: file-publishing
-  ImagePublishingRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-          - Action: sts:AssumeRole
-            Effect: Allow
-            Principal:
-              AWS:
-                Ref: AWS::AccountId
-          - Fn::If:
-              - HasTrustedAccounts
-              - Action: sts:AssumeRole
-                Effect: Allow
-                Principal:
-                  AWS:
-                    Ref: TrustedAccounts
-              - Ref: AWS::NoValue
-      RoleName:
-        Fn::Sub: cdk-${Qualifier}-image-publishing-role-${AWS::AccountId}-${AWS::Region}
-      Tags:
-        - Key: aws-cdk:bootstrap-role
-          Value: image-publishing
   LookupRole:
     Type: AWS::IAM::Role
     Properties:
@@ -371,33 +299,6 @@ Resources:
         - Ref: FilePublishingRole
       PolicyName:
         Fn::Sub: cdk-${Qualifier}-file-publishing-role-default-policy-${AWS::AccountId}-${AWS::Region}
-  ImagePublishingRoleDefaultPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyDocument:
-        Statement:
-          - Action:
-              - ecr:PutImage
-              - ecr:InitiateLayerUpload
-              - ecr:UploadLayerPart
-              - ecr:CompleteLayerUpload
-              - ecr:BatchCheckLayerAvailability
-              - ecr:DescribeRepositories
-              - ecr:DescribeImages
-              - ecr:BatchGetImage
-              - ecr:GetDownloadUrlForLayer
-            Resource:
-              Fn::Sub: ${ContainerAssetsRepository.Arn}
-            Effect: Allow
-          - Action:
-              - ecr:GetAuthorizationToken
-            Resource: "*"
-            Effect: Allow
-        Version: "2012-10-17"
-      Roles:
-        - Ref: ImagePublishingRole
-      PolicyName:
-        Fn::Sub: cdk-${Qualifier}-image-publishing-role-default-policy-${AWS::AccountId}-${AWS::Region}
   DeploymentActionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -587,10 +488,6 @@ Outputs:
     Export:
       Name:
         Fn::Sub: CdkBootstrap-${Qualifier}-FileAssetKeyArn
-  ImageRepositoryName:
-    Description: The name of the ECR repository which hosts docker image assets
-    Value:
-      Fn::Sub: ${ContainerAssetsRepository}
   BootstrapVersion:
     Description: The version of the bootstrap resources that are currently mastered in this stack
     Value:
