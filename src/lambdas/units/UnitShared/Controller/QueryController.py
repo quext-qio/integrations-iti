@@ -12,7 +12,7 @@ class QueryController:
     __dir_path is the path to the directory where the SQL files are located.
     Modify it according to your AWS Lambda environment.
     '''
-    __dir_path = Path('/path/to/sql/files')
+    __dir_path = Path('/UnitShared/SQL/')
 
     @staticmethod
     def read_query(path, cache_name, cache_key, cache_dur):

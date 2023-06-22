@@ -26,11 +26,11 @@ class DataControllerFactory:
         #         return response, 500
         
         if partner == "Newco":
-            response, code = DataNewco.get_unit_availability(ips_response)
-            return Controller("NewCo", response, code).built_response()
+            property_data, models_data, units_data, code = DataNewco.get_unit_availability(ips_response)
+            return Controller("NewCo", response, code).built_response(property_data, models_data, units_data)    
         elif partner == "ResMan":
-            response, code = DataResman.get_unit_availability(ips_response)
-            return Controller("ResMan", response, code).built_response()
+            property_data, models_data, units_data, code = DataResman.get_unit_availability(ips_response)
+            return Controller("ResMan", code).built_response(property_data, models_data, units_data)    
         elif partner == "Entrata":
             response, code = None, 200
         elif partner == "RealPage":
