@@ -84,21 +84,21 @@ pipeline {
                 }
             }
         }        
-        stage(('CDK bootstrap')) {
-            when {
-                expression { 
-                    envs.contains(DEPLOY_ENVIRONMENT) 
-                }
-            }
-            steps {
-                script {
-                    docker.image("quext/${DEPLOY_ENVIRONMENT}").inside() {
-                    sh "ls -lha"
-                    sh "cdk bootstrap ${env.COMMON_CONFIGS} --template cdk-zatoserverless-template.yaml --toolkit-stack-name quext-dev-zatoserverless --qualifier zatoapi --tags Team=Integration --tags Service=ZatoServerless"
-                    }
-                }
-            }
-        }
+        // stage(('CDK bootstrap')) {
+        //     when {
+        //         expression { 
+        //             envs.contains(DEPLOY_ENVIRONMENT) 
+        //         }
+        //     }
+        //     steps {
+        //         script {
+        //             docker.image("quext/${DEPLOY_ENVIRONMENT}").inside() {
+        //             sh "ls -lha"
+        //             sh "cdk bootstrap ${env.COMMON_CONFIGS} --template cdk-zatoserverless-template.yaml --toolkit-stack-name quext-dev-zatoserverless --qualifier zatoapi --tags Project=Quext --tags Environment=${DEPLOY_ENVIRONMENT} --tags Team=Integration --tags Service=ZatoServerless"
+        //             }
+        //         }
+        //     }
+        // }
         stage('CDK synth') {
             when {
                 expression { 
@@ -110,7 +110,7 @@ pipeline {
                     docker.image("quext/${DEPLOY_ENVIRONMENT}").inside() {
                     sh "cdk ls"
                     sh "cdk synth"
-                    sh "cdk deploy --app cdk.out --all --require-approval never --toolkit-stack-name quext-dev-zatoserverless --progress bar --trace true"
+                    sh "cdk deploy --app cdk.out --all --require-approval never --toolkit-stack-name quext-dev-zato-serverless --progress bar --trace true"
                     }
                 }
             }
