@@ -1,149 +1,316 @@
 from Utils.Constants.RealpageConstants import RealpageConstants
-import zeep
-import xmltodict
-import xml.etree.ElementTree as e
+from urllib.parse import urlencode
+import xml.etree.ElementTree as etree
 import os
 import datetime
 
 
 class DataResman:
 
-    def get_unit_availability(self, ips_response):
-        print("entra")
+    def get_unit_availability(self, ips):
+   
         code = 200
         errors = []
 
-        # Configurar la URL del WSDL según corresponda en AWS Lambda
-        wsdl = RealpageConstants.WSDL_URL
-
-        # Crear una instancia del cliente Zeep
-        client = zeep.Client(wsdl=wsdl)
-
-        # Obtener las variables de entorno de AWS Lambda para Autenticación
-        pmcid = os.environ.get(RealpageConstants.PMCID)
-        siteid = os.environ.get(RealpageConstants.SITEID)
-        licensekey = os.environ.get(RealpageConstants.LICENSE_KEY)
-
-        # Preparar los detalles de autenticación
-        _auth = client.get_type("ns0:AuthDTO")(pmcid=pmcid, siteid=siteid, licensekey=licensekey)
-
-        # Calcular la fecha necesaria (30 días a partir de hoy)
-        date_needed = datetime.date.today() + datetime.timedelta(days=30)
-
-        # Crear la lista de criterios de búsqueda
-        listcriterion = client.get_type("ns0:ArrayOfListCriterion")([
-            client.get_type("ns0:ListCriterion")(name=RealpageConstants.DATE_NEEDED, singlevalue=date_needed.strftime("%Y-%m-%d")),
-            client.get_type("ns0:ListCriterion")(name=RealpageConstants.LIMIT_RESULTS, singlevalue=False)
-        ])
-
-        # Llamar al servicio de getunitlist
-        res = client.service.getunitlist(auth=_auth, listCriteria=listcriterion)
-
-        # Parsear la respuesta XML a un diccionario
-        response = xmltodict.parse(e.tostring(res))
-        print(response)
-        # Obtener los datos de propiedad, modelos y unidades mediante la función translateRealPage
-        property, models, units = self.translateRealPage(response[RealpageConstants.GET_UNIT_LIST][RealpageConstants.UNIT_OBJECTS][RealpageConstants.UNIT_OBJECT], ips_response[RealpageConstants.PLATFORMDATA][RealpageConstants.FOREIGN_COMMUNITY_ID])
-
-        # Crear la respuesta final
-        response = {
-            "data": {
-                "provenance": [RealpageConstants.PLATFORM],
-                "property": property,
-                "models": models,
-                "units": units
-            },
-            "errors": errors
+        # These get replaced into the url template.
+        _params = { 
+            "interface": "MITS",
+            "method": "GetMarketing4_0",          
         }
+        
+        body = {}
+        if os.environ["PRODUCTION"] == "False":
+            body = { 
+                "PropertyID": ips["platformData"]["foreign_community_id"],
+                "AccountID": ips["platformData"]["foreign_customer_id"],
+                "IntegrationPartnerID": config["IntegrationPartnerID"],
+                "ApiKey": config["APIKey"]
+            }
+        else:
+            #Depending on the application hitting this endpoint, we may need to send different credentials, so look those up.
+            credentials, status = AccessUtils.externalCredentials(self.wsgi_environ, self.logger, "ResMan")
+            if status != "good":
+                errors.append({ "status": "error", "message": status })
+                response = { "data": { "provenance": ["resman"] }, "errors": errors }
+                return response, 500
+
+            body = { 
+                "IntegrationPartnerID": credentials["body"]["IntegrationPartnerID"],
+                "ApiKey": credentials["body"]["ApiKey"],
+                "PropertyID": ips["platformData"]["foreign_community_id"],
+                "AccountID": ips["platformData"]["foreign_customer_id"]
+            }
+          
+        _body = urlencode(body, {"Content-type": "application/x-www-form-urlencoded"})
+
+        # Headers. Probably doesn't need Accept, but blows up without Content-Length for sure.
+        headers = {'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json', 'Content-Length': str(len(str(_body)))}
+        resmanChannel = self.outgoing.plain_http['ResMan (External)']
+        resmanChannelResponse = resmanChannel.conn.post(self.cid, _body, _params, headers=headers)
+        
+        # json_xml = json.loads(Converter(resmanChannelResponse.text).xml_to_json())
+        # return [json_xml], 200    
+
+        xml = etree.fromstring(resmanChannelResponse.text)
+
+        if resmanChannelResponse.status_code != 200:
+            self.logger.info(resmanChannelResponse.status_code)
+            errors.append({ "status_code": resmanChannelResponse.status_code, 
+                            "status": xml.findall('Status')[0].text, 
+                            "message": xml.findall('ErrorDescription')[0].text })
+            response = { "data": { "provenance": ["resman"] }, "errors": errors }
+            code = 502
+        elif xml.findall("ErrorDescription"):
+            code = 502
+            errors.append({ "status": "error", "message": xml.findall("./ErrorDescription")[0].text })
+            response = { "data": { "provenance": ["resman"], }, "errors": errors }
+        else:
+            property, models, units = self.translateResmanXML(xml, "MITS/GetMarketing4_0", ips)
+            response = { "data": { "provenance": ["resman"], "property": property, "models": models, "units": units }, "errors": errors }
 
         return response, code
 
-    def translateRealPage(self, unit_objects, foreign_community_id):
-        models = []
-        units = []
-        property_id = None
-        property = {}
-        model_type_list = []
-        for input_dict in unit_objects:
-            if not property_id:
-                property_id = input_dict[RealpageConstants.PROPERTY_NUMBER_ID]
-                property = { 
-                    "name": input_dict[RealpageConstants.PROPERTY_NUMBER_ID], 
-                    "address": input_dict[RealpageConstants.ADDRESS][RealpageConstants.ADDRESS1], 
-                    "address2": None, 
-                    "city": input_dict[RealpageConstants.ADDRESS][RealpageConstants.CITY_NAME], 
-                    "state": input_dict[RealpageConstants.ADDRESS][RealpageConstants.STATE], 
-                    "postal": input_dict[RealpageConstants.ADDRESS][RealpageConstants.ZIP], 
-                    "email": None, 
-                    "phone": None, 
-                    "speed_dial": None, 
-                    "fax": None,
-                    "source_system": RealpageConstants.PARTNER_NAME
-                }
-            model_type = input_dict[RealpageConstants.FLOOR_PLAN][RealpageConstants.FLOOR_PLAN_CODE]
-            if model_type not in model_type_list:
-                model_type_list.append(input_dict[RealpageConstants.FLOOR_PLAN][RealpageConstants.FLOOR_PLAN_CODE])
-                models.append({
-                            "model_type": input_dict[RealpageConstants.FLOOR_PLAN][RealpageConstants.FLOOR_PLAN_CODE],
-                            "beds": int(input_dict[RealpageConstants.UNIT_DETAILS][RealpageConstants.BEDROOMS]), 
-                            "baths": int(float(input_dict[RealpageConstants.UNIT_DETAILS][RealpageConstants.BATHROOMS])),
-                            "floorplan": None,
-                            "virtual_tour": None,
-                            "photos": [], 
-                            "sqft": int(input_dict[RealpageConstants.UNIT_DETAILS][RealpageConstants.GROSS_SQFT_COUNT]),
-                            "floorplan_alt_text": input_dict[RealpageConstants.FLOOR_PLAN][RealpageConstants.FLOOR_PLAN_NAME],
-                            "sqft_range": input_dict[RealpageConstants.UNIT_DETAILS][RealpageConstants.GROSS_SQFT_COUNT],
-                            "unit_type_desc": input_dict[RealpageConstants.FLOOR_PLAN][RealpageConstants.FLOOR_PLAN_NAME],
-                            "unit_type_name": input_dict[RealpageConstants.FLOOR_PLAN][RealpageConstants.FLOOR_PLAN_CODE],
-                            "website": None,
-                            "virtual_tour_url": None,
-                            "sqft_model_base": input_dict[RealpageConstants.UNIT_DETAILS][RealpageConstants.GROSS_SQFT_COUNT],
-                            "property_name": input_dict[RealpageConstants.PROPERTY_NUMBER_ID],
-                            "foreign_community_id": foreign_community_id
-                        })
+   
+    def translateResmanXML(self, xml, method, ips):
+        # This isn't true Xpath 1.0, but some subset with changes. See:
+        # https://docs.python.org/3/library/xml.etree.elementtree.html#xpath-support
+        
+        if method == "MITS/GetMarketing4_0":
+            # This block extracts the "property" object from ResMan xml.
+            xpath_prefix = "Response/PhysicalProperty/Property/PropertyID/"
+
+            property_name = xml.findall(xpath_prefix + "MarketingName")[0].text
+            address = xml.findall(xpath_prefix + "Address/AddressLine1")[0].text
+            if xml.findall(xpath_prefix + "Address/AddressLine2"):
+                address2 = xml.findall(xpath_prefix + "Address/AddressLine2")[0].text
+            else:
+                address2 = None
+            city = xml.findall(xpath_prefix + "Address/City")[0].text
+            state = xml.findall(xpath_prefix + "Address/State")[0].text
+            postal = xml.findall(xpath_prefix + "Address/PostalCode")[0].text
+            email = xml.findall(xpath_prefix + "Email")[0].text
+            phone = xml.findall(xpath_prefix + "Phone[@PhoneType='personal']/PhoneNumber")[0].text
+            speed_dial = xml.findall(xpath_prefix + "Phone[@PhoneType='personal']/PhoneNumber")[0].text
+            fax = xml.findall(xpath_prefix + "Phone[@PhoneType='fax']/PhoneNumber")[0].text
             
-            units.append({ 
-                    "floor": int(input_dict[RealpageConstants.UNIT_DETAILS][RealpageConstants.FLOOR_NUMBER]), 
-                    "unit_number": input_dict[RealpageConstants.ADDRESS][RealpageConstants.UNIT_NUMBER], 
-                    "sqft": int(input_dict[RealpageConstants.UNIT_DETAILS][RealpageConstants.GROSS_SQFT_COUNT]), 
-                    "beds": int(float(input_dict[RealpageConstants.UNIT_DETAILS][RealpageConstants.BEDROOMS])),
-                    "baths": int(float(input_dict[RealpageConstants.UNIT_DETAILS][RealpageConstants.BATHROOMS])),
-                    "rent_amount": int(float(input_dict[RealpageConstants.EFFECTIVE_RENT])),
-                    "market_rent_amount": int(float(input_dict[RealpageConstants.FLOOR_PLAN_MARKET_RENT])),
-                    "available_date": datetime.datetime.strptime(input_dict[RealpageConstants.AVAILABILITY][RealpageConstants.MADE_READY_DATE], "%m/%d/%Y").strftime("%Y-%m-%d"),
-                    "unit_type_name": input_dict[RealpageConstants.FLOOR_PLAN][RealpageConstants.FLOOR_PLAN_CODE],
-                    "model_type": input_dict[RealpageConstants.FLOOR_PLAN][RealpageConstants.FLOOR_PLAN_CODE],
-                    "available": (1 if input_dict[RealpageConstants.AVAILABILITY][RealpageConstants.AVAILABLEBIT] == "true" else 0),
-                    "available_boolean":("true" if input_dict[RealpageConstants.AVAILABILITY][RealpageConstants.AVAILABLEBIT] == "true" else "false"),
-                    "building":input_dict[RealpageConstants.ADDRESS][RealpageConstants.BUILDING_ID],
-                    "is_available": (1 if input_dict[RealpageConstants.AVAILABILITY][RealpageConstants.AVAILABLEBIT] == "true" else 0),
-                    "market_rent": int(float(input_dict[RealpageConstants.EFFECTIVE_RENT])),
-                    "property_id":input_dict[RealpageConstants.PROPERTY_NUMBER_ID],
-                    "property_name":input_dict[RealpageConstants.PROPERTY_NUMBER_ID],
-                    "unit_id": int(input_dict[RealpageConstants.ADDRESS][RealpageConstants.UNIT_ID]),
-                    "unit_status": ("vacant - available" if input_dict[RealpageConstants.AVAILABILITY][RealpageConstants.AVAILABLEBIT] == "true" else "un-available"),
-                    "unit_type_desc": input_dict[RealpageConstants.FLOOR_PLAN][RealpageConstants.FLOOR_PLAN_NAME]
+            foreign_community_id = ips["platformData"]["foreign_community_id"] if "platformData" in ips and "foreign_community_id" in ips["platformData"] else "" 
+            source_system = ips["platformData"]["platform"] if "platformData" in ips and "platform" in ips["platformData"] else "" 
+
+            property = { 
+                "name": property_name, 
+                "address": address, 
+                "address2": address2, 
+                "city": city, 
+                "state": state, 
+                "postal": postal, 
+                "email": email, 
+                "phone": phone, 
+                "speed_dial": speed_dial, 
+                "fax": fax,
+                "source_system": source_system
+            }
+            
+            # This block extracts the "units" object from ResMan xml.
+            units = []
+            xpath_prefix = "Response/PhysicalProperty/Property/"
+            unit_floor_plan_min_value = {}
+            effective_amount = None
+            for i in xml.findall(xpath_prefix + "ILS_Unit"):
+                floor = int(i.findall("FloorLevel")[0].text)
+                unit_number = i.findall("Units/Unit/MarketingName")[0].text
+                sqft = int(i.findall("Units/Unit/MaxSquareFeet")[0].text)
+                floorplan = i.findall("Units/Unit/FloorplanName")[0].text
+                beds = float(i.findall("Units/Unit/UnitBedrooms")[0].text)
+                baths = float(i.findall("Units/Unit/UnitBathrooms")[0].text)
+
+                unit_property_name_aux = i.attrib["OrganizationName"] # property_name
+                unit_type_desc_aux = f"{int(beds)}x{int(baths)}" # unit_type_desc
+                building = i.findall("Units/Unit/Address")[0].findall("AddressLine1")[0].text
+                market_rent = int(i.findall("Units/Unit/MarketRent")[0].text)
+                unit_id = self.extract_number(i.attrib["IDValue"])
+                available_boolean = "true" if i.findall("Units/Unit/UnitLeasedStatus")[0].text == "available" else "false"
+                is_available = 1 if i.findall("Units/Unit/UnitLeasedStatus")[0].text == "available" else 0
+                available_aux = 1 if i.findall("Units/Unit/UnitLeasedStatus")[0].text == "available" else 0 # available 
+                unit_status = f"{i.findall('Units/Unit/UnitOccupancyStatus')[0].text} - {i.findall('Units/Unit/UnitLeasedStatus')[0].text}"
+                property_id = xml.findall("Response/PhysicalProperty/Property")[0].attrib["IDValue"]
+
+
+                for r in i.findall("Pricing/MITS-OfferTerm"):
+                    effective_amount =self.min_value(effective_amount, float(r.findall("EffectiveRent")[0].text))
+
+                market_rent_amount = float(i.findall("Units/Unit/MarketRent")[0].text)
+                effective_min_rent_amount = float(i.findall("EffectiveRent")[0].attrib['Min']) if 'Min' in i.findall("EffectiveRent")[0].attrib else None
+                if effective_min_rent_amount is None:
+                    effective_min_rent_amount = effective_amount
+                model_type = i.findall("Units/Unit/UnitType")[0].text
+
+                if i.findall("Availability/VacateDate"):
+                    vacate_date = str(datetime.date( int(i.findall("Availability/VacateDate")[0].attrib["Year"]),
+                                                    int(i.findall("Availability/VacateDate")[0].attrib["Month"]),
+                                                    int(i.findall("Availability/VacateDate")[0].attrib["Day"]) )
+                    )
+                else:
+                    vacate_date = None
+                min_rent_value_unit = effective_min_rent_amount
+                if "available" in self.request.payload and self.request.payload["available"]:
+                    if i.findall("Units/Unit/UnitLeasedStatus")[0].text in ['available', 'on_notice']:
+                        if unit_floor_plan_min_value.get(floorplan) is not None:
+                            min_rent_value_unit = self.min_value(min_rent_value_unit, unit_floor_plan_min_value.get(floorplan))
+                            unit_floor_plan_min_value[floorplan] = min_rent_value_unit
+                        else:
+                            unit_floor_plan_min_value[floorplan] = min_rent_value_unit
+                else:
+                    if unit_floor_plan_min_value.get(floorplan) is not None:
+                        min_rent_value_unit = self.min_value(min_rent_value_unit, unit_floor_plan_min_value.get(floorplan))
+                    else:
+                        unit_floor_plan_min_value[floorplan] = min_rent_value_unit
+                if "available" in self.request.payload and self.request.payload["available"]:
+                    if i.findall("Units/Unit/UnitLeasedStatus")[0].text in ['available', 'on_notice']:
+                        units.append({ 
+                            "floor": floor, 
+                            "unit_number": unit_number, 
+                            "sqft": sqft, 
+                            "beds": beds, 
+                            "baths": baths,
+                            "rent_amount": effective_min_rent_amount, 
+                            "market_rent_amount": min_rent_value_unit,
+                            "available_date": vacate_date,  
+                            "unit_type_name": model_type,
+                            "model_type": model_type,
+                            "available":available_aux,
+                            "available_boolean":available_boolean,
+                            "building":building,
+                            "is_available":is_available,
+                            "market_rent":market_rent,
+                            "property_id":property_id,
+                            "property_name":unit_property_name_aux,
+                            "unit_id":unit_id,
+                            "unit_status":unit_status,
+                            "unit_type_desc":unit_type_desc_aux
+                        })
+                else:
+                    units.append({ 
+                        "floor": floor, 
+                        "unit_number": unit_number, 
+                        "sqft": sqft, 
+                        "beds": beds, 
+                        "baths": baths,
+                        "rent_amount": effective_min_rent_amount, 
+                        "market_rent_amount": min_rent_value_unit,
+                        "available_date": vacate_date, 
+                        "unit_type_name": model_type,
+                        "model_type": model_type,
+                        "available":available_aux,
+                        "available_boolean":available_boolean,
+                        "building":building,
+                        "is_available":is_available,
+                        "market_rent":market_rent,
+                        "property_id":property_id,
+                        "property_name":unit_property_name_aux,
+                        "unit_id":unit_id,
+                        "unit_status":unit_status,
+                        "unit_type_desc":unit_type_desc_aux
+                    })
+
+            # This block extracts the "models" object from the ResMan xml.
+            models = []
+            for f in xml.findall(xpath_prefix + "Floorplan"):
+                model_type = f.attrib["IDValue"]
+                model_name = f.findall("Name")[0].text
+                beds = int(f.findall("Room[@RoomType='Bedroom']/Count")[0].text)
+                baths = float(f.findall("Room[@RoomType='Bathroom']/Count")[0].text)
+                market_min_rent = float(f.findall("MarketRent")[0].attrib["Min"]) if 'Min' in f.findall("MarketRent")[0].attrib else None
+                effective_min_rent = float(f.findall("EffectiveRent")[0].attrib["Min"]) if 'Min' in f.findall(
+                    "EffectiveRent")[0].attrib else None
+                available = int(f.findall("UnitsAvailable")[0].text)
+
+                photos = []
+                virtual_tour, floorplan = "", ""
+                for file in f.findall("File"):
+                    if file.findall("FileType")[0].text == "Floorplan":
+                        floorplan = file.findall("Src")[0].text
+                    elif file.findall("FileType")[0].text == "Video":
+                        iframe_markup = file.findall("Src")[0].text
+                        virtual_tour = re.findall(r'src="(.+?)"', iframe_markup)[0]
+                    elif file.findall("FileType")[0].text == "Photo":
+                        photos.append(file.findall("Src")[0].text)
+
+                sqft = int(f.findall("SquareFeet")[0].attrib["Avg"])
+                temp_min_avail_only_amount = None
+                if "available" in self.request.payload and self.request.payload["available"]:
+                    if model_name in unit_floor_plan_min_value.keys():
+                        temp_min_avail_only_amount = self.min_value(unit_floor_plan_min_value.get(model_name))
+                    if temp_min_avail_only_amount is None:
+                        market_rent_value_reported = market_min_rent
+                    else:
+                        market_rent_value_reported = temp_min_avail_only_amount
+                else:
+                    market_rent_value_reported = market_min_rent
+                
+                website = xml.findall(xpath_prefix + "PropertyID")[0].findall("WebSite")[0].text
+                floorplan_alt_text = f.findall("Comment")[0].text if len(f.findall("Comment")) > 0 else ""
+                sqft_max_all = int(f.findall("SquareFeet")[0].attrib["Max"])
+                sqft_min_all= int(f.findall("SquareFeet")[0].attrib["Min"])
+                sqft_max_avail= int(f.findall("SquareFeet")[0].attrib["Min"])
+                sqft_min_avail= int(f.findall("SquareFeet")[0].attrib["Max"])
+                sqft_min_report= sqft_min_avail if sqft_min_avail > 0 else sqft_min_all
+                sqft_max_report= sqft_max_avail if sqft_max_avail > 0 else sqft_max_all
+                sqft_range= f"{sqft_min_report}" if sqft_min_report ==  sqft_max_report else f"{sqft_min_report}-{sqft_max_report}"
+                total_units = int(f.findall("UnitCount")[0].text)
+                unit_market_rent_all = int(f.findall("MarketRent")[0].attrib["Min"])
+                unit_market_rent_avail = int(f.findall("MarketRent")[0].attrib["Max"])
+                unit_type_desc = f"{beds}x{int(baths)}"
+                virtual_tour = virtual_tour if virtual_tour != "" else None
+                unit_type_first_avail= None if available == 0  else datetime.datetime.now().date() #TODO: Get correct date
+                unit_type_name = f.attrib["IDValue"]
+                virtual_tour_url = None
+                sqft_model_base = sqft
+                property_name_aux = f.attrib["OrganizationName"]  
+
+                models.append({
+                    "model_type": model_type, 
+                    "beds": beds, 
+                    "baths": baths,
+                    "market_rent": market_rent_value_reported,
+                    "available": available, 
+                    "floorplan": floorplan, 
+                    "virtual_tour": virtual_tour,
+                    "photos": photos, 
+                    "sqft": sqft,
+                    "floorplan_alt_text": floorplan_alt_text,
+                    "sqft_max_all": sqft_max_all,
+                    "sqft_min_all": sqft_min_all,
+                    "sqft_max_avail": sqft_max_avail,
+                    "sqft_min_avail": sqft_min_avail,
+                    "sqft_min_report": sqft_min_report,
+                    "sqft_max_report": sqft_max_report,
+                    "sqft_range": sqft_range,
+                    "total_units": total_units,
+                    "unit_market_rent_all": unit_market_rent_all,
+                    "unit_market_rent_avail": unit_market_rent_avail,
+                    "unit_type_desc": unit_type_desc,
+                    "unit_type_first_avail": unit_type_first_avail,
+                    "unit_type_name": unit_type_name,
+                    "website": website,
+                    "virtual_tour_url": virtual_tour_url,
+                    "sqft_model_base": sqft_model_base,
+                    "property_name": property_name_aux,
+                    "foreign_community_id": foreign_community_id,
                 })
 
-        for model in models:
-            rent = []
-            sqft_min_max = []
-            unit_date_avail = []
-            for unit in units:
-                if unit['unit_type_name'] == model['model_type']:
-                    rent.append(unit['rent_amount'])
-                    sqft_min_max.append(unit['sqft'])
-                    sqft_min_max.append(unit['sqft'])
-                    unit_date_avail.append(unit['available_date'])
-            model['market_rent'] = int(float(min(rent)))
-            model['available'] = model['total_units'] = len(rent)
-            model['sqft_max_all'] = model['sqft_max_avail'] =  int(max(sqft_min_max))
-            model['sqft_min_all'] = model['sqft_min_avail'] = int(min(sqft_min_max))
-            model['sqft_min_report'] = model['sqft_min_all'] and int(model['sqft_min_all']) or int(model['sqft'])
-            model['sqft_max_report'] = model['sqft_max_all'] and int(model['sqft_max_all']) or int(model['sqft'])
-            model['unit_market_rent_all'] = int(float(min(rent)))
-            model['unit_market_rent_avail'] = int(float(min(rent)))
-            model['sqft_model_base'] = int(min(sqft_min_max))
-            model['unit_type_first_avail'] = min(unit_date_avail)
-
         return property, models, units
+    
+    def min_value(self, *args):
+        values = []
+        for arg in args:
+            if arg is not None:
+                values.append(float(arg))
+        return min(values) if len(values) > 0 else None
+    
+    def extract_number(self, input_string):
+        stripped_string = ''.join(c for c in input_string if c.isdigit())
+
+        if stripped_string:
+            return int(stripped_string)
+        else:
+            return -1

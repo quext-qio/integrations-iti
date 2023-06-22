@@ -1,19 +1,21 @@
 import sys
 class DataController:
     
-    def __init__(self, partner, partner_response, errors):
-        self.partner_response = partner_response
+    def __init__(self, partner, errors):
         self.errors = errors
         self.partner = partner
 
-    def built_response(self):
+    def built_response(self, property_data, models_data, units_data):
         # build proper response structure for every partner
-        print(sys.path)
+       
         response = { 
                     "data": {   
                         "provenance": [ self.partner ],   
-                        "residents": self.partner_response  
+                        "property": property_data,
+                        "models": models_data,
+                        "units": units_data
                         },  
                     "errors": self.errors    
                     }
         return response
+    

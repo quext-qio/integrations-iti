@@ -22,13 +22,8 @@ class DataNewco:
                 # Get the units data
                 units_data = self.get_units_data(session, parameters)
 
-            response = {
-                'provenance': ['newco-db'],
-                'property': property_data,
-                'models': models_data,
-                'units': units_data
-            }
-            return 200, response
+            return property_data, models_data, units_data ,200
+        
         except Exception as e:
             logging.error(f"An error occurred while retrieving unit availability: {str(e)}")
             return 500, f"An error occurred while retrieving unit availability: {str(e)}"
