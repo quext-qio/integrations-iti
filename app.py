@@ -27,7 +27,7 @@ stage = StageName.DEV
 tags = {
     'Environment': stage.value,
     'Project': 'quext',
-    'Service': 'zato-serverless',
+    'Service': 'aws-integration-engine',
     'Team': 'integration'
 }
 
