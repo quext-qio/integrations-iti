@@ -2,8 +2,8 @@ from aws_cdk import (
     Stack,
     Duration,
     aws_lambda as lambda_,
-    aws_apigateway as apigateway_,
-    aws_ssm as ssm
+    aws_apigateway as apigateway_
+    
 )
 from constructs import Construct
 

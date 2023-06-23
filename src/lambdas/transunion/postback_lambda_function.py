@@ -50,7 +50,7 @@ def lambda_handler(event, context):
         iterations = 0
 
         while success == False:
-            response = requests.get(f"{leasing_host}/{parameter_store['LEASING_FIND_BY_NUMBER']}/{application_number}")
+            response = requests.get(f"{leasing_host}{parameter_store['LEASING_FIND_BY_NUMBER']}/{application_number}")
             household_id = response.text
             iterations += 1
             
@@ -109,7 +109,7 @@ def lambda_handler(event, context):
     }
 
     # create the url needed for the leasing endpoint 
-    url = f"{leasing_host}/{leasing_background_screening_endpoint}/{household_id}"
+    url = f"{leasing_host}{leasing_background_screening_endpoint}/{household_id}"
 
     # call to update the data
     try:
