@@ -4,7 +4,8 @@ import xml.etree.ElementTree as etree
 import os
 import datetime, re
 import requests
-
+from Utils.Config.Config import config
+from Utils.Constants.ResmanConstants import ResmanConstants
 
 class DataResman:
 
@@ -12,39 +13,33 @@ class DataResman:
    
         code = 200
         errors = []
+        base_url = ResmanConstants.BASE_URL
+        interface = ResmanConstants.INTERFACE
+        method = ResmanConstants.METHOD
 
         # These get replaced into the url template.
         _params = { 
-            "interface": "MITS",
-            "method": "GetMarketing4_0",          
+            "interface": interface,
+            "method": method,          
         }
         
         body = {}
-        if code:
-            body = { 
-                "PropertyID": ips["platformData"]["foreign_community_id"],
-                "AccountID": ips["platformData"]["foreign_customer_id"],
-                "IntegrationPartnerID": "20422",
-                "ApiKey": "01mu8cUPjJUeTZtaPwyFGAhAtou70859"
-            }
-        else:
-            #Depending on the application hitting this endpoint, we may need to send different credentials, so look those up.
-            credentials, status = AccessUtils.externalCredentials(self.wsgi_environ, self.logger, "ResMan")
-            if status != "good":
-                errors.append({ "status": "error", "message": status })
-                response = { "data": { "provenance": ["resman"] }, "errors": errors }
-                return response, 500
+        partner = ResmanConstants.RESMAN
+        #Depending on the application hitting this endpoint, we may need to send different credentials, so look those up.
+        credentials, status = AccessUtils.externalCredentials(self.wsgi_environ, self.logger, "ResMan")
+        if status != "good":
+            errors.append({ "status": "error", "message": status })
+            response = { "data": { "provenance": [partner] }, "errors": errors }
+            return response, 500
 
-            body = { 
-                 "PropertyID": ips["platformData"]["foreign_community_id"],
-                "AccountID": ips["platformData"]["foreign_customer_id"],
-                "IntegrationPartnerID": "20422",
-                "ApiKey": "01mu8cUPjJUeTZtaPwyFGAhAtou70859"
+        body = { 
+            "PropertyID": ips["platformData"]["foreign_community_id"],
+            "AccountID": ips["platformData"]["foreign_customer_id"],
+            "IntegrationPartnerID": config['Integration_partner_id'],
+            "ApiKey": config['ApiKey']
             }
           
-        base_url = 'https://api.myresman.com'
-        interface = 'MITS'
-        method = 'GetMarketing4_0'
+       
         url = f'{base_url}/{interface}/{method}'
         _body = urlencode(body, {"Content-type": "application/x-www-form-urlencoded"})
     
@@ -62,19 +57,17 @@ class DataResman:
 
         xml = etree.fromstring(resmanChannelResponse.text)
         if resmanChannelResponse.status_code != 200:
-            print(resmanChannelResponse.status_code)
             errors.append({ "status_code": resmanChannelResponse.status_code, 
                             "status": xml.findall('Status')[0].text, 
                             "message": xml.findall('ErrorDescription')[0].text })
-            response = { "data": { "provenance": ["resman"] }, "errors": errors }
+            response = { "data": { "provenance": [partner] }, "errors": errors }
             code = 502
         elif xml.findall("ErrorDescription"):
             code = 502
             errors.append({ "status": "error", "message": xml.findall("./ErrorDescription")[0].text })
-            response = { "data": { "provenance": ["resman"], }, "errors": errors }
+            response = { "data": { "provenance": [partner], }, "errors": errors }
         else:
-            property, models, units = self.translateResmanXML(xml, "MITS/GetMarketing4_0", ips, event)
-            response = { "data": { "provenance": ["resman"], "property": property, "models": models, "units": units }, "errors": errors }
+            property, models, units = self.translateResmanXML(xml, f'{interface}/{method}', ips, event)
    
         return property, models, units, code
 
