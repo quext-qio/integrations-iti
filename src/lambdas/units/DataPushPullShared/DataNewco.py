@@ -77,11 +77,11 @@ class DataNewco:
             output += NewcoConstants.IS_AVAILABLE
         # Consume any remaining rows
         # Fetch all rows
+        cursor.execute(output, parameters)
         rows = cursor.fetchall()
         
         # Fetch the column names
         column_names = cursor.column_names
-        print(column_names)
         # Process each row and convert to dictionary
         units_data = []
         for row in rows:
@@ -90,5 +90,4 @@ class DataNewco:
         
         # Close the cursor and connection
         cursor.close()
-        print(units_data)
         return units_data

@@ -5,13 +5,14 @@ from datetime import date
 def lambda_handler(event, context):
     input_data = json.loads(event['body'])
     # Obtain the result from DataControllerFactory().create_data_controller(input_data, event)
-    result = DataControllerFactory().create_data_controller(input_data)
+    code, result= DataControllerFactory().create_data_controller(input_data)
+    print(result)
 
     # Convert date objects to strings
     result = convert_dates_to_strings(result)
 
     return {
-        'statusCode': "200",
+        'statusCode': code,
         'body': json.dumps(result),  # Convert the result to JSON
         'headers': {
             'Content-Type': 'application/json',

@@ -1,43 +1,45 @@
 import requests
-
+from Utils.Config.Config import config
+from Utils.Constants.EngrainConstants import EngrainConstants
 class DataEngrain:
 
     def get_unit_availability(self, ips):
-        asset_id = ips["platformData"]["asset_id"]
-        api_key = ips["platformData"]["api_key"]
+        asset_id = ips[EngrainConstants.PLATFORM_DATA]["asset_id"]
+        api_key = ips[EngrainConstants.PLATFORM_DATA]["api_key"]
+        engrain_host = config["Engrain_host"]
 
-        url_floorplans = f"https://api.sightmap.com/v1/assets/{asset_id}/multifamily/floor-plans"
+        url_floorplans = f"{engrain_host}{EngrainConstants.PATH}{asset_id}/multifamily/floor-plans"
         headers = {'API-Key': api_key}
 
         floorplans = requests.get(url_floorplans, headers=headers)
         floorplans_data = floorplans.json()
 
         process_id = self.getPricingProcessId(asset_id)
-        url_units = f"https://api.sightmap.com/v1/assets/{asset_id}/multifamily/pricing/{process_id}/units"
+        url_units = f"{engrain_host}{EngrainConstants.PATH}{asset_id}/multifamily/pricing/{process_id}/units"
         units_pricing = requests.get(url_units, headers=headers)
         units_pricing_data = units_pricing.json()
         
 
-        url_assets = f"https://api.sightmap.com/v1/assets/{asset_id}"
+        url_assets = f"{engrain_host}{EngrainConstants.PATH}{asset_id}"
         asset = requests.get(url_assets, headers=headers)
         asset_data = asset.json()
 
-        url_units = f"https://api.sightmap.com/v1/assets/{asset_id}/multifamily/units"
+        url_units = f"{engrain_host}{EngrainConstants.PATH}{asset_id}/multifamily/units"
         units_response = requests.get(url_units, headers=headers)
         units_response_data = units_response.json()
 
         units_fixed = []
-        for unit in units_response_data["data"]:
+        for unit in units_response_data[EngrainConstants.DATA]:
             units_fixed.append(
-                self.transform_units_json(unit, units_pricing_data["data"]))
+                self.transform_units_json(unit, units_pricing_data[EngrainConstants.DATA]))
 
-        models = self.getEngrainModels(units_response_data["data"],
-                                    floorplans_data["data"],units_pricing_data["data"])
-        return asset_data, models, units_fixed, 200
+        models = self.getEngrainModels(units_response_data[EngrainConstants.DATA],
+                                    floorplans_data[EngrainConstants.DATA],units_pricing_data[EngrainConstants.DATA])
+        return asset_data, models, units_fixed, []
     
     def get_price(self, prices, unit_number):
         for price in prices:
-            if price["unit_number"] == unit_number:
+            if price[EngrainConstants.UNIT_NUMBER] == unit_number:
                 return price["price"]
 
         return None
@@ -46,26 +48,26 @@ class DataEngrain:
         data = input_json
 
         transformed_data = {
-        "floor": int(data.get("floor_id", 0)),
-        "unit_number": str(data.get("unit_number", "")),
-        "sqft": int(data.get("area", 0)),
-        "beds": int(data.get("beds", 0)),
-        "baths": int(data.get("baths", 0)),
-        "rent_amount": self.get_price(prices, str(data.get("unit_number", ""))),
-        "market_rent_amount": float(data.get("market_rent_amount", 0.0)),
-        "available_date": data.get("available_date", ""),
-        "unit_type_name": data.get("unit_type_name", ""),
-        "model_type": data.get("model_type", ""),
-        "available": int(data.get("available", 0)),
-        "available_boolean": str(data.get("available_boolean", "false")),
-        "building": data.get("building", ""),
-        "is_available": int(data.get("is_available", 0)),
-        "market_rent": int(data.get("market_rent", 0)),
-        "property_id": data.get("property_id", ""),
-        "property_name": data.get("property_name", ""),
-        "unit_id": int(data.get("id", 0)),
-        "unit_status": data.get("unit_status", ""),
-        "unit_type_desc": data.get("unit_type_desc", "")
+        "floor": int(data.get(EngrainConstants.FLOOR_ID, 0)),
+        "unit_number": str(data.get(EngrainConstants.UNIT_NUMBER, "")),
+        "sqft": int(data.get(EngrainConstants.AREA, 0)),
+        "beds": int(data.get(EngrainConstants.BEDS, 0)),
+        "baths": int(data.get(EngrainConstants.BATHS, 0)),
+        "rent_amount": self.get_price(prices, str(data.get(EngrainConstants.UNIT_NUMBER, ""))),
+        "market_rent_amount": float(data.get(EngrainConstants.MARKET_RENT_AMOUNT, 0.0)),
+        "available_date": data.get(EngrainConstants.AVAILABLE_DATE, ""),
+        "unit_type_name": data.get(EngrainConstants.UNIT_TYPE_NAME, ""),
+        "model_type": data.get(EngrainConstants.MODEL_TYPE, ""),
+        "available": int(data.get(EngrainConstants.AVAILABLE, 0)),
+        "available_boolean": str(data.get(EngrainConstants.AVAILABLE_BOOLEAN, "false")),
+        "building": data.get(EngrainConstants.BUILDING, ""),
+        "is_available": int(data.get(EngrainConstants.IS_AVAILABLE, 0)),
+        "market_rent": int(data.get(EngrainConstants.MARKET_RENT, 0)),
+        "property_id": data.get(EngrainConstants.PROPERTY_ID, ""),
+        "property_name": data.get(EngrainConstants.PROPERTY_NAME, ""),
+        "unit_id": int(data.get(EngrainConstants.ID, 0)),
+        "unit_status": data.get(EngrainConstants.UNIT_STATUS, ""),
+        "unit_type_desc": data.get(EngrainConstants.UNIT_TYPE_DESC, "")
         }
 
         return transformed_data
@@ -112,23 +114,25 @@ class DataEngrain:
     def getMaxPrice(self, floor_plan_id, units, units_pricing_data):
         prices = []
         for unit in units:
-            if floor_plan_id == unit["floor_plan_id"] and self.get_price(
-                units_pricing_data, unit["unit_number"]) is not None:
+            if floor_plan_id == unit[EngrainConstants.FLOORPLAN_ID] and self.get_price(
+                units_pricing_data, unit[EngrainConstants.UNIT_NUMBER]) is not None:
 
                 prices.append(
-                int(self.get_price(units_pricing_data, unit["unit_number"])))
+                int(self.get_price(units_pricing_data, unit[EngrainConstants.UNIT_NUMBER])))
         
             max_price = max(prices) if len(prices) > 0 else 0
         return (str(max_price))
 
-    def getPricingProcessId(asset_id):
-        url = f'https://api.sightmap.com/v1/assets/{asset_id}/multifamily/pricing'
-        headers = {'API-Key': 'QOZgAsIsMgOwxLTDV4selhYrhePKLoGz'}
+    def getPricingProcessId(self, asset_id):
+        engrain_host = config["Engrain_host"]
+        api_key = config["Engrain_api_key"]
+        url = f'{engrain_host}{asset_id}/multifamily/pricing'
+        headers = {'API-Key': {api_key}}
         process_id = 0
         processes = requests.get(url, headers=headers)
         data = processes.json()
 
-        for price in data["data"]:
+        for price in data[EngrainConstants.DATA]:
           if price["type"] == "push":
                 process_id = price["id"]
                 break
