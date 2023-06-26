@@ -1,5 +1,5 @@
 import json
-
+import requests
 
 class DataEntrata:
 
@@ -8,29 +8,32 @@ class DataEntrata:
         errors = []
 
         # These get replaced into the url template.
-        _params = { "subdomain": "primeplacellc",
-                    "method": "properties",          
+        _params = {"subdomain": "primeplacellc", "method": "properties"}
+
+        _body = json.dumps({
+            "auth": {"type": "basic"},
+            "method": {"name": "getProperties", "params": {"showAllStatus": "1"}}
+        })
+
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic cXVleHRfYXBpQHByaW1lcGxhY2VsbGM6UXVleHQ2MTAyMDIyXg=='
         }
 
-        _body = json.dumps( { "auth": { "type": "basic" }, "method": { "name": "getProperties", "params": { "showAllStatus": "1" } } } )
+        url_template = 'https://{subdomain}.entrata.com/api/{method}'
+        entrata_url = url_template.format(**_params)
 
-        headers = {'Content-Type': 'application/json', 'Authorization': 'Basic cXVleHRfYXBpQHByaW1lcGxhY2VsbGM6UXVleHQ2MTAyMDIyXg==' }
+        entrataChannelResponse = requests.post(entrata_url, data=_body, headers=headers)
 
-        entrataChannel = self.outgoing.plain_http['Entrata (External)']
-        entrataChannelResponse = entrataChannel.conn.post(self.cid, _body, _params, headers=headers)
-
-        self.logger.info(entrataChannelResponse.text)
 
         if entrataChannelResponse.status_code != 200:
-            self.logger.info(entrataChannelResponse.status_code)
             errors.append({ "status_code": entrataChannelResponse.status_code, 
                             "status": entrataChannelResponse.text.findall('Status')[0].text,
                             "message": entrataChannelResponse.text.findall('ErrorDescription')[0].text })
-            response = { "data": { "provenance": ["resman"] }, "errors": errors }
-            code = 502
+            return [], [], [], errors
         else:
             property, models, units = self.translateEntrataJSON(entrataChannelResponse.text, self)
-            response = { "data": { "provenance": ["entrata"], "property": property, "models": models, "units": units }, "errors": errors }
+            return property, models, units, []
 
 
     def translateEntrataJSON(self, entrataJSON ):
