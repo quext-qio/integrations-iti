@@ -12,7 +12,6 @@ class QueryController:
     __dir_path is the path to the directory where the SQL files are located.
     Modify it according to your AWS Lambda environment.
     '''
-    __dir_path = Path('/UnitShared/SQL/')
 
     @staticmethod
     def read_query(path, cache_name, cache_key, cache_dur):
@@ -21,23 +20,23 @@ class QueryController:
         '''
         output = QueryController.__cache_obj.get_from_cache(cache_name, cache_key)
         if not output:
-            with open(str(QueryController.__dir_path / path), 'r') as f:
-                logging.info(str(QueryController.__dir_path / path))
+            with open(str(path), 'r') as f:
+                logging.info(str(path))
                 output = f.read()
             QueryController.__cache_obj.update_cache(cache_name, cache_key, output, cache_dur)
         return output
     
     
 
-    def get_db_session():
+    def get_db_session(self):
         """
         Crea y devuelve una conexión a la base de datos MySQL.
         """
         # Parámetros de conexión a la base de datos
-        db_host = 'localhost'
-        db_user = 'ingrid-oktara'
-        db_password = 'jAVi2PUs2y1dyTJwL2twx8vsyMuh'
-        db_name = 'envDev'
+        db_host = 'newco-prod-readonly2.czlebpbzjy34.us-east-2.rds.amazonaws.com'
+        db_user = 'zato'
+        db_password = 'TyN2!m-db8D7-yua49yycL8h'
+        db_name = 'forge'
         
         # Intenta establecer la conexión a la base de datos
         try:

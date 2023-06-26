@@ -12,4 +12,4 @@ SELECT
 FROM 
   properties 
 WHERE 
-  id = :newco_property_id
+  id = %s

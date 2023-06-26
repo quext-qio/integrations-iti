@@ -2,12 +2,13 @@ from Utils.Constants.RealpageConstants import RealpageConstants
 from urllib.parse import urlencode
 import xml.etree.ElementTree as etree
 import os
-import datetime
+import datetime, re
+import requests
 
 
 class DataResman:
 
-    def get_unit_availability(self, ips):
+    def get_unit_availability(self, ips, event):
    
         code = 200
         errors = []
@@ -19,12 +20,12 @@ class DataResman:
         }
         
         body = {}
-        if os.environ["PRODUCTION"] == "False":
+        if code:
             body = { 
                 "PropertyID": ips["platformData"]["foreign_community_id"],
                 "AccountID": ips["platformData"]["foreign_customer_id"],
-                "IntegrationPartnerID": config["IntegrationPartnerID"],
-                "ApiKey": config["APIKey"]
+                "IntegrationPartnerID": "20422",
+                "ApiKey": "01mu8cUPjJUeTZtaPwyFGAhAtou70859"
             }
         else:
             #Depending on the application hitting this endpoint, we may need to send different credentials, so look those up.
@@ -35,26 +36,33 @@ class DataResman:
                 return response, 500
 
             body = { 
-                "IntegrationPartnerID": credentials["body"]["IntegrationPartnerID"],
-                "ApiKey": credentials["body"]["ApiKey"],
-                "PropertyID": ips["platformData"]["foreign_community_id"],
-                "AccountID": ips["platformData"]["foreign_customer_id"]
+                 "PropertyID": ips["platformData"]["foreign_community_id"],
+                "AccountID": ips["platformData"]["foreign_customer_id"],
+                "IntegrationPartnerID": "20422",
+                "ApiKey": "01mu8cUPjJUeTZtaPwyFGAhAtou70859"
             }
           
+        base_url = 'https://api.myresman.com'
+        interface = 'MITS'
+        method = 'GetMarketing4_0'
+        url = f'{base_url}/{interface}/{method}'
         _body = urlencode(body, {"Content-type": "application/x-www-form-urlencoded"})
-
-        # Headers. Probably doesn't need Accept, but blows up without Content-Length for sure.
-        headers = {'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json', 'Content-Length': str(len(str(_body)))}
-        resmanChannel = self.outgoing.plain_http['ResMan (External)']
-        resmanChannelResponse = resmanChannel.conn.post(self.cid, _body, _params, headers=headers)
-        
+    
+        # Prepare the headers
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json',
+            'Content-Length': str(len(_body))
+        }
+    
+        # Send the HTTP POST request
+        resmanChannelResponse = requests.post(url, data=_body, headers=headers)
         # json_xml = json.loads(Converter(resmanChannelResponse.text).xml_to_json())
         # return [json_xml], 200    
 
         xml = etree.fromstring(resmanChannelResponse.text)
-
         if resmanChannelResponse.status_code != 200:
-            self.logger.info(resmanChannelResponse.status_code)
+            print(resmanChannelResponse.status_code)
             errors.append({ "status_code": resmanChannelResponse.status_code, 
                             "status": xml.findall('Status')[0].text, 
                             "message": xml.findall('ErrorDescription')[0].text })
@@ -65,13 +73,14 @@ class DataResman:
             errors.append({ "status": "error", "message": xml.findall("./ErrorDescription")[0].text })
             response = { "data": { "provenance": ["resman"], }, "errors": errors }
         else:
-            property, models, units = self.translateResmanXML(xml, "MITS/GetMarketing4_0", ips)
+            property, models, units = self.translateResmanXML(xml, "MITS/GetMarketing4_0", ips, event)
             response = { "data": { "provenance": ["resman"], "property": property, "models": models, "units": units }, "errors": errors }
-
-        return response, code
+   
+        return property, models, units, code
 
    
-    def translateResmanXML(self, xml, method, ips):
+    def translateResmanXML(self, xml, method, ips, event):
+        
         # This isn't true Xpath 1.0, but some subset with changes. See:
         # https://docs.python.org/3/library/xml.etree.elementtree.html#xpath-support
         
@@ -152,7 +161,7 @@ class DataResman:
                 else:
                     vacate_date = None
                 min_rent_value_unit = effective_min_rent_amount
-                if "available" in self.request.payload and self.request.payload["available"]:
+                if "available" in event and event["available"]:
                     if i.findall("Units/Unit/UnitLeasedStatus")[0].text in ['available', 'on_notice']:
                         if unit_floor_plan_min_value.get(floorplan) is not None:
                             min_rent_value_unit = self.min_value(min_rent_value_unit, unit_floor_plan_min_value.get(floorplan))
@@ -164,7 +173,7 @@ class DataResman:
                         min_rent_value_unit = self.min_value(min_rent_value_unit, unit_floor_plan_min_value.get(floorplan))
                     else:
                         unit_floor_plan_min_value[floorplan] = min_rent_value_unit
-                if "available" in self.request.payload and self.request.payload["available"]:
+                if "available" in event and event["available"]:
                     if i.findall("Units/Unit/UnitLeasedStatus")[0].text in ['available', 'on_notice']:
                         units.append({ 
                             "floor": floor, 
@@ -237,7 +246,7 @@ class DataResman:
 
                 sqft = int(f.findall("SquareFeet")[0].attrib["Avg"])
                 temp_min_avail_only_amount = None
-                if "available" in self.request.payload and self.request.payload["available"]:
+                if "available" in event and event["available"]:
                     if model_name in unit_floor_plan_min_value.keys():
                         temp_min_avail_only_amount = self.min_value(unit_floor_plan_min_value.get(model_name))
                     if temp_min_avail_only_amount is None:
