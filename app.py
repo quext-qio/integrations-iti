@@ -20,6 +20,7 @@ from src.utils.enums.stage_name import StageName
 app = cdk.App()
 
 # --------------------------------------------------------------------
+# Stage to deploy
 current_stage = os.getenv('STAGE', 'dev')
 if current_stage == 'stage':
     stage = StageName.STAGE
@@ -32,7 +33,6 @@ print(f"Deploying in stage: {stage.value}")
 
 # --------------------------------------------------------------------
 # Tags for all resources
-
 server_name = "aws-integration-engine"
 tags = {
     'Environment': stage.value,
@@ -95,7 +95,6 @@ lxml_layer = layer_stack.get_lxml_layer
 
 # --------------------------------------------------------------------
 # Stack for placepay endpoints
-#dev-zato-serverless-placepaystack
 PlacepayStack(
     app, 
     f"{stage.value}-{server_name}-placepay_stack", 
