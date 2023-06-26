@@ -8,16 +8,11 @@ from constructs import Construct
 
 class UnitsStack(Stack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str],**kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
-        # Units 
-        environment={
-            "LOG_LEVEL": "INFO",
-            "AUTH_HOST": "https://auth-api.dev.quext.io",
-            "IPS_HOST" : "https://partner-api.dev.quext.io"
-        }
+  
         timeout=Duration.seconds(900)
         allow_methods=['OPTIONS', 'POST']
 

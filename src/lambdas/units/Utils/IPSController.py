@@ -4,7 +4,8 @@ class IPSController:
 
     def get_partner(self, community_id, customer_id, purpose):
         try:
-            ips_host = os.environ.get('IPS_HOST')
+            parameter_store = json.loads(os.environ.get("parameter_store"))
+            ips_host = parameter_store['IPS_HOST']
             url = f'{ips_host}/api/read-configuration/{customer_id}/{community_id}/{purpose}'
             payload = {}
             headers = {

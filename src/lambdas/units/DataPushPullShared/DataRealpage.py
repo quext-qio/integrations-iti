@@ -1,19 +1,17 @@
 import os
 import datetime
 import xmltodict
-import zeep
 import xml.etree.ElementTree as etree
-
 from Utils.Constants.RealpageConstants import RealpageConstants
-
+from zeep import Client
 
 class DataRealpage:
         
     def get_unit_availability(self, ips):
         code = 200
         errors = []
-        wsdl = 'https://gateway.rpx.realpage.com/rpxgateway/partner/DigitalHuman/DigitalHuman.svc/GetWSDL'
-        client = zeep.Client(wsdl=wsdl)
+        wsdl = RealpageConstants.WSDL_URL
+        client = Client(wsdl=wsdl)
         factory = client.type_factory('ns0')
         # Preparing auth details from service request
         _auth = factory.AuthDTO(pmcid=os.environ[RealpageConstants.PMCID],

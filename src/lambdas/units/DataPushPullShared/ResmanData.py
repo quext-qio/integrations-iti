@@ -5,6 +5,7 @@ import os
 import datetime, re
 import requests
 from Utils.Config.Config import config
+from Utils.AccessControl import AccessUtils as AccessControl
 from Utils.Constants.ResmanConstants import ResmanConstants
 
 class DataResman:
@@ -25,12 +26,12 @@ class DataResman:
         
         body = {}
         partner = ResmanConstants.RESMAN
-        #Depending on the application hitting this endpoint, we may need to send different credentials, so look those up.
-        credentials, status = AccessUtils.externalCredentials(self.wsgi_environ, self.logger, "ResMan")
-        if status != "good":
-            errors.append({ "status": "error", "message": status })
-            response = { "data": { "provenance": [partner] }, "errors": errors }
-            return response, 500
+        # Depending on the application hitting this endpoint, we may need to send different credentials, so look those up.
+        # credentials, status = AccessControl.externalCredentials(self.wsgi_environ, self.logger, "ResMan")
+        # if status != "good":
+        #     errors.append({ "status": "error", "message": status })
+        #     response = { "data": { "provenance": [partner] }, "errors": errors }
+        #     return response, 500
 
         body = { 
             "PropertyID": ips["platformData"]["foreign_community_id"],
@@ -52,24 +53,19 @@ class DataResman:
     
         # Send the HTTP POST request
         resmanChannelResponse = requests.post(url, data=_body, headers=headers)
-        # json_xml = json.loads(Converter(resmanChannelResponse.text).xml_to_json())
-        # return [json_xml], 200    
-
         xml = etree.fromstring(resmanChannelResponse.text)
         if resmanChannelResponse.status_code != 200:
             errors.append({ "status_code": resmanChannelResponse.status_code, 
                             "status": xml.findall('Status')[0].text, 
                             "message": xml.findall('ErrorDescription')[0].text })
-            response = { "data": { "provenance": [partner] }, "errors": errors }
-            code = 502
+            return [],[],[],errors 
         elif xml.findall("ErrorDescription"):
-            code = 502
             errors.append({ "status": "error", "message": xml.findall("./ErrorDescription")[0].text })
-            response = { "data": { "provenance": [partner], }, "errors": errors }
+            return [],[],[],errors 
         else:
             property, models, units = self.translateResmanXML(xml, f'{interface}/{method}', ips, event)
    
-        return property, models, units, code
+        return property, models, units, []
 
    
     def translateResmanXML(self, xml, method, ips, event):
