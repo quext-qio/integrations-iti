@@ -20,7 +20,15 @@ from src.utils.enums.stage_name import StageName
 app = cdk.App()
 
 # --------------------------------------------------------------------
-stage = StageName.DEV
+current_stage = os.getenv('STAGE', 'dev')
+if current_stage == 'stage':
+    stage = StageName.STAGE
+elif current_stage == 'prod':
+    stage = StageName.PROD
+else:
+    stage = StageName.DEV
+print(f"Deploying in stage: {stage.value}")
+
 
 # --------------------------------------------------------------------
 # Tags for all resources
