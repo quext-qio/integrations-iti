@@ -14,10 +14,10 @@ class NewcoConstants:
     NEWCO_MODELS_QUERY = 'newco_models_query'
     NEWCO_UNITS_QUERY = 'newco_units_query'
     NEWCO_BASE_QUERY = 'newco_base_query'
-    QUERY_PATH = '/Utils/SQL/'
-    NEWCO_PROPERTY_ID = "newco_property_id"
+    QUERY_PATH = 'Utils/SQL/'
+    NEWCO_PROPERTY_ID = "newco_property_id" 
     PLATFORMDATA = "platformData"
-    COMMUNITYID = "foreing_community_id"
+    COMMUNITYID = "foreign_community_id"
     NEWCO_UNITS_PROPERTY_QUERY = "NewcoUnitsPropertyQuery.sql"
     NEWCO_UNITS_MODELS_QUERY = "NewcoUnitsModelsQuery.sql"
     NEWCO_UNITS_UNITS_QUERY = "NewcoUnitsUnitsQuery.sql"
