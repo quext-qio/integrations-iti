@@ -84,7 +84,12 @@ transunion_resource_v2 = api_v2.add_resource("transunion")
 
 # --------------------------------------------------------------------
 # Load all layers to share between lambda's functions
-layer_stack =  LayersStack(app, f"{stage.value}-{server_name}-layers_stack")
+layer_stack =  LayersStack(
+    app, 
+    f"{stage.value}-{server_name}-layers_stack",
+    description="Stack load all layers to share between lambda's functions",
+    tags=tags,    
+)
 cerberus_layer = layer_stack.get_cerberus_layer
 place_api_layer = layer_stack.get_place_api_layer
 requests_layer = layer_stack.get_requests_layer
