@@ -46,11 +46,9 @@ pipeline {
                         DEPLOY_ENVIRONMENT = params.ENVIRONMENT
                     }
                     currentBuild.displayName = "#${BUILD_NUMBER} Environment: ${DEPLOY_ENVIRONMENT}"
-                    env.CDK_ACCOUNT = accounts.get(DEPLOY_ENVIRONMENT)
-                    env.CDK_REGION = defaultRegion
-                    echo(env.CDK_ACCOUNT)
-                    echo(env.CDK_REGION)
-                    jenkinsRole = "arn:aws:iam::633546161654:role/devops-test-cdk"
+                    env.ACCOUNT_ID = accounts.get(DEPLOY_ENVIRONMENT)
+                    env.REGION = defaultRegion
+                    jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/devops-test-cdk"
                     def AWS_KEYS = sh(returnStdout: true, script: """
                         aws sts assume-role --role-arn $jenkinsRole \
                         --role-session-name cdk \
@@ -61,9 +59,7 @@ pipeline {
                     env.AWS_ACCESS_KEY_ID=AWS_KEYS[0]
                     env.AWS_SECRET_ACCESS_KEY=AWS_KEYS[1]
                     env.AWS_SESSION_TOKEN=AWS_KEYS[2]
-                    env.COMMON_CONFIGS = """ aws://${accounts.get(DEPLOY_ENVIRONMENT)}/${defaultRegion} --cloudformation-execution-policies arn:aws:iam::633546161654:policy/devops-test-cdk"""//--cloudformation-execution-policies arn:aws:iam::633546161654:role/devops-test-cdk --trust ${shared_services_account_id} --trust-for-lookup ${shared_services_account_id} --cloudformation-execution-policies ${jenkinsRole}"""
-                    env.DEPLOY_SCRIPT = """cdk deploy --require-approval=never """
-                    writeFile file: 'AWS', text: "AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}"+"\n"+"AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}"+"\n"+"AWS_SESSION_TOKEN=${env.AWS_SESSION_TOKEN}"
+                    env.COMMON_CONFIGS = """ aws://${accounts.get(DEPLOY_ENVIRONMENT)}/${defaultRegion} --cloudformation-execution-policies arn:aws:iam::${ACCOUNT_ID}:policy/devops-test-cdk"""//--cloudformation-execution-policies arn:aws:iam::633546161654:role/devops-test-cdk --trust ${shared_services_account_id} --trust-for-lookup ${shared_services_account_id} --cloudformation-execution-policies ${jenkinsRole}"""
                 }
             }
         }
@@ -91,8 +87,10 @@ pipeline {
             }
             steps {
                 script {
+                    sh "env"
                     docker.image("quext/${DEPLOY_ENVIRONMENT}").inside() {
                     //sh "cdk synth"
+                    sh "env"
                     sh "export STAGE=${DEPLOY_ENVIRONMENT}"
                     sh "cdk deploy --all --require-approval never --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true"
                     }
