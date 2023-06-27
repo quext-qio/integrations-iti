@@ -67,24 +67,22 @@ pipeline {
                 }
             }
         }     
-        stage("Build and Publish tagged Docker images") {
+        stage("Build image") {
             when {
-                allOf {
-                    anyOf {
-                        changeset "Dockerfile"
-                        changeset "requirements.txt"
-                    }
-                    expression { 
-                        envs.contains(DEPLOY_ENVIRONMENT) 
-                    }
-                }                    
+                expression { 
+                    envs.contains(DEPLOY_ENVIRONMENT) 
+                }
             }
             steps {
                 script { 
-                    docker_build_and_publish(ecr_tag, imagePaths)
+                    sh """
+                        echo "Building image for ${DEPLOY_ENVIRONMENT}"
+                        echo "docker build -t quext/${DEPLOY_ENVIRONMENT} ."
+                        docker build -t quext/${DEPLOY_ENVIRONMENT} .
+                    """
                 }
             }
-        }        
+        }       
         stage('CDK deploy') {
             when {
                 expression { 
@@ -94,12 +92,14 @@ pipeline {
             steps {
                 script {
                     sh "env"
-                    docker.image("${ecr_repository}:${ecr_tag}").inside() {
+                    docker.image("quext/${DEPLOY_ENVIRONMENT}").inside() {
+                    //sh "cdk synth"
+                    sh "env"
                     sh "export STAGE=${DEPLOY_ENVIRONMENT}"
                     sh "cdk deploy --all --require-approval never --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true"
                     }
                 }
             }
-        }     
+        }   
     }
 }
