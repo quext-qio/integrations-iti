@@ -75,7 +75,7 @@ pipeline {
             steps {
                 script { 
                     sh """
-                        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 273056594042.dkr.ecr.us-east-1.amazonaws.com"
+                        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 273056594042.dkr.ecr.us-east-1.amazonaws.com
                         docker build -t ${ecr_repository_uri}:${imageTag} .
                         docker push ${ecr_repository_uri}:${imageTag}
                     """
