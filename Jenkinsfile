@@ -91,7 +91,7 @@ pipeline {
             steps {
                 script {
                     sh "env"
-                    docker.image(${ecr_repository}:${ecr_tag} ).inside() {
+                    docker.image("${ecr_repository}:${ecr_tag}").inside() {
                     sh "export STAGE=${DEPLOY_ENVIRONMENT}"
                     sh "cdk deploy --all --require-approval never --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true"
                     }
