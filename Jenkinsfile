@@ -4,7 +4,7 @@ git_repo_creds = [$class: 'UsernamePasswordMultiBinding', credentialsId: 'quext-
 List stop_branches_list = ['stage', 'prod']
 List envsToBuildAndDeploy = ['dev','qa']
 List envs = envsToBuildAndDeploy + stop_branches_list
-Map imagePaths = ['273056594042.dkr.ecr.us-east-1.amazonaws.com/integration/api': './',]
+ecr_repository_uri = '273056594042.dkr.ecr.us-east-1.amazonaws.com/integration/api'
 defaultRegion = "us-east-1"
 DEPLOY_ENVIRONMENT = 'none'
 shared_services_account_id = '273056594042'
@@ -81,7 +81,8 @@ pipeline {
             }
             steps {
                 script { 
-                    docker_build_and_publish(imageTag, imagePaths) 
+                    docker build -t ${ecr_repository_uri}:${imageTag} .
+                    docker push ${ecr_repository_uri}:${imageTag}
                 }
             }
         }        
@@ -93,10 +94,10 @@ pipeline {
             }
             steps {
                 script {
-                    docker.image("quext/${DEPLOY_ENVIRONMENT}").inside() {
-                    //sh "cdk synth"
+                    docker.image("${ecr_repository_uri}:${imageTag}").inside() {
                     sh "export STAGE=${DEPLOY_ENVIRONMENT}"
-                    sh "cdk deploy --all --require-approval never --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true"
+                    sh "cdk synth"
+                    sh "cdk deploy --app cdk.out --all --require-approval never --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true"
                     }
                 }
             }
