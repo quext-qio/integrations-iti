@@ -63,7 +63,6 @@ pipeline {
                     // env.AWS_ACCESS_KEY_ID=AWS_KEYS[0]
                     // env.AWS_SECRET_ACCESS_KEY=AWS_KEYS[1]
                     // env.AWS_SESSION_TOKEN=AWS_KEYS[2]
-                    env.COMMON_CONFIGS = """ aws://${accounts.get(DEPLOY_ENVIRONMENT)}/${defaultRegion} --cloudformation-execution-policies arn:aws:iam::${ACCOUNT_ID}:policy/devops-test-cdk"""//--cloudformation-execution-policies arn:aws:iam::633546161654:role/devops-test-cdk --trust ${shared_services_account_id} --trust-for-lookup ${shared_services_account_id} --cloudformation-execution-policies ${jenkinsRole}"""
                 }
             }
         }
@@ -75,9 +74,11 @@ pipeline {
             }
             steps {
                 script { 
-                    sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 273056594042.dkr.ecr.us-east-1.amazonaws.com"
-                    sh "docker build -t ${ecr_repository_uri}:${imageTag}" .
-                    sh "docker push ${ecr_repository_uri}:${imageTag}"
+                    sh """
+                        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 273056594042.dkr.ecr.us-east-1.amazonaws.com"
+                        docker build -t ${ecr_repository_uri}:${imageTag} .
+                        docker push ${ecr_repository_uri}:${imageTag}
+                    """
                 }
             }
         }        
