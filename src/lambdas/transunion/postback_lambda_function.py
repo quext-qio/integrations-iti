@@ -50,26 +50,27 @@ def lambda_handler(event, context):
         iterations = 0
 
         while success == False:
-            response = requests.get(f"{parameter_store['LEASING_HOST']}/{application_number}")
+            response = requests.get(f"{leasing_host}{parameter_store['LEASING_FIND_BY_NUMBER']}/{application_number}")
             household_id = response.text
             iterations += 1
-
-            if response.status_code == constants["HTTP_GOOD_RESPONSE_CODE"] or iterations == constants["BACKGROUND_SCREENING_MAX_ITERATIONS"]:
+            
+            if (household_id != "[]" and response.status_code == constants["HTTP_GOOD_RESPONSE_CODE"]) or iterations == constants["BACKGROUND_SCREENING_MAX_ITERATIONS"]:
                 success = True
             else:
                 time.sleep(1)
-        
+            
         print(f"iterations done: {iterations} - for this application number: {application_number}")
 
-        if response.status_code != constants["HTTP_GOOD_RESPONSE_CODE"]:
-            temp_response = json.loads(household_id)
+        if household_id == "[]" or response.status_code != constants["HTTP_GOOD_RESPONSE_CODE"]:
+            temp_response = json.loads(household_id) if "{" in household_id else f"Unable to find the house hold id for this application number: {application_number}"
+            
             print(f"The status response of the get household id (find-by-number) endpoint wasn't successful: {response.status_code}")
-
+            
             return {
-                "statusCode": response.status_code,
+                "statusCode": response.status_code if response.status_code != constants["HTTP_GOOD_RESPONSE_CODE"] else 404,
                 "body": json.dumps({
                     "data": {},
-                    "errors": temp_response["message"]
+                    "errors": temp_response["message"] if "message" in temp_response else temp_response
                 }),
                 "headers": {
                     "Content-Type": "application/json",
@@ -108,7 +109,7 @@ def lambda_handler(event, context):
     }
 
     # create the url needed for the leasing endpoint 
-    url = f"{leasing_host}{leasing_background_screening_endpoint}{household_id}"
+    url = f"{leasing_host}{leasing_background_screening_endpoint}/{household_id}"
 
     # call to update the data
     try:

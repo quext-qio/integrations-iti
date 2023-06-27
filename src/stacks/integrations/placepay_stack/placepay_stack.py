@@ -8,15 +8,11 @@ from constructs import Construct
 
 class PlacepayStack(Stack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
         # Constants
-        environment={
-            "LOG_LEVEL": "INFO",
-            "PLACE_PAY_API_KEY": "test_private_key__-yK6oFDnaJFwIrhVcCfI5r",
-        }
         timeout=Duration.seconds(900)
         allow_methods=['OPTIONS', 'POST']
         

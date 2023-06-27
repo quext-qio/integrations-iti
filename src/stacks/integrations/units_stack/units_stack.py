@@ -15,7 +15,8 @@ class UnitsStack(Stack):
         # Units 
         environment={
             "LOG_LEVEL": "INFO",
-            "TEST": "test",
+            "AUTH_HOST": "https://auth-api.dev.quext.io",
+            "IPS_HOST" : "https://partner-api.dev.quext.io"
         }
         timeout=Duration.seconds(900)
         allow_methods=['OPTIONS', 'POST']

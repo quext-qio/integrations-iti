@@ -56,3 +56,34 @@ command.
  * `cdk docs`        open CDK documentation
 
 Enjoy!
+
+
+## Deploy specific stage:
+
+Supoorted options:
+- dev
+- stage
+- prod
+
+Should set the variable `STAGE` with one of the last values before deploy the stack. By default, the stage will be `dev`.
+
+To deploy with a specific stage, follow these steps:
+
+1. Set the `STAGE` variable to the desired stage value before deploying the stack. Choose one of the supported options (`dev`, `stage`, or `prod`). For example:
+
+    **Unix/Linux/macOS:**
+    ```bash
+    export STAGE=stage
+    ```
+
+    **Windows (PowerShell):**
+    ```powershell
+    $env:STAGE = "stage"
+    ```
+
+2. Run the command `cdk deploy --all` without specifying the `--stage` parameter. 
+The script will use the value of the `STAGE` variable to determine the deployment stage.
+
+By default, if you don't set the `STAGE` variable, the deployment will be performed with the `dev` stage.
+
+This approach allows you to deploy the stack with a specific stage by setting the `STAGE` variable accordingly before running the deployment command.
