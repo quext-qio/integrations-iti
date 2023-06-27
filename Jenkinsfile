@@ -92,8 +92,9 @@ pipeline {
             steps {
                 script {
                     docker.image("quext/${DEPLOY_ENVIRONMENT}").inside() {
-                    sh "cdk synth"
-                    sh "cdk deploy --app cdk.out --all --require-approval never --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true"
+                    //sh "cdk synth"
+                    sh "export STAGE=${DEPLOY_ENVIRONMENT}"
+                    sh "cdk deploy --all --require-approval never --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true"
                     }
                 }
             }
