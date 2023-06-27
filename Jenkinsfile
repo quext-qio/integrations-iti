@@ -49,7 +49,7 @@ pipeline {
                     env.ACCOUNT_ID = accounts.get(DEPLOY_ENVIRONMENT)
                     env.REGION = defaultRegion
                     env.ecr_tag = ${DEPLOY_ENVIRONMENT}-${BRANCH_NAME}
-                    jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/devops-test-cdk"
+                    jenkinsRole = "arn:aws:iam::${env.ACCOUNT_ID}:role/devops-test-cdk"
                     def AWS_KEYS = sh(returnStdout: true, script: """
                         aws sts assume-role --role-arn $jenkinsRole \
                         --role-session-name cdk \
@@ -60,7 +60,7 @@ pipeline {
                     env.AWS_ACCESS_KEY_ID=AWS_KEYS[0]
                     env.AWS_SECRET_ACCESS_KEY=AWS_KEYS[1]
                     env.AWS_SESSION_TOKEN=AWS_KEYS[2]
-                    env.COMMON_CONFIGS = """ aws://${accounts.get(DEPLOY_ENVIRONMENT)}/${defaultRegion} --cloudformation-execution-policies arn:aws:iam::${ACCOUNT_ID}:policy/devops-test-cdk"""//--cloudformation-execution-policies arn:aws:iam::633546161654:role/devops-test-cdk --trust ${shared_services_account_id} --trust-for-lookup ${shared_services_account_id} --cloudformation-execution-policies ${jenkinsRole}"""
+                    env.COMMON_CONFIGS = """ aws://${accounts.get(DEPLOY_ENVIRONMENT)}/${defaultRegion} --cloudformation-execution-policies arn:aws:iam::${env.ACCOUNT_ID}:policy/devops-test-cdk"""//--cloudformation-execution-policies arn:aws:iam::633546161654:role/devops-test-cdk --trust ${shared_services_account_id} --trust-for-lookup ${shared_services_account_id} --cloudformation-execution-policies ${jenkinsRole}"""
                 }
             }
         }     
