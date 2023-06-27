@@ -81,8 +81,8 @@ pipeline {
             }
             steps {
                 script { 
-                    docker build -t ${ecr_repository_uri}:${imageTag} .
-                    docker push ${ecr_repository_uri}:${imageTag}
+                    sh "docker build -t ${ecr_repository_uri}:${imageTag}" .
+                    sh "docker push ${ecr_repository_uri}:${imageTag}"
                 }
             }
         }        
