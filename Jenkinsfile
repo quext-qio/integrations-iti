@@ -4,11 +4,10 @@ git_repo_creds = [$class: 'UsernamePasswordMultiBinding', credentialsId: 'quext-
 List stop_branches_list = ['stage', 'prod']
 List envsToBuildAndDeploy = ['dev','qa']
 List envs = envsToBuildAndDeploy + stop_branches_list
-Map imagePaths = ['273056594042.dkr.ecr.us-east-1.amazonaws.com/integration/api': ''./'']
+Map imagePaths = ['273056594042.dkr.ecr.us-east-1.amazonaws.com/integration/api': './']
 defaultRegion = "us-east-1"
 DEPLOY_ENVIRONMENT = 'none'
 shared_services_account_id = '273056594042'
-ecr_repository_uri = '273056594042.dkr.ecr.us-east-1.amazonaws.com/integration/api'
 
 branch_env = [
         "dev"   : 'dev'
@@ -52,7 +51,6 @@ pipeline {
                     currentBuild.displayName = "#${BUILD_NUMBER} Environment: ${DEPLOY_ENVIRONMENT}"
                     env.ACCOUNT_ID = accounts.get(DEPLOY_ENVIRONMENT)
                     env.REGION = defaultRegion
-                    env.ecr_repository = "repository_uri"
                     env.ecr_tag = ${DEPLOY_ENVIRONMENT}-${BRANCH_NAME}
                     jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/devops-test-cdk"
                     def AWS_KEYS = sh(returnStdout: true, script: """
