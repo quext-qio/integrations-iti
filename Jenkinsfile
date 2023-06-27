@@ -68,10 +68,12 @@ pipeline {
         }     
         stage("Build and Publish tagged Docker images") {
             when {
-                allOf {
+                {
                     expression { 
                         envs.contains(DEPLOY_ENVIRONMENT) 
                     }
+                }
+                anyOf {
                     changeset "Dockerfile"
                     changeset "requirements.txt"
                 }
