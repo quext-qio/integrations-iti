@@ -1,7 +1,10 @@
+@Library('quext-shared-library') _
+
 git_repo_creds = [$class: 'UsernamePasswordMultiBinding', credentialsId: 'quext-github', usernameVariable: 'GITHUB_USERNAME', passwordVariable: 'GITHUB_PASSWORD']
 List stop_branches_list = ['stage', 'prod']
 List envsToBuildAndDeploy = ['dev','qa']
 List envs = envsToBuildAndDeploy + stop_branches_list
+Map imagePaths = ['273056594042.dkr.ecr.us-east-1.amazonaws.com/integration/api': './',]
 defaultRegion = "us-east-1"
 DEPLOY_ENVIRONMENT = 'none'
 shared_services_account_id = '273056594042'
@@ -48,6 +51,7 @@ pipeline {
                     currentBuild.displayName = "#${BUILD_NUMBER} Environment: ${DEPLOY_ENVIRONMENT}"
                     env.ACCOUNT_ID = accounts.get(DEPLOY_ENVIRONMENT)
                     env.REGION = defaultRegion
+                    env.imageTag = "${DEPLOY_ENVIRONMENT}-${BRANCH_NAME}"
                     jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/devops-test-cdk"
                     def AWS_KEYS = sh(returnStdout: true, script: """
                         aws sts assume-role --role-arn $jenkinsRole \
@@ -65,17 +69,19 @@ pipeline {
         }
         stage("Build image") {
             when {
-                expression { 
-                    envs.contains(DEPLOY_ENVIRONMENT) 
+                allOf {
+                    expression { 
+                        envs.contains(DEPLOY_ENVIRONMENT) 
+                    }
+                    anyOf {
+                        changeset "Dockerfile"
+                        changeset "requirements.txt"
+                    }
                 }
             }
             steps {
                 script { 
-                    sh """
-                        echo "Building image for ${DEPLOY_ENVIRONMENT}"
-                        echo "docker build -t quext/${DEPLOY_ENVIRONMENT} ."
-                        docker build -t quext/${DEPLOY_ENVIRONMENT} .
-                    """
+                    docker_build_and_publish(imageTag, imagePaths) 
                 }
             }
         }        
