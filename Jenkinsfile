@@ -4,6 +4,7 @@ git_repo_creds = [$class: 'UsernamePasswordMultiBinding', credentialsId: 'quext-
 List stop_branches_list = ['stage', 'prod']
 List envsToBuildAndDeploy = ['dev','qa']
 List envs = envsToBuildAndDeploy + stop_branches_list
+Map imagePaths = ['273056594042.dkr.ecr.us-east-1.amazonaws.com/integration/api': ''./'']
 defaultRegion = "us-east-1"
 DEPLOY_ENVIRONMENT = 'none'
 shared_services_account_id = '273056594042'
@@ -82,7 +83,7 @@ pipeline {
             }
             steps {
                 script { 
-                    docker_build_and_publish(ecr_tag, ecr_repository)
+                    docker_build_and_publish(ecr_tag, imagePaths)
                 }
             }
         }        
