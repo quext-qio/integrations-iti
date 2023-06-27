@@ -73,7 +73,9 @@ pipeline {
                         changeset "Dockerfile"
                         changeset "requirements.txt"
                     }
-                    envs.contains(DEPLOY_ENVIRONMENT) 
+                    expression { 
+                        envs.contains(DEPLOY_ENVIRONMENT) 
+                    }
                 }                    
             }
             steps {
