@@ -81,6 +81,7 @@ pipeline {
             }
             steps {
                 script { 
+                    sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 273056594042.dkr.ecr.us-east-1.amazonaws.com"
                     sh "docker build -t ${ecr_repository_uri}:${imageTag}" .
                     sh "docker push ${ecr_repository_uri}:${imageTag}"
                 }
@@ -94,6 +95,7 @@ pipeline {
             }
             steps {
                 script {
+                    sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 273056594042.dkr.ecr.us-east-1.amazonaws.com"
                     docker.image("${ecr_repository_uri}:${imageTag}").inside() {
                     sh "export STAGE=${DEPLOY_ENVIRONMENT}"
                     sh "cdk synth"
