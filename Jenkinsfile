@@ -69,14 +69,8 @@ pipeline {
         }
         stage("Build image") {
             when {
-                allOf {
-                    expression { 
-                        envs.contains(DEPLOY_ENVIRONMENT) 
-                    }
-                    // anyOf {
-                    //     changeset "Dockerfile"
-                    //     changeset "requirements.txt"
-                    // }
+                expression { 
+                    envs.contains(DEPLOY_ENVIRONMENT) 
                 }
             }
             steps {
