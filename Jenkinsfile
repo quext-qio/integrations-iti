@@ -1,5 +1,3 @@
-@Library("quext-shared-library") _
-
 git_repo_creds = [$class: 'UsernamePasswordMultiBinding', credentialsId: 'quext-github', usernameVariable: 'GITHUB_USERNAME', passwordVariable: 'GITHUB_PASSWORD']
 List stop_branches_list = ['stage', 'prod']
 List envsToBuildAndDeploy = ['dev','qa']
@@ -12,7 +10,7 @@ branch_env = [
         "dev"   : 'dev'
     ]
 accounts = [
-            "dev"  : "633546161654"
+        "dev"  : "633546161654"
     ]
 
 pipeline {
