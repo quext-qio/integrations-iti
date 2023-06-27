@@ -15,18 +15,22 @@ class EnvStack(Stack):
 
         # --------------------------------------------------------------------
         # Create the environment based on the stage name
-        # TODO: Change the parameter name when all environments are ready
         parameter_name = ""
         if stage_name == StageName.DEV:
-            parameter_name = "/integrations/dev/backend" 
+            parameter_name = "/dev/integrations/aws/migration" 
         elif stage_name == StageName.STAGE:
-            parameter_name = "/integrations/stage/backend"
+            parameter_name = "/stage/integrations/aws/migration"
         elif stage_name == StageName.PROD:
-            parameter_name = "/integrations/aws/migration"
+            parameter_name = "/prod/integrations/aws/migration"
         else:
             raise Exception("Invalid stage name")
 
-        ssm_client = boto3.client("ssm", region_name="us-east-1")
+        ssm_client = boto3.client(
+            "ssm", 
+            region_name="us-east-1", 
+            #aws_access_key_id='', 
+            #aws_secret_access_key='',
+        )
         response = ssm_client.get_parameter(Name=parameter_name, WithDecryption=True)
 
         self.env = {
