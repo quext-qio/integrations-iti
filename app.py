@@ -30,7 +30,6 @@ else:
     stage = StageName.DEV
 print(f"Deploying in stage: {stage.value}")
 
-
 # --------------------------------------------------------------------
 # Tags for all resources
 server_name = "aws-integration-engine"
@@ -42,6 +41,11 @@ tags = {
 }
 
 # --------------------------------------------------------------------
+# Role for quext-shared-services
+role_arn = os.getenv('ROLE_ARN', 'arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters')
+
+
+# --------------------------------------------------------------------
 # Environment variables for share with all lambda's functions
 env_stack = EnvStack(
     app, 
@@ -49,6 +53,7 @@ env_stack = EnvStack(
     stage_name=stage,
     description="Stack load environment variables for all lambda's functions",
     tags=tags,
+    role_arn=role_arn,
 )
 environment=env_stack.get_env
 

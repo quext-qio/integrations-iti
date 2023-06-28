@@ -10,7 +10,7 @@ class EnvStack(Stack):
     def get_env(self):
         return self.env
 
-    def __init__(self, scope: Construct, construct_id: str, stage_name: StageName, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, stage_name: StageName, role_arn: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # --------------------------------------------------------------------
@@ -33,7 +33,7 @@ class EnvStack(Stack):
         
         # Assume the IAM role
         response = sts_client.assume_role(
-            RoleArn="arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters",
+            RoleArn=role_arn,
             RoleSessionName=f"{stage_name.value}-assumed-session"
         )
 
