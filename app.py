@@ -96,7 +96,7 @@ requests_layer = layer_stack.get_requests_layer
 xmltodict_layer = layer_stack.get_xmltodict_layer
 mysql_layer = layer_stack.get_mysql_layer
 zeep_layer = layer_stack.get_zeep_layer
-#lxml_layer = layer_stack.get_lxml_layer
+suds_layer = layer_stack.get_suds_layer
 
 # --------------------------------------------------------------------
 # Stack for placepay endpoints
@@ -139,7 +139,8 @@ UnitsStack(
     app, 
     f"{stage.value}-{server_name}-unitsStack", 
     api=general_resource_v2, 
-    layers=[cerberus_layer, mysql_layer, zeep_layer, xmltodict_layer],
+    layers=[cerberus_layer, mysql_layer, zeep_layer, suds_layer, xmltodict_layer],
+    environment=environment,
     description="Stack for units endpoints",
     tags=tags,
 )
