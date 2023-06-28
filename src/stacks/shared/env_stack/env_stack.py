@@ -25,11 +25,10 @@ class EnvStack(Stack):
         else:
             raise Exception("Invalid stage name")
 
-        ssm_client = boto3.client(
+        session = boto3.Session(profile_name='shared_acc')
+        ssm_client = session.client(
             "ssm", 
             region_name="us-east-1", 
-            #aws_access_key_id='', 
-            #aws_secret_access_key='',
         )
         response = ssm_client.get_parameter(Name=parameter_name, WithDecryption=True)
 
