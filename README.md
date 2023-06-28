@@ -87,3 +87,22 @@ The script will use the value of the `STAGE` variable to determine the deploymen
 By default, if you don't set the `STAGE` variable, the deployment will be performed with the `dev` stage.
 
 This approach allows you to deploy the stack with a specific stage by setting the `STAGE` variable accordingly before running the deployment command.
+
+
+## AWS Credentials Configuration
+In order to successfully deploy and access AWS resources, you need to configure two accounts in the `~/.aws/credentials` file. 
+These accounts will be referenced as [default], which allows for deployment in the main account, 
+and [shared_acc], which points to the `quext-shared-services` account and is used to retrieve values from Parameter Store.
+
+##### Example:
+```shell
+[default]
+aws_access_key_id=
+aws_secret_access_key=
+aws_session_token=
+
+[shared_acc]
+aws_access_key_id=
+aws_secret_access_key=
+aws_session_token=
+```
