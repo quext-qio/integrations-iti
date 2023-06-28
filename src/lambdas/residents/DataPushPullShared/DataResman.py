@@ -62,7 +62,6 @@ class DataResman:
 
         xml = etree.fromstring(resmanChannelResponse.text)
         if resmanChannelResponse.status_code != 200:
-            print(resmanChannelResponse.status_code)
             errors.append({ "status_code": resmanChannelResponse.status_code, 
                             "status": xml.findall('Status')[0].text, 
                             "message": xml.findall('ErrorDescription')[0].text })

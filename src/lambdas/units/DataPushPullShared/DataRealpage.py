@@ -1,31 +1,40 @@
 import os
-import datetime
-import xmltodict
-import xml.etree.ElementTree as etree
+import datetime, json
 from Utils.Constants.RealpageConstants import RealpageConstants
-from zeep import Client
+import suds
 
 class DataRealpage:
         
     def get_unit_availability(self, ips):
-        code = 200
         errors = []
+        parameter_store = json.loads(os.environ.get("parameter_store"))
         wsdl = RealpageConstants.WSDL_URL
-        client = Client(wsdl=wsdl)
-        factory = client.type_factory('ns0')
-        # Preparing auth details from service request
-        _auth = factory.AuthDTO(pmcid=os.environ[RealpageConstants.PMCID],
-                                siteid=os.environ[RealpageConstants.SITEID],
-                                licensekey=os.environ[RealpageConstants.LICENSE_KEY])
+        client = suds.client.Client(wsdl)
+        _auth = client.factory.create(RealpageConstants.AUTHDTO)
+        _auth.pmcid = parameter_store[RealpageConstants.PMCID]
+        _auth.siteid = parameter_store[RealpageConstants.SITEID]
+        _auth.licensekey = parameter_store[RealpageConstants.LICENSE_KEY]
 
-        date_needed = datetime.date.today()+ datetime.timedelta(days=30)
-        listcriterion = factory.ArrayOfListCriterion([factory.ListCriterion(name='DateNeeded',singlevalue=date_needed.strftime("%Y-%m-%d")), \
-                                              factory.ListCriterion(name='LimitResults',singlevalue=False)])
-        res = client.service.getunitlist(auth=_auth,listCriteria=listcriterion)
-        response = xmltodict.parse(etree.tostring(res))
-        property, models, units = self.translateRealPage(response["GetUnitList"]["UnitObjects"]["UnitObject"], ips["platformData"]["foreign_community_id"])
-        response = { "data": { "provenance": ["realpage"], "property": property, "models": models, "units": units }, "errors": errors }
-        return response, code
+  
+        date_needed = datetime.date.today() + datetime.timedelta(days=30)
+        listcriterion = client.factory.create('ArrayOfListCriterion')
+        
+        date_criterion = client.factory.create(RealpageConstants.LIST_CRITERION)
+        date_criterion.name = RealpageConstants.DATE_NEEDED
+        date_criterion.singlevalue = date_needed.strftime("%Y-%m-%d")
+        
+        limit_criterion = client.factory.create(RealpageConstants.LIST_CRITERION)
+        limit_criterion.name = RealpageConstants.LIMIT_RESULTS
+        limit_criterion.singlevalue = False
+        
+        listcriterion.ListCriterion.append(date_criterion)
+        listcriterion.ListCriterion.append(limit_criterion)
+        
+        response = client.service.getunitlist(auth=_auth, listCriteria=listcriterion)
+       
+        property, models, units = self.translateRealPage(response[RealpageConstants.GET_UNIT_LIST][RealpageConstants.UNIT_OBJECTS][RealpageConstants.UNIT_OBJECT], ips[RealpageConstants.PLATFORMDATA][RealpageConstants.FOREIGN_COMMUNITY_ID])
+        
+        return property, models, units, errors
     
     def translateRealPage(self, vals, foreign_community_id=None):
         models = []

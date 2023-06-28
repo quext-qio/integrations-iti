@@ -63,4 +63,6 @@ class RealpageConstants:
     LEASING_AGENT_ID = "76832549"
     AVAILABLEBIT = 'AvailableBit'
     PARTNER_NAME = 'RealPage'
+    LIST_CRITERION = 'ListCriterion'
+    AUTHDTO = 'AuthDTO'
   

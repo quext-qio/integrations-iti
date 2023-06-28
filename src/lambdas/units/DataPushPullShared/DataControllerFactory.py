@@ -26,7 +26,6 @@ class DataControllerFactory:
         # if status != "good":
         #         response = { "data": { "provenance": [partner] }, "errors": status }
         #         return response, 500
-        print(ips_response)
         if partner == "Newco":
             property_data, models_data, units_data, errors = DataNewco().get_unit_availability(ips_response, input)
             return Controller("NewCo", errors).built_response(property_data, models_data, units_data)    

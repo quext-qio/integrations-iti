@@ -2,7 +2,6 @@ import os
 import json
 
 parameter_store = json.loads(os.environ.get("parameter_store"))
-print(parameter_store)
 config = {
     "Integration_partner_id": parameter_store['RESMAN_INTEGRATION_PARTNER_ID'],
     "ApiKey": parameter_store['RESMAN_API_KEY'],
