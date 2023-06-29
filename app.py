@@ -9,6 +9,7 @@ from src.stacks.integrations.transunion_stack.transunion_stack import TransUnion
 from src.stacks.integrations.customers_stack.customers_stack import CustomersStack
 from src.stacks.integrations.residents_stack.residents_stack import ResidentsStack
 from src.stacks.integrations.engrain_stack.engrain_stack import EngrainStack
+from src.stacks.integrations.tour_availability_stack.tour_availability_stack import TourAvailabilityStack
 from src.stacks.shared.api_stack.api_stack import APIStack
 from src.stacks.shared.layers_stack.layers_stack import LayersStack
 from src.stacks.shared.env_stack.env_stack import EnvStack
@@ -79,6 +80,7 @@ placepay_resource_v1 = api_v1.add_resource("placepay")
 resman_resource_v1 = api_v1.add_resource("resman")
 general_resource_v1 = api_v1.add_resource("general")
 transunion_resource_v1 = api_v1.add_resource("transunion")
+tour_resource_v1 = api_v1.add_resource("tour")
 
 # --------------------------------------------------------------------
 # Suported third party services v2
@@ -86,6 +88,7 @@ placepay_resource_v2 = api_v2.add_resource("placepay")
 resman_resource_v2 = api_v2.add_resource("resman")
 general_resource_v2 = api_v2.add_resource("general")
 transunion_resource_v2 = api_v2.add_resource("transunion")
+tour_resource_v2 = api_v2.add_resource("tour")
 
 # --------------------------------------------------------------------
 # Load all layers to share between lambda's functions
@@ -193,6 +196,18 @@ EngrainStack(
     description="Stack for Engrain Job",
     tags=tags,
 )
+# --------------------------------------------------------------------
+# Stack for Tours endpoints
+TourAvailabilityStack(
+    app, 
+    f"{stage.value}-{server_name}-tourAvailabilityStack",
+    api=tour_resource_v2, 
+    layers=[cerberus_layer, suds_layer],
+    environment=environment,
+    description="Stack for Tour availability endpoints",
+    tags=tags,
+)
+
 
 # --------------------------------------------------------------------
 # Synth the app
