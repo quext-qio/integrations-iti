@@ -105,8 +105,8 @@ pipeline {
                     sh "ROLE_ARN=arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters"
                     sh "env"
                     sh "export STAGE=${DEPLOY_ENVIRONMENT}"
-                    sh "cdk synth"
-                    sh "cdk deploy --app cdk.out --all --require-approval never --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true"
+                    //sh "cdk synth"
+                    sh "cdk deploy --all --require-approval never --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true"
                     }
                 }
             }
