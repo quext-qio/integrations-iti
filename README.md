@@ -71,15 +71,15 @@ To deploy with a specific stage, follow these steps:
 
 1. Set the `STAGE` variable to the desired stage value before deploying the stack. Choose one of the supported options (`dev`, `stage`, or `prod`). For example:
 
-    **Unix/Linux/macOS:**
-    ```bash
-    export STAGE=stage
-    ```
+**Unix/Linux/macOS:**
+```bash
+export STAGE=stage
+```
 
-    **Windows (PowerShell):**
-    ```powershell
-    $env:STAGE = "stage"
-    ```
+**Windows (PowerShell):**
+```powershell
+$env:STAGE = "stage"
+```
 
 2. Run the command `cdk deploy --all` without specifying the `--stage` parameter. 
 The script will use the value of the `STAGE` variable to determine the deployment stage.
@@ -92,3 +92,19 @@ This approach allows you to deploy the stack with a specific stage by setting th
 ## Set Role ARN 
 
 1. Set the `ROLE_ARN` variable to select a new assumed role PD: (The Role should exist in AWS account).
+
+
+## Set env variables for current session:
+
+**Unix/Linux/macOS:**
+```bash
+export AWS_ACCESS_KEY_ID=
+export AWS_SECRET_ACCESS_KEY=
+export AWS_SESSION_TOKEN=
+```
+**Windows (PowerShell):**
+```powershell
+$env:AWS_ACCESS_KEY_ID = 
+$env:AWS_SECRET_ACCESS_KEY = 
+$env:AWS_SESSION_TOKEN = 
+```

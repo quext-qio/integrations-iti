@@ -2,6 +2,7 @@ from aws_cdk import (
     Stack
 )
 import boto3
+import os
 from constructs import Construct
 from src.utils.enums.stage_name import StageName
 
@@ -26,7 +27,15 @@ class EnvStack(Stack):
             raise Exception("Invalid stage name")
 
         # Load session using default AWS credentials
-        session = boto3.Session(profile_name='default')
+        aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID')
+        aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
+        aws_session_token=os.getenv('AWS_SESSION_TOKEN')
+
+        session = boto3.Session(
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
+        )
         
         # Create a client to interact with the STS (Security Token Service)
         sts_client = session.client("sts")
