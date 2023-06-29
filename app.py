@@ -30,7 +30,6 @@ else:
     stage = StageName.DEV
 print(f"Deploying in stage: {stage.value}")
 
-
 # --------------------------------------------------------------------
 # Tags for all resources
 server_name = "aws-integration-engine"
@@ -42,6 +41,11 @@ tags = {
 }
 
 # --------------------------------------------------------------------
+# Role for quext-shared-services
+role_arn = os.getenv('ROLE_ARN', 'arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters')
+
+
+# --------------------------------------------------------------------
 # Environment variables for share with all lambda's functions
 env_stack = EnvStack(
     app, 
@@ -49,6 +53,7 @@ env_stack = EnvStack(
     stage_name=stage,
     description="Stack load environment variables for all lambda's functions",
     tags=tags,
+    role_arn=role_arn,
 )
 environment=env_stack.get_env
 
@@ -96,7 +101,7 @@ requests_layer = layer_stack.get_requests_layer
 xmltodict_layer = layer_stack.get_xmltodict_layer
 mysql_layer = layer_stack.get_mysql_layer
 zeep_layer = layer_stack.get_zeep_layer
-lxml_layer = layer_stack.get_lxml_layer
+suds_layer = layer_stack.get_suds_layer
 
 # --------------------------------------------------------------------
 # Stack for placepay endpoints
@@ -139,7 +144,8 @@ UnitsStack(
     app, 
     f"{stage.value}-{server_name}-unitsStack", 
     api=general_resource_v2, 
-    layers=[cerberus_layer, mysql_layer, zeep_layer, lxml_layer, xmltodict_layer],
+    layers=[cerberus_layer, mysql_layer, zeep_layer, suds_layer, xmltodict_layer],
+    environment=environment,
     description="Stack for units endpoints",
     tags=tags,
 )

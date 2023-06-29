@@ -87,3 +87,8 @@ The script will use the value of the `STAGE` variable to determine the deploymen
 By default, if you don't set the `STAGE` variable, the deployment will be performed with the `dev` stage.
 
 This approach allows you to deploy the stack with a specific stage by setting the `STAGE` variable accordingly before running the deployment command.
+
+
+## Set Role ARN 
+
+1. Set the `ROLE_ARN` variable to select a new assumed role PD: (The Role should exist in AWS account).

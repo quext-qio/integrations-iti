@@ -31,8 +31,8 @@ class LayersStack(Stack):
         return self.zeep_layer
     
     @property
-    def get_lxml_layer(self):
-        return self.lxml_layer
+    def get_suds_layer(self):
+        return self.suds_layer
     
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -164,12 +164,12 @@ class LayersStack(Stack):
         self.zeep_layer = zeep_layer  
 
         # --------------------------------------------------------------------
-          # Create lxml layer
-        lxml_layer = lambda_.LayerVersion(
-            self, "lxmlLayer",
-            layer_version_name="lxmlLayer",
+        # Create mysql_layer layer
+        suds_layer = lambda_.LayerVersion(
+            self, "SudsPy3Layer",
+            layer_version_name="SudsPy3Layer",
             description="Package documentation: https://pypi.org/project/",
-            code=lambda_.Code.from_asset("./src/utils/layers/lxml_layer.zip"),
+            code=lambda_.Code.from_asset("./src/utils/layers/suds_layer.zip"),
             compatible_runtimes=[
                 lambda_.Runtime.PYTHON_3_10,
                 lambda_.Runtime.PYTHON_3_9,
@@ -182,4 +182,6 @@ class LayersStack(Stack):
                 lambda_.Architecture.X86_64,
             ],
         )
-        self.lxml_layer = lxml_layer  
+        self.suds_layer = suds_layer  
+
+        # --------------------------------------------------------------------

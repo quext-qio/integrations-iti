@@ -10,7 +10,7 @@ prop_select as (
   where 
     disposition_date is null 
     and `status` <> 'Archive'
-    and properties.id = :newco_property_id
+    and properties.id =  %s
 ) 
 /*
 pricing_info gets market_rent value from the base_market_rent of the unit type and then adds in all of the costs of amenities for the particular unit.
