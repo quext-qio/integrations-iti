@@ -34,10 +34,10 @@ print(f"Deploying in stage: {stage.value}")
 # Tags for all resources
 server_name = "integrationApi"
 tags = {
-    'Environment': stage.value,
-    'Project': 'quext',
-    'Service': server_name,
-    'Team': 'integration'
+    'environment': stage.value,
+    'project': 'quext',
+    'service': server_name,
+    'team': 'integration'
 }
 
 # --------------------------------------------------------------------
