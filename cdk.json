@@ -15,7 +15,7 @@
     ]
   },
   "context": {
-    "@aws-cdk/core:bootstrapQualifier": "zatoapi",
+    "@aws-cdk/core:bootstrapQualifier": "intgrnapi",
     "@aws-cdk/aws-lambda:recognizeLayerVersion": true,
     "@aws-cdk/core:checkSecretUsage": true,
     "@aws-cdk/core:target-partitions": [
