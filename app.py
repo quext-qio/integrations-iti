@@ -32,7 +32,7 @@ print(f"Deploying in stage: {stage.value}")
 
 # --------------------------------------------------------------------
 # Tags for all resources
-server_name = "aws-integration-engine"
+server_name = "integrationApi"
 tags = {
     'Environment': stage.value,
     'Project': 'quext',
