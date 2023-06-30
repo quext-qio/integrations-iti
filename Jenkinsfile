@@ -48,6 +48,7 @@ pipeline {
                     else {
                         DEPLOY_ENVIRONMENT = params.ENVIRONMENT
                     }
+                    cleanWs()
                     currentBuild.displayName = "#${BUILD_NUMBER} Environment: ${DEPLOY_ENVIRONMENT}"
                     env.ACCOUNT_ID = accounts.get(DEPLOY_ENVIRONMENT)
                     env.REGION = defaultRegion
