@@ -3,18 +3,16 @@ from DataPushPullShared.DataControllerFactory import DataControllerFactory
 from datetime import date
 
 def lambda_handler(event, context):
-    headers = event['headers']
-    print(headers)
-    wsgi_input = {
-        'PATH_INFO': event['resource'],
-        'REQUEST_METHOD': "POST",
-        'HTTP_X_API_KEY': headers['x-api-key']
-    }
+    #headers = event['headers']
+    # wsgi_input = {
+    #     'PATH_INFO': event['resource'],
+    #     'REQUEST_METHOD': "POST",
+    #     'HTTP_X_API_KEY': headers['x-api-key']
+    # }
     
     input_data = json.loads(event['body'])
     # Obtain the result from DataControllerFactory().create_data_controller(input_data, event)
-    code, result= DataControllerFactory().create_data_controller(input_data, wsgi_input)
-    print(result)
+    code, result= DataControllerFactory().create_data_controller(input_data)
 
     # Convert date objects to strings
     result = convert_dates_to_strings(result)

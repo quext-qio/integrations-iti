@@ -84,4 +84,4 @@ class DataController:
             "errors": errors
         }
 
-        return response
+        return authChannelResponse.status_code, response

@@ -1,5 +1,7 @@
 import os
-import datetime, json, logging
+import datetime, json, logging, requests
+from datetime import  date, timedelta
+from Utils.Constants import RealpageConstants
 import suds
 
 
@@ -11,18 +13,12 @@ class DataRealpage:
         """
             
         logging.info("Availability: RealPage")  
-        response_list = self.get_available_times(input.platformData.communityUUID,self, input)
+        response_list = self.get_available_times(event["platformData"].get("communityUUID",""), event)
         if len(response_list) > 0:
-            self.response.status_code = 200
-            self.response.payload = {
-                    "data": {
-                    "availableTimes": response_list
-                    },
-                "error": {}
-            } 
+            return response_list, []
 
         elif len(response_list) == 0:
-            self.logger.warning("RealPage services is not responding or has provided an empty payload.")
+            print("RealPage services is not responding or has provided an empty payload.")
             self.response.status_code = 409
             self.response.payload = {
                 "data": {},
@@ -32,24 +28,14 @@ class DataRealpage:
             }   
         return
         
-    def get_available_times(self, community_id:str, service_obj, payload):
+    def get_available_times(self, ips_response, payload):
         """
         Returns the available times based on the start date and end date
         """
-        _partnerpayload = {
-            "communityUUID": community_id
-        }
-        partner_uuid_cache = service_obj.cache.get_cache('builtin', 'default')
-
-        if 'partner_uuid' not in partner_uuid_cache:
-            outgoingIPSPartnerChannel = service_obj.outgoing.plain_http[VendorConstants.GET_PARTNER_OUTGOING_CHANNEL]
-            outgoingIPSPartnerChannelResponse = outgoingIPSPartnerChannel.conn.get(service_obj.cid, _partnerpayload)
-            ips_partner_response = json.loads(outgoingIPSPartnerChannelResponse.text)
-            partner_uuid = ips_partner_response['content'][0]['uuid'] if ips_partner_response.get('content') and len(
-                ips_partner_response.get('content')) > 0 else ""
-            partner_uuid_cache.set('partner_uuid', partner_uuid)
-        else:
-            partner_uuid = partner_uuid_cache.get('partner_uuid')
+        outgoingIPSPartnerChannelResponse = ips_response
+        ips_partner_response = json.loads(outgoingIPSPartnerChannelResponse.text)
+        partner_uuid = ips_partner_response['content'][0]['uuid'] if ips_partner_response.get('content') and len(
+            ips_partner_response.get('content')) > 0 else ""
 
         api_creds = ""
         outgoingIPSSecurityResponse = ""
@@ -58,47 +44,42 @@ class DataRealpage:
         licensekey = ""
         client = None
         if partner_uuid:  # and input.get("source"):
-            security_response_cache = service_obj.cache.get_cache('builtin', 'default')
-            if 'security_response' not in security_response_cache:
-                outgoingIPSSecurityChannel = service_obj.outgoing.plain_http[VendorConstants.GET_SECURITY_OUTGOING_CHANNEL]
-                outgoingIPSSecurityResponse = outgoingIPSSecurityChannel.conn.get(service_obj.cid,
-                                                                                dict(partnerUUID=partner_uuid))
+                parameter_store = json.loads(os.environ.get("parameter_store"))
+                host = parameter_store['ACL_HOST']
+                outgoingIPSSecurityResponse = requests.get(f'{host}/api/partners/security/RealPage?redacted=off')
                 security_response = json.loads(outgoingIPSSecurityResponse.text)
-                security_response_cache.set('security_response', security_response)
-            else:
-                security_response = security_response_cache.get('security_response')
 
-            if len(security_response["content"]) > 0:
-                for i in security_response["content"]:
-                    if i["partner_name"] == PartnerConstants.REALPAGE:
-                        api_creds = i["security"]["credentials"][0]["body"]["DH"]  # if input["source"]==VendorConstants.DH else i["security"]["credentials"][0]["body"]["WS"]
-                        imp = Import('http://www.w3.org/2001/XMLSchema', location='http://www.w3.org/2001/XMLSchema.xsd')
-                        imp.filter.add('http://xml.apache.org/xml-soap')
-                        doctor = ImportDoctor(imp)
-                        client = Client(api_creds["wsdl"], doctor=doctor)  # creating client connection
-                        pmcid = api_creds["pmcid"]
-                        siteid = api_creds["siteid"]
-                        licensekey = api_creds["licensekey"]
-                        break
+                if len(security_response["content"]) > 0:
+                    for i in security_response["content"]:
+                        if i["partner_name"] == RealpageConstants.REALPAGE:
+                            api_creds = i["security"]["credentials"][0]["body"]["DH"]  # if input["source"]==VendorConstants.DH else i["security"]["credentials"][0]["body"]["WS"]
+                            imp = suds.xsd.doctor.Import('http://www.w3.org/2001/XMLSchema', location='http://www.w3.org/2001/XMLSchema.xsd')
+                            imp.filter.add('http://xml.apache.org/xml-soap')
+                            doctor = suds.xsd.doctor.ImportDoctor(imp)
+                            client = suds.Client(api_creds["wsdl"], doctor=doctor)  # creating client connection
+                            pmcid = api_creds["pmcid"]
+                            siteid = api_creds["siteid"]
+                            licensekey = api_creds["licensekey"]
+                            break
 
         if not client:
-            client = Client(VendorConstants.DHWSDL)  # creating client connection
+            client = suds.Client(RealpageConstants.DHWSDL)  # creating client connection
 
         factory = client.factory
         # Preparing auth details from service request
         _auth = factory.create('AuthDTO', pmcid=pmcid, siteid=siteid, licensekey=licensekey)
 
-        date_diff = datetime.strptime(payload.timeData.toDate, RealpageConstants.DAYFORMAT) - \
-                    datetime.strptime(payload.timeData.fromDate, RealpageConstants.DAYFORMAT)
-        toDate = payload.timeData.toDate
+        date_diff = datetime.strptime(payload["timeData"]["toDate"], RealpageConstants.DAYFORMAT) - \
+                    datetime.strptime(payload["timeData"]["fromDate"], RealpageConstants.DAYFORMAT)
+        toDate = payload["timeData"]["toDate"]
         if date_diff.days > 7:
-            toDate = (datetime.strptime(payload.timeData.fromDate, RealpageConstants.DAYFORMAT) +
+            toDate = (datetime.strptime(payload["timeData"]["fromDate"], RealpageConstants.DAYFORMAT) +
                     timedelta(days=7)).strftime(RealpageConstants.DAYFORMAT)
 
         getappointmenttimesparam = factory.create('getappointmenttimesparam',
                                                 checkall='False',
                                                 leasingagentid=RealpageConstants.LEASING_AGENT_ID,
-                                                startdatetime=payload.timeData.fromDate + RealpageConstants.START_TIME,
+                                                startdatetime=payload["timeData"]["fromDate"] + RealpageConstants.START_TIME,
                                                 enddatetime=toDate + RealpageConstants.END_TIME)
 
         response = client.service.getagentsappointmenttimes(auth=_auth,
@@ -126,7 +107,7 @@ class DataRealpage:
                 elif leasing_agents.get('availabledates') and isinstance(leasing_agents['availabledates']['availabledate'], dict):
                     response_list.append(leasing_agents['availabledates']['availabledate'])
 
-        return generate_time_slots(response_list)
+        return self.generate_time_slots(response_list)
 
     def generate_time_slots(self, input_dict):
         '''

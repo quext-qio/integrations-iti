@@ -202,7 +202,7 @@ TourAvailabilityStack(
     app, 
     f"{stage.value}-{server_name}-tourAvailabilityStack",
     api=tour_resource_v2, 
-    layers=[cerberus_layer, suds_layer],
+    layers=[cerberus_layer, requests_layer, suds_layer],
     environment=environment,
     description="Stack for Tour availability endpoints",
     tags=tags,

@@ -1,6 +1,6 @@
 import logging, json, os, requests
 from Utils.Config.Config import config
-from Utils.Constants.Constants import Constants
+from Utils.Constants.FunnelConstants import FunnelConstants
 
 class DataFunnel:
 
@@ -10,20 +10,21 @@ class DataFunnel:
         Get Tour availability information
         """
         _params = {
-            "group_id": ips["platformData"]["communityID"],
+            "group_id": ips["platformData"]["foreign_community_id"],
             "from_date": event["timeData"].get("fromDate", ""),
             "to_date": event["timeData"].get("toDate", ""),
         }
-        url = f"{Constants.FUNNEL_HOST}/api/v2/appointments/group/{_params['group_id']}/available-times/"
+        url = f"{FunnelConstants.FUNNEL_HOST}/api/v2/appointments/group/{_params['group_id']}/available-times/"
 
         headers = {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': f'Basic {config["Funnel_api_key"]}'
         }
 
-        response = requests.post(url, headers=headers, json=_params)
+        response = requests.get(url, headers=headers, params=_params)
 
-        response = response.text
-
+        response = json.loads(response.text)
+        print(response)
         #If exist an error from funnel
         if not "available_times" in response:
             error = response['errors'] if "errors" in response else response
@@ -42,4 +43,6 @@ class DataFunnel:
             list_date = date.split("T")
             new_date = f"{list_date[0]} {list_date[1]}"
             new_data.append(new_date)
+        
+        print(new_data)
         return new_data, []

@@ -17,11 +17,8 @@ class AccessControl():
         self.ACLs = []
 
     def load_acls(self, partner=""):
-        
-        parameter_store = json.loads(os.environ.get("parameter_store"))
-        host = parameter_store['ACL_HOST']
-        url = f'{host}/api/partners/security/{partner}?redacted=off'
-        response = requests.get(url)
+        host = os.environ['ACL_HOST']
+        response = requests.get(f'{host}/api/partners/security/{partner}?redacted=off')
         # If outgoing return an error
         if response.status_code != 200:
             logging.info(response.text)
@@ -45,8 +42,6 @@ class AccessUtils:
         wsgi = wsgi_environ
         endpoint = wsgi['PATH_INFO']
         verb = wsgi['REQUEST_METHOD']
-        print(ACLs[0])
-        print(wsgi["HTTP_X_API_KEY"])
         try:
             api_key = wsgi['HTTP_X_API_KEY']
         except KeyError:
@@ -66,7 +61,7 @@ class AccessUtils:
                     return None, "No permission for this endpoint."
             return None, "Unknown API key."
         except Exception as e:
-            logging.warning(f"Error Get ACLs: {e}")
+            logger.warning(f"Error Get ACLs: {e}")
 
     @staticmethod
     def accessControl_v2(wsgi_environ, logger, ACLs):
@@ -151,9 +146,9 @@ class AccessUtils:
         if len(ACLs) == 0:
             is_ok, acl_response, ACLs =  access_control.load_acls()
         if not is_ok:
-            logging.warning(f"Error to load acls: {acl_response}")
+            logger.warning(f"Error to load acls: {acl_response}")
         acl, status = access_util_obj.accessControl(wsgi_environ, logger, ACLs)
-        logging.info(status)
+        logger.info(status)
         response_code = access_util_obj.return_response(response, acl, status)
         return response_code
 

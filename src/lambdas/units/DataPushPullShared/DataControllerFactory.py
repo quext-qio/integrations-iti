@@ -7,11 +7,11 @@ from .ResmanData import DataResman
 from Utils.IPSController import IPSController
 from Utils.AccessControl import AccessUtils as AccessControl
 
-import json, logging
+import json
 
 class DataControllerFactory:
 
-    def create_data_controller(self, input, wsgi_input):
+    def create_data_controller(self, input):
         code, ips_response =  IPSController().get_partner(input["communityUUID"],input["customerUUID"],"units")
         ips_response = json.loads(ips_response.text)
         partner = ""
@@ -22,10 +22,10 @@ class DataControllerFactory:
              return  500, { "errors": [ { "message": ips_response } ] }
              
          # Get credentials
-        res = AccessControl.check_access_control(wsgi_input, logging , ips_response)
-        if res:
-            return
-        
+        # credentials, status = AccessControl.externalCredentials(event, [] , partner)
+        # if status != "good":
+        #         response = { "data": { "provenance": [partner] }, "errors": status }
+        #         return response, 500
         if partner == "Newco":
             property_data, models_data, units_data, errors = DataNewco().get_unit_availability(ips_response, input)
             return Controller("NewCo", errors).built_response(property_data, models_data, units_data)    

@@ -4,13 +4,10 @@ from DataPushPullShared.DataController import DataController
 
 def lambda_handler(event, context):
     input = json.loads(event['body'])
-    data_controller = DataController("info")
+    code, data_controller = DataController("info").get_communities(input.get("customerUUID",""))
     return {
-        'statusCode': "500",
-        'body': json.dumps({
-            'data': data_controller.get_communities(input["customerUUID"]),
-            'errors': []
-        }),
+        'statusCode': code,
+        'body':  json.dumps(data_controller),
         'headers': {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',  
