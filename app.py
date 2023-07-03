@@ -102,6 +102,7 @@ xmltodict_layer = layer_stack.get_xmltodict_layer
 mysql_layer = layer_stack.get_mysql_layer
 zeep_layer = layer_stack.get_zeep_layer
 suds_layer = layer_stack.get_suds_layer
+shared_layer = layer_stack.get_shared_layer
 
 # --------------------------------------------------------------------
 # Stack for placepay endpoints
@@ -109,7 +110,7 @@ PlacepayStack(
     app, 
     f"{stage.value}-{server_name}-placepayStack", 
     api=placepay_resource_v1, 
-    layers=[cerberus_layer, place_api_layer],
+    layers=[cerberus_layer, place_api_layer, shared_layer],
     environment=environment,
     description="Stack for placepay endpoints",
     tags=tags,
