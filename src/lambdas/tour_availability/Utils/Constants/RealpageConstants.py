@@ -23,7 +23,7 @@ class RealpageConstants:
     FROM_DATE = 'fromDate'
     TO_DATE = 'toDate'
     AVAILABLE_DATES = 'availabledates'
-    AVAILABLE_DATE = 'availabledates'
+    AVAILABLE_DATE = 'availabledate'
     GET_APPOINTMENT_TIMES = 'getagentsappointmenttimes'
     LEASING_AGENT = 'leasingagent'
     GET_APPOINTMENT_PARAM = 'getappointmenttimesparam'
