@@ -1,8 +1,9 @@
 import os
 import datetime, json, logging, requests
-from datetime import  date, timedelta
-from Utils.Constants import RealpageConstants
+from datetime import  datetime, timedelta
+from Utils.Constants.RealpageConstants import RealpageConstants
 import suds
+from cerberus import Validator
 
 
 class DataRealpage:
@@ -13,28 +14,22 @@ class DataRealpage:
         """
             
         logging.info("Availability: RealPage")  
-        response_list = self.get_available_times(event["platformData"].get("communityUUID",""), event)
+        response_list = self.get_available_times(ips, event)
         if len(response_list) > 0:
             return response_list, []
 
         elif len(response_list) == 0:
             print("RealPage services is not responding or has provided an empty payload.")
-            self.response.status_code = 409
-            self.response.payload = {
-                "data": {},
-                "error": {
-                    "message": "Please contact the leasing office by phone to schedule a tour.",
-                }
-            }   
-        return
+            
+        return [], {"message": "Please contact the leasing office by phone to schedule a tour."}
         
     def get_available_times(self, ips_response, payload):
         """
         Returns the available times based on the start date and end date
         """
         outgoingIPSPartnerChannelResponse = ips_response
-        ips_partner_response = json.loads(outgoingIPSPartnerChannelResponse.text)
-        partner_uuid = ips_partner_response['content'][0]['uuid'] if ips_partner_response.get('content') and len(
+        ips_partner_response = outgoingIPSPartnerChannelResponse
+        partner_uuid = ips_partner_response['content'][0]['uuid'] if ips_partner_response.get('content', "") and len(
             ips_partner_response.get('content')) > 0 else ""
 
         api_creds = ""
@@ -46,7 +41,7 @@ class DataRealpage:
         if partner_uuid:  # and input.get("source"):
                 parameter_store = json.loads(os.environ.get("parameter_store"))
                 host = parameter_store['ACL_HOST']
-                outgoingIPSSecurityResponse = requests.get(f'{host}/api/partners/security/RealPage?redacted=off')
+                outgoingIPSSecurityResponse = requests.get(f'{host}/api/partners/security/{partner_uuid}?redacted=off')
                 security_response = json.loads(outgoingIPSSecurityResponse.text)
 
                 if len(security_response["content"]) > 0:
@@ -67,8 +62,11 @@ class DataRealpage:
 
         factory = client.factory
         # Preparing auth details from service request
-        _auth = factory.create('AuthDTO', pmcid=pmcid, siteid=siteid, licensekey=licensekey)
-
+        _auth = client.factory.create(RealpageConstants.AUTHDTO)
+        _auth.pmcid = pmcid
+        _auth.siteid = siteid
+        _auth.licensekey = licensekey
+        
         date_diff = datetime.strptime(payload["timeData"]["toDate"], RealpageConstants.DAYFORMAT) - \
                     datetime.strptime(payload["timeData"]["fromDate"], RealpageConstants.DAYFORMAT)
         toDate = payload["timeData"]["toDate"]
@@ -76,37 +74,30 @@ class DataRealpage:
             toDate = (datetime.strptime(payload["timeData"]["fromDate"], RealpageConstants.DAYFORMAT) +
                     timedelta(days=7)).strftime(RealpageConstants.DAYFORMAT)
 
-        getappointmenttimesparam = factory.create('getappointmenttimesparam',
-                                                checkall='False',
-                                                leasingagentid=RealpageConstants.LEASING_AGENT_ID,
-                                                startdatetime=payload["timeData"]["fromDate"] + RealpageConstants.START_TIME,
-                                                enddatetime=toDate + RealpageConstants.END_TIME)
-
-        response = client.service.getagentsappointmenttimes(auth=_auth,
-                                                            getappointmenttimesparam=getappointmenttimesparam)
-
-        v = client.validator
-        v.allow_unknown = True
-        result = client.dict(response)
-        isValid = v(result,
-                    RealpageConstants.Validation_Schema[RealpageConstants.Schema.REAL_PAGE_GET_AGENT_APPOINTMENT_TIME])
-
+        getappointmenttimesparam = factory.create('getappointmenttimesparam')
+        
+        # Set the attributes of the getappointmenttimesparam object
+        getappointmenttimesparam.checkall = False
+        getappointmenttimesparam.leasingagentid = RealpageConstants.LEASING_AGENT_ID
+        getappointmenttimesparam.startdatetime = payload["timeData"]["fromDate"] + RealpageConstants.START_TIME
+        getappointmenttimesparam.enddatetime = toDate + RealpageConstants.END_TIME
+        response = client.service.getagentsappointmenttimes(auth=_auth, getappointmenttimesparam=getappointmenttimesparam)
+        
         response_list = []
+     
         logging.info("Available Dates")
-        if isValid:
-            leasing_agents = result["getagentsappointmenttimes"]['leasingagent']
-            if isinstance(leasing_agents, list):
-                for i in leasing_agents:
-                    if i.get('availabledates') and isinstance(i['availabledates']['availabledate'], list):
-                        response_list.extend(i['availabledates']['availabledate'])
-                    elif i.get('availabledates') and isinstance(i['availabledates']['availabledate'], dict):
-                        response_list.append(i['availabledates']['availabledate'])
-            elif isinstance(leasing_agents, dict):
-                if leasing_agents.get('availabledates') and isinstance(leasing_agents['availabledates']['availabledate'], list):
-                    response_list.extend(leasing_agents['availabledates']['availabledate'])
-                elif leasing_agents.get('availabledates') and isinstance(leasing_agents['availabledates']['availabledate'], dict):
-                    response_list.append(leasing_agents['availabledates']['availabledate'])
-
+        for i in response["getagentsappointmenttimes"]['leasingagent']:
+            i = dict([i])
+            if i.get('availabledates'):
+                if 'availabledate' in i['availabledates']:
+                    available_dates = i['availabledates']['availabledate']
+                    if isinstance(available_dates, list):
+                        response_list.extend(available_dates)
+                    elif isinstance(available_dates, dict):
+                        response_list.append(available_dates)
+                    else:
+                        response_list.append(available_dates)
+        
         return self.generate_time_slots(response_list)
 
     def generate_time_slots(self, input_dict):
@@ -115,12 +106,13 @@ class DataRealpage:
         '''
         final_result = []
         for i in range(len(input_dict)):
-            start, end = input_dict[i].values()
+           
+            start, end = input_dict[i]
             res = []
-            start_time = datetime.strptime(start, '%Y-%m-%dT%H:%M:%S')
+            start_time = datetime.strptime(start[1], '%Y-%m-%dT%H:%M:%S')
             start_time_str = start_time.strftime('%Y-%m-%d %H:%M:%S')
             sth,stm = start_time.hour,start_time.minute
-            end_time = datetime.strptime(end, '%Y-%m-%dT%H:%M:%S')
+            end_time = datetime.strptime(end[1], '%Y-%m-%dT%H:%M:%S')
             end_time_str = end_time.strftime('%Y-%m-%d %H:%M:%S')
             eth,etm = end_time.hour, end_time.minute
             if (abs(sth-eth) in (0,1) and abs(stm-etm) in (15,45)) :

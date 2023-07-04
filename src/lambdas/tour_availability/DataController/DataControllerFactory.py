@@ -27,14 +27,15 @@ class DataControllerFactory:
         #         return response, 500
         if partner == "Funnel":
             data, errors = DataFunnel().get_tour_availability(ips_response, input)
-            return DataController([]).built_response(data)    
+            return DataController(errors).built_response(data)    
         elif partner == "Entrata":
             data, errors = DataEntrata().get_tour_availability()
             return DataController(errors).built_response(data)   
         elif partner == "RealPage":
-            code, ips_response =  IPSController().get_partner(input["platformData"]["communityUUID"],input["platformData"]["customerUUID"],"tourAvailability")
-            ips_response = json.loads(ips_response.text)
-            data, errors = DataRealpage().get_tour_availability(ips_response, input)
+            code, partners =  IPSController().get_list_partners(input["platformData"]["communityUUID"])
+            partners = json.loads(partners.text)
+            data, errors = DataRealpage().get_tour_availability(partners, input)
+            print(data)
             return DataController(errors).built_response(data)   
         else:
             data, errors = DataResman().get_tour_availability(ips_response, input)
