@@ -234,12 +234,18 @@ class LayersStack(Stack):
         os.system(f"exit")
         print("=> Virtual environment 'v-env' deactivated")
 
+        # Get Python version
+        version_info = os.popen("python --version").read().strip()
+        python_version_info = version_info.split(" ")[1].split(".")[:2]
+        python_version = f"{python_version_info[0]}.{python_version_info[1]}"
+        print(f"=> Python version: {python_version}")
+
         # Create a new directory called "python"
         os.makedirs("python", exist_ok=True)
         print("=> Directory 'python' created")
 
         # Copy all files and folders from the "site-packages" directory inside the "v-env" virtual environment
-        os.system(f"cp -r {os.getcwd()}/v-env/lib/python3.9/site-packages/* {os.getcwd()}/python")
+        os.system(f"cp -r {os.getcwd()}/v-env/lib/python{python_version}/site-packages/* {os.getcwd()}/python")
         print("=> All files and folders from the 'site-packages' directory inside the 'v-env' virtual environment copied to 'python' directory")
 
         # Zip the "python" directory
