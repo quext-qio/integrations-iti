@@ -54,7 +54,7 @@ class DataRealpage:
                             client = suds.Client(api_creds[RealpageConstants.WSDL], doctor=doctor)  # creating client connection
                             pmcid = api_creds[RealpageConstants.PMCID]
                             siteid = api_creds[RealpageConstants.SITEID]
-                            licensekey = api_creds[RealpageConstants.LICENSEKEY]
+                            licensekey = api_creds[RealpageConstants.LICENSE_KEY]
                             break
 
         if not client:
