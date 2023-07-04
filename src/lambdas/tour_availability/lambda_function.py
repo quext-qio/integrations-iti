@@ -1,13 +1,12 @@
 import json
-from DataPushPullShared.DataController import DataController
-#from cerberus import Validator
+from DataController.DataControllerFactory import DataControllerFactory
 
 def lambda_handler(event, context):
     input = json.loads(event['body'])
-    code, data_controller = DataController("info").get_communities(input.get("customerUUID",""))
+    code, data = DataControllerFactory().create_data_controller(input)
     return {
         'statusCode': code,
-        'body':  json.dumps(data_controller),
+        'body': json.dumps(data),
         'headers': {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',  

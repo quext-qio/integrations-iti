@@ -47,4 +47,4 @@ class DataController:
                             })
             response = { "data": { "provenance": [ "auth-service" ], "customers": customers }, "errors": [] }
 
-        return response
+        return authChannelResponse.status_code, response
