@@ -3,7 +3,6 @@ import datetime, json, logging, requests
 from datetime import  datetime, timedelta
 from Utils.Constants.RealpageConstants import RealpageConstants
 import suds
-from cerberus import Validator
 
 
 class DataRealpage:
@@ -19,7 +18,7 @@ class DataRealpage:
             return response_list, []
 
         elif len(response_list) == 0:
-            print("RealPage services is not responding or has provided an empty payload.")
+            logging.warn("RealPage services is not responding or has provided an empty payload.")
             
         return [], {"message": "Please contact the leasing office by phone to schedule a tour."}
         
@@ -29,8 +28,8 @@ class DataRealpage:
         """
         outgoingIPSPartnerChannelResponse = ips_response
         ips_partner_response = outgoingIPSPartnerChannelResponse
-        partner_uuid = ips_partner_response['content'][0]['uuid'] if ips_partner_response.get('content', "") and len(
-            ips_partner_response.get('content')) > 0 else ""
+        partner_uuid = ips_partner_response[RealpageConstants.CONTENT][0]['uuid'] if ips_partner_response.get(RealpageConstants.CONTENT, "") and len(
+            ips_partner_response.get(RealpageConstants.CONTENT)) > 0 else ""
 
         api_creds = ""
         outgoingIPSSecurityResponse = ""
@@ -38,23 +37,24 @@ class DataRealpage:
         siteid = ""
         licensekey = ""
         client = None
-        if partner_uuid:  # and input.get("source"):
+        if partner_uuid:  
                 parameter_store = json.loads(os.environ.get("parameter_store"))
                 host = parameter_store['ACL_HOST']
                 outgoingIPSSecurityResponse = requests.get(f'{host}/api/partners/security/{partner_uuid}?redacted=off')
                 security_response = json.loads(outgoingIPSSecurityResponse.text)
 
-                if len(security_response["content"]) > 0:
-                    for i in security_response["content"]:
-                        if i["partner_name"] == RealpageConstants.REALPAGE:
-                            api_creds = i["security"]["credentials"][0]["body"]["DH"]  # if input["source"]==VendorConstants.DH else i["security"]["credentials"][0]["body"]["WS"]
-                            imp = suds.xsd.doctor.Import('http://www.w3.org/2001/XMLSchema', location='http://www.w3.org/2001/XMLSchema.xsd')
-                            imp.filter.add('http://xml.apache.org/xml-soap')
+                #CREATING CLIENT CONNECTION WITH API CREDENTIALS RETURNED FROM SECURITY RESPONSE
+                if len(security_response[RealpageConstants.CONTENT]) > 0:
+                    for i in security_response[RealpageConstants.CONTENT]:
+                        if i[RealpageConstants.PARTNER_NAME] == RealpageConstants.REALPAGE:
+                            api_creds = i[RealpageConstants.SECURITY][RealpageConstants.CREDENTIALS][0][RealpageConstants.BODY][RealpageConstants.DH] # getting api credentials
+                            imp = suds.xsd.doctor.Import(RealpageConstants.IMPORT_HOST, location=RealpageConstants.IMPORT_LOCATION)
+                            imp.filter.add(RealpageConstants.XML_SOAP)
                             doctor = suds.xsd.doctor.ImportDoctor(imp)
-                            client = suds.Client(api_creds["wsdl"], doctor=doctor)  # creating client connection
-                            pmcid = api_creds["pmcid"]
-                            siteid = api_creds["siteid"]
-                            licensekey = api_creds["licensekey"]
+                            client = suds.Client(api_creds[RealpageConstants.WSDL], doctor=doctor)  # creating client connection
+                            pmcid = api_creds[RealpageConstants.PMCID]
+                            siteid = api_creds[RealpageConstants.SITEID]
+                            licensekey = api_creds[RealpageConstants.LICENSEKEY]
                             break
 
         if not client:
@@ -67,30 +67,30 @@ class DataRealpage:
         _auth.siteid = siteid
         _auth.licensekey = licensekey
         
-        date_diff = datetime.strptime(payload["timeData"]["toDate"], RealpageConstants.DAYFORMAT) - \
-                    datetime.strptime(payload["timeData"]["fromDate"], RealpageConstants.DAYFORMAT)
-        toDate = payload["timeData"]["toDate"]
+        date_diff = datetime.strptime(payload[RealpageConstants.TIME_DATA][RealpageConstants.TO_DATE], RealpageConstants.DAYFORMAT) - \
+                    datetime.strptime(payload[RealpageConstants.TIME_DATA][RealpageConstants.FROM_DATE], RealpageConstants.DAYFORMAT)
+        toDate = payload[RealpageConstants.TIME_DATA][RealpageConstants.TO_DATE]
         if date_diff.days > 7:
-            toDate = (datetime.strptime(payload["timeData"]["fromDate"], RealpageConstants.DAYFORMAT) +
+            toDate = (datetime.strptime(payload[RealpageConstants.TIME_DATA][RealpageConstants.FROM_DATE], RealpageConstants.DAYFORMAT) +
                     timedelta(days=7)).strftime(RealpageConstants.DAYFORMAT)
 
-        getappointmenttimesparam = factory.create('getappointmenttimesparam')
+        getappointmenttimesparam = factory.create(RealpageConstants.GET_APPOINTMENT_PARAM)
         
         # Set the attributes of the getappointmenttimesparam object
         getappointmenttimesparam.checkall = False
         getappointmenttimesparam.leasingagentid = RealpageConstants.LEASING_AGENT_ID
-        getappointmenttimesparam.startdatetime = payload["timeData"]["fromDate"] + RealpageConstants.START_TIME
+        getappointmenttimesparam.startdatetime = payload[RealpageConstants.TIME_DATA][RealpageConstants.FROM_DATE] + RealpageConstants.START_TIME
         getappointmenttimesparam.enddatetime = toDate + RealpageConstants.END_TIME
         response = client.service.getagentsappointmenttimes(auth=_auth, getappointmenttimesparam=getappointmenttimesparam)
         
         response_list = []
      
         logging.info("Available Dates")
-        for i in response["getagentsappointmenttimes"]['leasingagent']:
+        for i in response[RealpageConstants.GET_APPOINTMENT_TIMES][RealpageConstants.LEASING_AGENT]:
             i = dict([i])
-            if i.get('availabledates'):
-                if 'availabledate' in i['availabledates']:
-                    available_dates = i['availabledates']['availabledate']
+            if i.get(RealpageConstants.AVAILABLE_DATES):
+                if RealpageConstants.AVAILABLE_DATE in i[RealpageConstants.AVAILABLE_DATES]:
+                    available_dates = i[RealpageConstants.AVAILABLE_DATES][RealpageConstants.AVAILABLE_DATE]
                     if isinstance(available_dates, list):
                         response_list.extend(available_dates)
                     elif isinstance(available_dates, dict):
