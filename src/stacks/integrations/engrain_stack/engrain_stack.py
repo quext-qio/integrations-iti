@@ -9,7 +9,7 @@ from constructs import Construct
 
 class EngrainStack(Stack):
     
-    def __init__(self, scope: Construct, construct_id: str, environment: dict[str, str], **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, environment: dict[str, str],  layers:list, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         
         # --------------------------------------------------------------------
@@ -23,6 +23,7 @@ class EngrainStack(Stack):
             code=lambda_.Code.from_asset("./src/lambdas/engrain"),
             handler="lambda_function.lambda_handler",
             function_name="Engrain_Job_Function",
+            layers=layers,
         )
 
         # Create a CloudWatch Event Rule

@@ -28,7 +28,7 @@ elif current_stage == 'prod':
     stage = StageName.PROD
 else:
     stage = StageName.DEV
-print(f"Deploying in stage: {stage.value}")
+print(f"Stage seleted: {stage.value}")
 
 # --------------------------------------------------------------------
 # Tags for all resources
@@ -95,14 +95,12 @@ layer_stack =  LayersStack(
     description="Stack load all layers to share between lambda's functions",
     tags=tags,    
 )
-cerberus_layer = layer_stack.get_cerberus_layer
 place_api_layer = layer_stack.get_place_api_layer
-requests_layer = layer_stack.get_requests_layer
-xmltodict_layer = layer_stack.get_xmltodict_layer
 mysql_layer = layer_stack.get_mysql_layer
 zeep_layer = layer_stack.get_zeep_layer
 suds_layer = layer_stack.get_suds_layer
 shared_layer = layer_stack.get_shared_layer
+pip_packages_layer = layer_stack.get_pip_packages_layer
 
 # --------------------------------------------------------------------
 # Stack for placepay endpoints
@@ -110,10 +108,14 @@ PlacepayStack(
     app, 
     f"{stage.value}-{server_name}-placepayStack", 
     api=placepay_resource_v1, 
-    layers=[cerberus_layer, place_api_layer, shared_layer],
     environment=environment,
     description="Stack for placepay endpoints",
     tags=tags,
+    layers=[
+        place_api_layer,
+        shared_layer,
+        pip_packages_layer,
+    ],
 )
 
 # --------------------------------------------------------------------
@@ -122,9 +124,12 @@ GuestcardsStack(
     app, 
     f"{stage.value}-{server_name}-guestcardsStack", 
     api=resman_resource_v1,
-    layers=[cerberus_layer],
     description="Stack for guestcards endpoints",
     tags=tags,
+    layers=[
+        pip_packages_layer,
+        shared_layer,
+    ],
 )
 
 # --------------------------------------------------------------------
@@ -133,10 +138,13 @@ TransUnionStack(
     app, 
     f"{stage.value}-{server_name}-transUnionStack", 
     api=transunion_resource_v1, 
-    layers=[cerberus_layer, requests_layer, xmltodict_layer],
     environment=environment,
     description="Stack for transunion endpoints",
     tags=tags,
+    layers=[
+        pip_packages_layer,
+        shared_layer,
+    ],
 )
 
 # --------------------------------------------------------------------
@@ -145,10 +153,16 @@ UnitsStack(
     app, 
     f"{stage.value}-{server_name}-unitsStack", 
     api=general_resource_v2, 
-    layers=[cerberus_layer, mysql_layer, zeep_layer, suds_layer, xmltodict_layer],
     environment=environment,
     description="Stack for units endpoints",
     tags=tags,
+    layers=[
+        pip_packages_layer, 
+        mysql_layer, 
+        zeep_layer, 
+        suds_layer, 
+        shared_layer,
+    ],
 )
 
 # --------------------------------------------------------------------
@@ -157,9 +171,12 @@ CommunitiesStack(
     app, 
     f"{stage.value}-{server_name}-communitiesStack", 
     api=general_resource_v1, 
-    layers=[cerberus_layer, requests_layer],
     description="Stack for communities endpoints",
     tags=tags,
+    layers=[
+        pip_packages_layer,
+        shared_layer,
+    ],
 )
 
 # --------------------------------------------------------------------
@@ -168,9 +185,12 @@ CustomersStack(
     app, 
     f"{stage.value}-{server_name}-customersStack", 
     api=general_resource_v1, 
-    layers=[cerberus_layer, requests_layer],
     description="Stack for customers endpoints",
     tags=tags,
+    layers=[
+        pip_packages_layer,
+        shared_layer,
+    ],
 )
 
 # --------------------------------------------------------------------
@@ -179,9 +199,12 @@ ResidentsStack(
     app, 
     f"{stage.value}-{server_name}-residentsStack", 
     api=general_resource_v1, 
-    layers=[cerberus_layer, requests_layer],
     description="Stack for residents endpoints",
     tags=tags,
+    layers=[
+        pip_packages_layer,
+        shared_layer,
+    ],
 )
 
 # --------------------------------------------------------------------
@@ -192,6 +215,10 @@ EngrainStack(
     environment=environment,
     description="Stack for Engrain Job",
     tags=tags,
+    layers=[
+        pip_packages_layer,
+        shared_layer,
+    ],
 )
 
 # --------------------------------------------------------------------
