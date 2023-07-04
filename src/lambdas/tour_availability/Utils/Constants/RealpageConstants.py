@@ -10,7 +10,7 @@ class RealpageConstants:
     AUTHDTO = 'AuthDTO'
     PMCID = 'pmcid'
     SITEID = 'siteid'
-    LICENSE_KEY = 'license_key'
+    LICENSE_KEY = 'licensekey'
     DATE_NEEDED = 'date_needed'
     WSDL = 'wsdl'
     CONTENT = 'content'
