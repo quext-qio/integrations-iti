@@ -108,3 +108,28 @@ $env:AWS_ACCESS_KEY_ID =
 $env:AWS_SECRET_ACCESS_KEY = 
 $env:AWS_SESSION_TOKEN = 
 ```
+
+
+## Set Role ARN 
+
+1. Set the `ROLE_ARN` variable to select a new assumed role PD: (The Role should exist in AWS account).
+
+
+## Set packages creation:
+The `PACKAGES` environment variable is set to `False` by default.
+
+To generate a new `pip_packages_layer.zip` file with the latest information from `requirements-all-lambdas.txt`, 
+you can set the value of `PACKAGES` to `True`. 
+This file contains a set of packages required by all lambda functions.
+
+**Unix/Linux/macOS:**
+
+```bash
+export PACKAGES=True
+```
+**Windows (PowerShell):**
+```powershell
+$env:PACKAGES=True
+```
+
+By following these instructions, you can control the generation of the `pip_packages_layer.zip` file based on the value of the `PACKAGES` environment variable.

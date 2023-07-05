@@ -8,22 +8,10 @@ from aws_cdk import (
 )
 
 class LayersStack(Stack):
-    # @property
-    # def get_cerberus_layer(self):
-    #     return self.cerberus_layer
-    
     @property
     def get_place_api_layer(self):
         return self.place_api_layer
-    
-    # @property
-    # def get_requests_layer(self):
-    #     return self.requests_layer
 
-    # @property
-    # def get_xmltodict_layer(self):
-    #     return self.xmltodict_layer
-    
     @property
     def get_mysql_layer(self):
         return self.mysql_layer
@@ -44,16 +32,16 @@ class LayersStack(Stack):
     def get_pip_packages_layer(self):
         return self.pip_packages_layer
     
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, should_create_dynamic_packages: bool, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         
         # --------------------------------------------------------------------
         # Create a layer called [shared_layer] in complilation time
         self.create_shared_layer()
-
-        # --------------------------------------------------------------------
-        # Create a layer with all the pip packages defined in [requirements-all-lambdas.txt]
-        self.create_pip_packages_as_layer_zip()
+        
+        if should_create_dynamic_packages:
+            # Create a layer with all the pip packages defined in [requirements-all-lambdas.txt]
+            self.create_pip_packages_as_layer_zip()
 
         # --------------------------------------------------------------------
         # Create place-api layer

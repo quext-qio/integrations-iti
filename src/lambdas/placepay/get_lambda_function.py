@@ -1,16 +1,11 @@
 import json
 import place
-from example_class import ExampleClass
 from Schemas.SchemaRequestGet import SchemaRequestGet
 from Config.Config import config
 
 def lambda_handler(event, context):
     query_params = event['queryStringParameters']
     is_valid, input_errors = SchemaRequestGet(query_params).is_valid()
-
-    # Test shared class 
-    example = ExampleClass("John")
-    example.say_hello()
 
     if is_valid:
         try:

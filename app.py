@@ -15,10 +15,17 @@ from src.stacks.shared.layers_stack.layers_stack import LayersStack
 from src.stacks.shared.env_stack.env_stack import EnvStack
 from src.utils.enums.stage_name import StageName
 
-
 # --------------------------------------------------------------------
 # Create the app
 app = cdk.App()
+
+# --------------------------------------------------------------------
+# Setting the environment variable PACKAGES to True will 
+# re-create the package for [pip_packages_layer]
+#
+# Setting the environment variable PACKAGES to False will
+# use the package already created in [src/utils/layers/pip_packages_layer.zip]
+should_create_dynamic_packages = os.getenv('PACKAGES', False)
 
 # --------------------------------------------------------------------
 # Stage to deploy
@@ -96,7 +103,8 @@ layer_stack =  LayersStack(
     app, 
     f"{stage.value}-{server_name}-layersStack",
     description="Stack load all layers to share between lambda's functions",
-    tags=tags,    
+    tags=tags, 
+    should_create_dynamic_packages=should_create_dynamic_packages,   
 )
 place_api_layer = layer_stack.get_place_api_layer
 mysql_layer = layer_stack.get_mysql_layer
