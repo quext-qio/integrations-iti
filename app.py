@@ -239,7 +239,8 @@ TourAvailabilityStack(
     api=tour_resource_v2, 
     layers=[
         pip_packages_layer,
-         suds_layer
+         suds_layer,
+         shared_layer
     ],
     environment=environment,
     description="Stack for Tour availability endpoints",

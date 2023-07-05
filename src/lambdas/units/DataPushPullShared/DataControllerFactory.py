@@ -4,7 +4,7 @@ from .DataEntrata import DataEntrata
 from .DataEngrain import DataEngrain
 from .DataRealpage import DataRealpage
 from .ResmanData import DataResman
-from Utils.IPSController import IPSController
+from IPSController import IPSController
 from Utils.AccessControl import AccessUtils as AccessControl
 
 import json, logging
@@ -12,7 +12,7 @@ import json, logging
 class DataControllerFactory:
 
     def create_data_controller(self, input, wsgi_input):
-        code, ips_response =  IPSController().get_partner(input["communityUUID"],input["customerUUID"],"units")
+        code, ips_response =  IPSController().get_platform_data(input["communityUUID"],input["customerUUID"],"units")
         ips_response = json.loads(ips_response.text)
         partner = ""
        

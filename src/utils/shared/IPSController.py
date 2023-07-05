@@ -2,7 +2,7 @@ import requests, json, os
 
 class IPSController:
 
-    def get_partner(self, community_id, customer_id, purpose):
+    def get_platform_data(self, community_id, customer_id, purpose):
         try:
             parameter_store = json.loads(os.environ.get("parameter_store"))
             ips_host = parameter_store['IPS_HOST']
@@ -18,7 +18,6 @@ class IPSController:
         except Exception as e:
             print(f"Error IPS endpoint: {e}")
             return 500, f"Error from IPS: {e}"
-            
     
     def get_list_partners(self, community_id):
         try:
