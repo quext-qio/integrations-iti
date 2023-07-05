@@ -96,18 +96,20 @@ pipeline {
             }
             steps {
                 script {
+                    sh "env"
                     sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 273056594042.dkr.ecr.us-east-1.amazonaws.com"
                     docker.image("${ecr_repository_uri}:${imageTag}").inside() {
-                    jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/devops-test-cdk"
-                    def AWS_KEYS = sh(returnStdout: true, script: """
-                        aws sts assume-role --role-arn $jenkinsRole \
-                        --role-session-name cdk \
-                        --query '[Credentials.AccessKeyId,Credentials.SecretAccessKey,Credentials.SessionToken]' \
-                        --output text""")
-                    AWS_KEYS = AWS_KEYS.split("\\s+")
-                    env.AWS_ACCESS_KEY_ID=AWS_KEYS[0]
-                    env.AWS_SECRET_ACCESS_KEY=AWS_KEYS[1]
-                    env.AWS_SESSION_TOKEN=AWS_KEYS[2]
+                    // jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/devops-test-cdk"
+                    // def AWS_KEYS = sh(returnStdout: true, script: """
+                    //     aws sts assume-role --role-arn $jenkinsRole \
+                    //     --role-session-name cdk \
+                    //     --query '[Credentials.AccessKeyId,Credentials.SecretAccessKey,Credentials.SessionToken]' \
+                    //     --output text""")
+                    // AWS_KEYS = AWS_KEYS.split("\\s+")
+                    // env.AWS_ACCESS_KEY_ID=AWS_KEYS[0]
+                    // env.AWS_SECRET_ACCESS_KEY=AWS_KEYS[1]
+                    // env.AWS_SESSION_TOKEN=AWS_KEYS[2]
+                    sh "env"
                     sh "ROLE_ARN=arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters"
                     sh "export STAGE=${DEPLOY_ENVIRONMENT}"
                     //sh "cdk synth"
