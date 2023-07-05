@@ -3,15 +3,14 @@ from DataPushPullShared.DataFunnel import DataFunnel
 from DataPushPullShared.DataEntrata import DataEntrata
 from DataPushPullShared.DataRealpage import DataRealpage
 from DataPushPullShared.ResmanData import DataResman
-from Utils.IPSController import IPSController
-#from Utils.AccessControl import AccessUtils as AccessControl
+from IPSController import IPSController
 
 import json
 
 class DataControllerFactory:
 
     def create_data_controller(self, input):
-        code, ips_response =  IPSController().get_partner(input["platformData"]["communityUUID"],input["platformData"]["customerUUID"],"tourAvailability")
+        code, ips_response =  IPSController().get_platform_data(input["platformData"]["communityUUID"],input["platformData"]["customerUUID"],"tourAvailability")
         ips_response = json.loads(ips_response.text)
         partner = ""
        

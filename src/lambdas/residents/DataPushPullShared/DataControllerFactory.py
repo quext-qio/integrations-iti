@@ -2,7 +2,7 @@ from .DataController import DataController as Controller
 from .DataNewCo import DataNewco
 from .DataQuext import DataQuext
 from .DataResman import DataResman
-from Utils.IPSController import IPSController
+from IPSController import IPSController
 from Utils.AccessControl import AccessUtils as AccessControl
 
 import json
@@ -10,7 +10,7 @@ import json
 class DataControllerFactory:
 
     def create_data_controller(self, input, event):
-        code, ips_response =  IPSController().get_partner(input["communityUUID"],input["customerUUID"],"residents")
+        code, ips_response =  IPSController().get_platform_data(input["communityUUID"],input["customerUUID"],"residents")
         ips_response = json.loads(ips_response.text)
         partner = ""
        
