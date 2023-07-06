@@ -2,11 +2,18 @@ import json
 from DataPushPullShared.DataController import DataController
 
 def lambda_handler(event, context):
+    headers = event['headers']
+    wsgi_input = {
+        'PATH_INFO': event['resource'],
+        'REQUEST_METHOD': "GET"
+    }
+    if 'x-api-key' in headers:
+        wsgi_input['HTTP_X_API_KEY'] = headers['x-api-key']
 
     input = event['body']
     input = json.loads(input) if input else {}
     
-    code, data_controller = DataController("info").get_customers(input.get("customerUUID",""))
+    code, data_controller = DataController("info").get_customers(input.get("customerUUID",""), wsgi_input)
     return {
         'statusCode': code,
         'body':  json.dumps(data_controller),

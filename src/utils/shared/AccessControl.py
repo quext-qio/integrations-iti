@@ -77,19 +77,20 @@ class AccessUtils:
             return None, "No API key header."
         if api_key is None:
             return None, "No API key value."
-
-        api_key = api_key.strip("Bearer ") # Stripping Bearer prefix to validate apikey
+        
+        # Stripping Bearer prefix to validate apikey
+        api_key = api_key.strip("Bearer ")
         try:
             for d in ACLs:
                 if "apiKey" in d and d["apiKey"] == api_key:
-                    if "endpoints" not in d:
-                        return None, "No permission for any endpoint is defined."
-                    for e in d["endpoints"]:
-                        if "uri" in e and "verbs" in e and e["uri"] == endpoint and verb in e["verbs"]:
-                            return e["acl"], "good"
-                        elif "uri" in e and e["uri"] == endpoint:
-                            return None, "No permission for this HTTP method."
-                    return None, "No permission for this endpoint."
+                        if "endpoints" not in d:
+                            return None, "No permission for any endpoint is defined."
+                        for e in d["endpoints"]:
+                            if "uri" in e and "verbs" in e and e["uri"] == endpoint and verb in e["verbs"]:
+                                return e["acl"], "good"
+                            elif "uri" in e and e["uri"] == endpoint:
+                                return None, "No permission for this HTTP method."
+                        return None, "No permission for this endpoint."
             return None, "Unknown API key."
         except Exception as e:
             logging.warning(f"Error Get ACLs: {e}")
@@ -122,13 +123,13 @@ class AccessUtils:
 
     @staticmethod
     def return_response(acl, status):
-        response = {}, 200
+
         if acl is None:
             if status == "No API key header.":
-                response = json.dumps( { "errors": [ { "message": status } ] } ), 401
+                return { "errors": [ { "message": status } ] } , 401
             else:
-                response = json.dumps( { "errors": [ { "message": status } ] } ), 403
-            return response
+                return { "errors": [ { "message": status } ] } , 403
+        return {}, 200
 
     @staticmethod
     def check_access_control(wsgi_environ):
@@ -147,6 +148,7 @@ class AccessUtils:
             is_ok, acl_response, ACLs =  access_control.load_acls()
         if not is_ok:
             logging.warning(f"Error to load acls: {acl_response}")
+            return {"error": "Error to load acls"}, 500
         acl, status = access_util_obj.accessControl(wsgi_environ, ACLs)
         logging.info(status)
         response, status = access_util_obj.return_response(acl, status)

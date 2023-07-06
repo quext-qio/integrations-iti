@@ -112,6 +112,7 @@ zeep_layer = layer_stack.get_zeep_layer
 suds_layer = layer_stack.get_suds_layer
 shared_layer = layer_stack.get_shared_layer
 pip_packages_layer = layer_stack.get_pip_packages_layer
+crypto_layer = layer_stack.get_crypto_layer
 
 # --------------------------------------------------------------------
 # Stack for placepay endpoints
@@ -188,6 +189,7 @@ CommunitiesStack(
         pip_packages_layer,
         shared_layer,
     ],
+    environment=environment,
 )
 
 # --------------------------------------------------------------------
@@ -202,6 +204,7 @@ CustomersStack(
         pip_packages_layer,
         shared_layer,
     ],
+    environment=environment,
 )
 
 # --------------------------------------------------------------------
@@ -215,7 +218,10 @@ ResidentsStack(
     layers=[
         pip_packages_layer,
         shared_layer,
+        crypto_layer,
+        mysql_layer,
     ],
+    environment=environment,
 )
 
 # --------------------------------------------------------------------

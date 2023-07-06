@@ -7,4 +7,4 @@ class DataQuext:
         pass
 
     def get_resident_data(self, credentials):
-         return  []
+         return  [],[]

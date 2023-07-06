@@ -32,6 +32,10 @@ class LayersStack(Stack):
     def get_pip_packages_layer(self):
         return self.pip_packages_layer
     
+    @property
+    def get_crypto_layer(self):
+        return self.crypto_layer
+    
     def __init__(self, scope: Construct, construct_id: str, should_create_dynamic_packages: bool, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         
@@ -126,6 +130,28 @@ class LayersStack(Stack):
             ],
         )
         self.suds_layer = suds_layer  
+
+        # --------------------------------------------------------------------
+        # Create suds_layer layer
+        crypto_layer = lambda_.LayerVersion(
+            self, "CryptodomeLayer",
+            layer_version_name="CryptodomeLayer",
+            description="Package documentation: https://pypi.org/project/",
+            code=lambda_.Code.from_asset("./src/utils/layers/crypto_layer.zip"),
+            compatible_runtimes=[
+                lambda_.Runtime.PYTHON_3_10,
+                lambda_.Runtime.PYTHON_3_9,
+                lambda_.Runtime.PYTHON_3_8,
+                lambda_.Runtime.PYTHON_3_7,
+                lambda_.Runtime.PYTHON_3_6,
+            ],
+            compatible_architectures=[
+                lambda_.Architecture.ARM_64,
+                lambda_.Architecture.X86_64,
+            ],
+        )
+        self.crypto_layer = crypto_layer  
+
 
         # --------------------------------------------------------------------
         # Create Custom Shared Layer 
