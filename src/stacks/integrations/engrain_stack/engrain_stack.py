@@ -1,11 +1,12 @@
 from aws_cdk import (
     Stack,
-    Duration,
     aws_lambda as lambda_,
     aws_events as events_,
     aws_events_targets as targets_,
+    Tags,
 )
 from constructs import Construct
+import boto3
 
 class EngrainStack(Stack):
     
@@ -29,9 +30,14 @@ class EngrainStack(Stack):
         # Create a CloudWatch Event Rule
         event_rule = events_.Rule(
             self,
-            "FiveMinutesScheduledEvent",
-            schedule=events_.Schedule.rate(Duration.minutes(5)),
+            f"FiveMinutesScheduledEvent",
+            schedule=events_.Schedule.cron(minute="*/5"),
+            description="CloudWatch Event Rule for Engrain Job",
         )
-        
+
         # Add the Lambda function as a target to the event rule
-        event_rule.add_target(targets_.LambdaFunction(lambda_fn))
+        event_rule.add_target(
+            targets_.LambdaFunction(
+                lambda_fn,
+            ),
+        )

@@ -41,12 +41,10 @@ print(f"Stage seleted: {stage.value}")
 # --------------------------------------------------------------------
 # Tags for all resources
 server_name = "aws-integration-engine"
-tags = {
-    'Environment': stage.value,
-    'Project': 'quext',
-    'Service': server_name,
-    'Team': 'integration'
-}
+cdk.Tags.of(app).add("Project", 'quext')
+cdk.Tags.of(app).add("Team", 'integration')
+cdk.Tags.of(app).add("Environment", stage.value)
+cdk.Tags.of(app).add("Service", server_name)
 
 # --------------------------------------------------------------------
 # Role for quext-shared-services
@@ -60,7 +58,6 @@ env_stack = EnvStack(
     f"{stage.value}-{server_name}-envStack", 
     stage_name=stage,
     description="Stack load environment variables for all lambda's functions",
-    tags=tags,
     role_arn=role_arn,
 )
 environment=env_stack.get_env
@@ -72,7 +69,6 @@ api_stack = APIStack(
     f"{stage.value}-{server_name}-apiStack", 
     stage_name=stage,
     description="Stack load API Gateway for all lambda's functions",
-    tags=tags,
 )
 api=api_stack.get_api
 
@@ -103,7 +99,6 @@ layer_stack =  LayersStack(
     app, 
     f"{stage.value}-{server_name}-layersStack",
     description="Stack load all layers to share between lambda's functions",
-    tags=tags, 
     should_create_dynamic_packages=should_create_dynamic_packages,   
 )
 place_api_layer = layer_stack.get_place_api_layer
@@ -122,7 +117,6 @@ PlacepayStack(
     api=placepay_resource_v1, 
     environment=environment,
     description="Stack for placepay endpoints",
-    tags=tags,
     layers=[
         place_api_layer,
         shared_layer,
@@ -137,7 +131,6 @@ GuestcardsStack(
     f"{stage.value}-{server_name}-guestcardsStack", 
     api=resman_resource_v1,
     description="Stack for guestcards endpoints",
-    tags=tags,
     layers=[
         pip_packages_layer,
         shared_layer,
@@ -152,7 +145,6 @@ TransUnionStack(
     api=transunion_resource_v1, 
     environment=environment,
     description="Stack for transunion endpoints",
-    tags=tags,
     layers=[
         pip_packages_layer,
         shared_layer,
@@ -167,7 +159,6 @@ UnitsStack(
     api=general_resource_v2, 
     environment=environment,
     description="Stack for units endpoints",
-    tags=tags,
     layers=[
         pip_packages_layer, 
         mysql_layer, 
@@ -184,7 +175,6 @@ CommunitiesStack(
     f"{stage.value}-{server_name}-communitiesStack", 
     api=general_resource_v1, 
     description="Stack for communities endpoints",
-    tags=tags,
     layers=[
         pip_packages_layer,
         shared_layer,
@@ -199,7 +189,6 @@ CustomersStack(
     f"{stage.value}-{server_name}-customersStack", 
     api=general_resource_v1, 
     description="Stack for customers endpoints",
-    tags=tags,
     layers=[
         pip_packages_layer,
         shared_layer,
@@ -214,7 +203,6 @@ ResidentsStack(
     f"{stage.value}-{server_name}-residentsStack", 
     api=general_resource_v1, 
     description="Stack for residents endpoints",
-    tags=tags,
     layers=[
         pip_packages_layer,
         shared_layer,
@@ -231,7 +219,6 @@ EngrainStack(
     f"{stage.value}-{server_name}-engrainStack",
     environment=environment,
     description="Stack for Engrain Job",
-    tags=tags,
     layers=[
         pip_packages_layer,
         shared_layer,
@@ -250,7 +237,6 @@ TourAvailabilityStack(
     ],
     environment=environment,
     description="Stack for Tour availability endpoints",
-    tags=tags,
 )
 
 
