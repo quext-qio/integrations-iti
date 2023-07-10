@@ -13,10 +13,9 @@ def lambda_handler(event, context):
     # Validate if Engrain has permisions for run
     engrain_info = EngrainJob()
     job_should_execute = engrain_info.is_running()
-    #TODO: Discomment this lines when endpoint is ready
-    # if not job_should_execute:
-    #     print(f"Engrain Push: The Job is off")
-    #     return
+    if not job_should_execute:
+        print(f"Engrain Push: The Job is off")
+        return
 
     print(f"Engrain Push: Starting Job")
     current_dateTime = datetime.now()
@@ -163,99 +162,81 @@ def get_newco_properties_ids(sql):
 
 # ---------------------------------------------------------------------------------------------------
 def update_engrain(properties_list, list_errors):
-    print("update_engrain")
-    show_errors(list_errors)
+    # List to save transactions info
+    list_transactions=[]
+    index = 0
 
-
-#     # List to save transactions info
-#     list_transactions=[]
-#     index = 0
-
-#     # Loop every property
-#     for property_info in properties_list:
-#         index +=1
-#         # Call newco db to validate if has data
-#         parameters = { "newco_property_id": property_info['propertyId'] }  
-#         response_of_database, code = data_from_newco(engrain_push_newco_query, parameters, property_info)
-#         if len(response_of_database['data']) == 0:
-#             list_errors.append({"type":"WARNING", "message":f"Engrain Push ({index}): No Data Returned From Newco DB: item = {property_info}", "info": json.dumps(property_info)})
-#         else:
-#             transaction_info = dict()
-#             transaction_info["assetId"] = f"{property_info['assetId']}"
-#             transaction_info["pricingId"] = f"{property_info['pricingId']}"
-#             transaction_info["commit"] = "1"
-#             transaction_info["transactionId"] = -1
-#             is_transaction_open = False
-#             try:
-#                 # Try to open transaction
-#                 transaction_id, errors = get_transaction_id(property_info)
+    # Loop every property
+    for property_info in properties_list:
+        index +=1
+        # Call newco db to validate if has data
+        parameters = { "newco_property_id": property_info['propertyId'] }  
+        response_of_database, code = data_from_newco(engrain_push_newco_query, parameters, property_info)
+        if len(response_of_database['data']) == 0:
+            list_errors.append({"type":"WARNING", "message":f"Engrain Push ({index}): No Data Returned From Newco DB: item = {property_info}", "info": json.dumps(property_info)})
+        else:
+            transaction_info = dict()
+            transaction_info["assetId"] = f"{property_info['assetId']}"
+            transaction_info["pricingId"] = f"{property_info['pricingId']}"
+            transaction_info["commit"] = "1"
+            transaction_info["transactionId"] = -1
+            is_transaction_open = False
+            try:
+                # Try to open transaction
+                transaction_id, errors = get_transaction_id(property_info)
                 
-#                 # if can't get the transaction id, save the error
-#                 if transaction_id == -1:
-#                     list_errors.append(errors)
-#                 else:
-#                     is_transaction_open = True
-#                     # Save transaction info to close in second execution
-#                     transaction_info["transactionId"] = transaction_id
-#                     list_transactions.append(transaction_info)
+                # if can't get the transaction id, save the error
+                if transaction_id == -1:
+                    list_errors.append(errors)
+                else:
+                    is_transaction_open = True
+                    # Save transaction info to close in second execution
+                    transaction_info["transactionId"] = transaction_id
+                    list_transactions.append(transaction_info)
 
-#                     # Save transaction id in current property to use later
-#                     property_info['transactionId'] = transaction_id
+                    # Save transaction id in current property to use later
+                    property_info['transactionId'] = transaction_id
 
-#                     # Post information
-#                     print(f"Engrain Push ({index}): Property Id: {property_info}, Size of items: {len(response_of_database['data'])}")
-#                     is_saved = post_transactions(response_of_database['data'], property_info)   
-#                     print(f"Engrain Push ({index}): Post Data Correct? {is_saved}, item = {property_info}, info: {json.dumps(transaction_info)}")
+                    # Post information
+                    print(f"Engrain Push ({index}): Property Id: {property_info}, Size of items: {len(response_of_database['data'])}")
+                    is_saved = post_transactions(response_of_database['data'], property_info)   
+                    print(f"Engrain Push ({index}): Post Data Correct? {is_saved}, item = {property_info}, info: {json.dumps(transaction_info)}")
                     
-#                     # Close the transaction
-#                     headers = get_headers()
-#                     params_close = {
-#                         "assetId" : f"{property_info['assetId']}",
-#                         "pricingId" : f"{property_info['pricingId']}",
-#                         "transactionId": transaction_id,
-#                         "commit":"1"
-#                     }
-#                     conn = self.outgoing.plain_http['Engrain Push Transaction Data'].conn
-#                     close_transaction = conn.post(self.cid, params=params_close, headers=headers)
-#                     is_transaction_open = False
-#                     print(f"Engrain Push ({index}): First Close Transaction: {close_transaction.status_code}, info: {json.dumps(transaction_info)}, item = {property_info}")
-#                     list_errors.append({"type":"INFO", "message":f"First Close Transaction ({index}): {close_transaction.status_code}, item = {property_info}", "info": json.dumps(transaction_info)})
+                    # Close the transaction
+                    url_close_transaction = f"https://api.sightmap.com/v1/assets/{property_info['assetId']}/multifamily/pricing/{property_info['pricingId']}/transactions/{transaction_id}/ingest?commit={1}"
+                    close_transaction = requests.request("POST", url_close_transaction, headers=get_headers())
+                    is_transaction_open = False
+                    print(f"Engrain Push ({index}): First Close Transaction: {close_transaction.status_code}, info: {json.dumps(transaction_info)}, item = {property_info}")
+                    list_errors.append({"type":"INFO", "message":f"First Close Transaction ({index}): {close_transaction.status_code}, item = {property_info}", "info": json.dumps(transaction_info)})
 
 
-#             except Exception as e:
-#                 # Save exception error
-#                 print(f"Engrain Push: Exception, {e}")
-#                 list_errors.append({"type":"ERROR", "message":f"Unhandled error in Engrain population flow, Error={e}, item = {property_info['name']}", "info": json.dumps(property_info)})
-#                 if is_transaction_open:
-#                     # Close the transaction if is currently open
-#                     headers = get_headers()
-#                     params_close = {
-#                         "assetId" : f"{property_info['assetId']}",
-#                         "pricingId" : f"{property_info['pricingId']}",
-#                         "transactionId": transaction_id,
-#                         "commit":"1"
-#                     }
-#                     conn = self.outgoing.plain_http['Engrain Push Transaction Data'].conn
-#                     close_transaction = conn.post(self.cid, params=transaction_info, headers=headers)
-#                     print(f"Engrain Push ({index}): Close Transaction in Exception: {close_transaction.status_code}, info: {json.dumps(transaction_info)}, item = {property_info}")
-#                     list_errors.append({"type":"INFO", "message":f"Close Transaction in Exception ({index}): {close_transaction.status_code}, item = {property_info}", "info": json.dumps(transaction_info)})
+            except Exception as e:
+                # Save exception error
+                print(f"Engrain Push: Exception, {e}")
+                list_errors.append({"type":"ERROR", "message":f"Unhandled error in Engrain population flow, Error={e}, item = {property_info['name']}", "info": json.dumps(property_info)})
+                if is_transaction_open:
+                    # Close the transaction if is currently open
+                    url_close_transaction = f"https://api.sightmap.com/v1/assets/{property_info['assetId']}/multifamily/pricing/{property_info['pricingId']}/transactions/{transaction_id}/ingest?commit={1}"
+                    close_transaction = requests.request("POST", url_close_transaction, headers=get_headers())
+                    print(f"Engrain Push ({index}): Close Transaction in Exception: {close_transaction.status_code}, info: {json.dumps(transaction_info)}, item = {property_info}")
+                    list_errors.append({"type":"INFO", "message":f"Close Transaction in Exception ({index}): {close_transaction.status_code}, item = {property_info}", "info": json.dumps(transaction_info)})
 
-#     # Close all transaction if any is not closed yet
-#     index = 1
-#     for transaction in list_transactions:
-#         conn = self.outgoing.plain_http['Engrain Push Transaction Data'].conn
-#         close_transaction = conn.post(self.cid, params=transaction, headers=headers)
-#         if close_transaction.status_code > 299 and close_transaction.status_code < 200:
-#             list_errors.append({"type":"ERROR", "message":f"Closed a transaction with status pendding in second verification, assetId={transaction['assetId']}, pricingId={transaction['pricingId']}", "info": json.dumps(transaction), "response": json.dumps(close_transaction.text)})
-#         index+=1
+    # Close all transaction if any is not closed yet
+    index = 1
+    for transaction in list_transactions:
+        url_close_transaction = f"https://api.sightmap.com/v1/assets/{transaction['assetId']}/multifamily/pricing/{transaction['pricingId']}/transactions/{transaction['transactionId']}/ingest?commit={1}"
+        close_transaction = requests.request("POST", url_close_transaction, headers=get_headers())
+        if close_transaction.status_code > 299 and close_transaction.status_code < 200:
+            list_errors.append({"type":"ERROR", "message":f"Closed a transaction with status pendding in second verification, assetId={transaction['assetId']}, pricingId={transaction['pricingId']}", "info": json.dumps(transaction), "response": json.dumps(close_transaction.text)})
+        index+=1
 
-#     # Update information in singleton state
-#     engrain_info = EngrainJob()
-#     engrain_info.currently_executing(False)
+    # Update information in singleton state
+    engrain_info = EngrainJob()
+    engrain_info.currently_executing(False)
     
-#     # Show logs
-#     show_errors(list_errors)
-#     print(f"Engrain Push: Finish Job")
+    # Show logs
+    show_errors(list_errors)
+    print(f"Engrain Push: Finish Job")
 
 
 # ---------------------------------------------------------------------------------------------------
@@ -269,31 +250,25 @@ def get_headers():
         'API-Key': config["api_key"]
     }
 
-# # ---------------------------------------------------------------------------------------------------
-# def get_transaction_id(item):
-#     """Method to extract the transaction id
-#     Args:
-#         item (dict): this is the information of every item of zato (key/value) db
-    
-#     Returns:
-#         int: if the transaction is ok will be the transaction id number. if not will be -1
-#     """
-#     headers = get_headers()
-#     params = {
-#         "assetId" : f"{item['assetId']}",
-#         "pricingId" : f"{item['pricingId']}"
-#     }
-#     conn = self.outgoing.plain_http['Engrain Push Transaction Url'].conn
-#     transaction_url_response = conn.post(self.cid, params=params, headers=headers)
-#     if transaction_url_response.status_code == 202:
-#         dict_transaction_response = json.loads(transaction_url_response.text)
-#         url_path = dict_transaction_response['transaction_url']
-#         transaction_id = url_path.split("/")[-1]
-#         print(f"Engrain Push: Open Transaction Id: {transaction_id}, URL: {dict_transaction_response['transaction_ingest_url']}")
-#         return transaction_id, {}
-#     else:
-#         print(f"Engrain Push: Transaction pending, code: {transaction_url_response.status_code}, info: {json.dumps(item)}")
-#         return -1, {"type":"ERROR", "message":f"Engrain Push: Error to get the Transaction Id, {json.loads(transaction_url_response.text)}", "info": json.dumps(item)}
+# ---------------------------------------------------------------------------------------------------
+def get_transaction_id(item):
+    """Method to extract the transaction id
+    Args:
+        item (dict): this is the information of every item of zato (key/value) db
+    Returns:
+        int: if the transaction is ok will be the transaction id number. if not will be -1
+    """
+    url_transaction_id = f"https://api.sightmap.com/v1/assets/{item['assetId']}/multifamily/pricing/{item['pricingId']}/ingest"
+    transaction_url_response = requests.request("POST", url_transaction_id,  headers=get_headers())
+    if transaction_url_response.status_code == 202:
+        dict_transaction_response = json.loads(transaction_url_response.text)
+        url_path = dict_transaction_response['transaction_url']
+        transaction_id = url_path.split("/")[-1]
+        print(f"Engrain Push: Open Transaction Id: {transaction_id}, URL: {dict_transaction_response['transaction_ingest_url']}")
+        return transaction_id, {}
+    else:
+        print(f"Engrain Push: Transaction pending, code: {transaction_url_response.status_code}, info: {json.dumps(item)}")
+        return -1, {"type":"ERROR", "message":f"Engrain Push: Error to get the Transaction Id, {json.loads(transaction_url_response.text)}", "info": json.dumps(item)}
 
 # ---------------------------------------------------------------------------------------------------
 def data_from_newco(sql, parameters, item):
@@ -342,41 +317,32 @@ def check_integer_value(value):
     except Exception:
         return None
 
-# # ---------------------------------------------------------------------------------------------------
-# def post_transactions(data, property_info):
-#     """Add the transactions data to Engrain
-    
-#     Args:
-#         data (list): This is the response of the newco database
-    
-#     Returns:
-#         Bool: True if everything is ok, False if exist an error 
-#     """
-#     _body = []
-#     for row in data:
-#         item = {
-#             "unit_number": f"{row['unit_number']}",
-#             "provider_id": f"{row['provider_id']}",
-#             "price": row['price'],
-#             "lease_term":  check_integer_value(row['lease_term']),
-#             "available_on": None if row['available_on'] == None else row['available_on'].strftime('%Y-%m-%d'),
-#             "lease_starts_on":  None if row['lease_starts_on'] == None else row['lease_starts_on'].strftime('%Y-%m-%d'),
-#         }
-#         _body.append(item)  
-#     body = json.dumps(_body, default=str)  
-#     try:
-#         headers = get_headers()
-#         params = {
-#             "assetId" : f"{property_info['assetId']}",
-#             "pricingId" : f"{property_info['pricingId']}",
-#             "transactionId": f"{property_info['transactionId']}",
-#             "commit":"0"
-#         }
-#         conn = self.outgoing.plain_http['Engrain Push Transaction Data'].conn
-#         response = conn.post(self.cid, data=body, params=params, headers=headers)  
-#         print(f"Engrain Push: Transaction Id {property_info['transactionId']}, Response Code: {response.status_code}")
-#         return True
+# ---------------------------------------------------------------------------------------------------
+def post_transactions(data, property_info):
+    """Add the transactions data to Engrain
+    Args:
+        data (list): This is the response of the newco database   
+    Returns:
+        Bool: True if everything is ok, False if exist an error 
+    """
+    _body = []
+    for row in data:
+        item = {
+            "unit_number": f"{row['unit_number']}",
+            "provider_id": f"{row['provider_id']}",
+            "price": row['price'],
+            "lease_term":  check_integer_value(row['lease_term']),
+            "available_on": None if row['available_on'] == None else row['available_on'].strftime('%Y-%m-%d'),
+            "lease_starts_on":  None if row['lease_starts_on'] == None else row['lease_starts_on'].strftime('%Y-%m-%d'),
+        }
+        _body.append(item)  
+    body = json.dumps(_body, default=str)  
+    try:
+        url_post_transactions = f"https://api.sightmap.com/v1/assets/{property_info['assetId']}/multifamily/pricing/{property_info['pricingId']}/transactions/{property_info['transactionId']}/ingest?commit={0}"
+        response = requests.request("POST", url_post_transactions, data=body, headers=get_headers())
+        print(f"Engrain Push: Transaction Id {property_info['transactionId']}, Response Code: {response.status_code}, url: {url_post_transactions}")
+        return True
 
-#     except Exception as e:
-#         print(f"Engrain Push: Transaction Id, {property_info['transactionId']}, Error: {e}")
-#         return False
+    except Exception as e:
+        print(f"Engrain Push: Transaction Id, {property_info['transactionId']}, Error: {e}")
+        return False
