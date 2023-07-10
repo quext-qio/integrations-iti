@@ -1,6 +1,8 @@
 import json
-import datetime
 import requests
+from datetime import datetime
+from contextlib import closing
+from utils.newco_database import NewcoDatabase
 from config.engrain_job_status import EngrainJob
 from config.config import config
 from constants.queries import engrain_push_newco_query
@@ -11,9 +13,10 @@ def lambda_handler(event, context):
     # Validate if Engrain has permisions for run
     engrain_info = EngrainJob()
     job_should_execute = engrain_info.is_running()
-    if not job_should_execute:
-        print(f"Engrain Push: The Job is off")
-        return
+    #TODO: Discomment this lines when endpoint is ready
+    # if not job_should_execute:
+    #     print(f"Engrain Push: The Job is off")
+    #     return
 
     print(f"Engrain Push: Starting Job")
     current_dateTime = datetime.now()
@@ -22,141 +25,148 @@ def lambda_handler(event, context):
     list_errors = []
 
 
-#     # Creation of data dynamic
-#     try:
-#         # Get Communities
-#         sql = "SELECT id as propertyId, name FROM properties WHERE disposition_date IS NULL AND `status` <> 'Archive' ORDER BY name;"
-#         list_properties, code = get_newco_properties_ids(sql)
-#         list_communities = list_properties["data"]
-#         if code == 500:
-#             print(list_properties["errors"][0])
-#             list_errors.append({"type":"ERROR", "message":f"Newco database returned an unhandled error, it is necesary for creation of data dynamic", "info": {json.dumps(list_properties["errors"][0])}})
-#             show_errors(list_errors)
-#             return
+    # Creation of data dynamic
+    try:
+        # Get Communities
+        sql = "SELECT id as propertyId, name FROM properties WHERE disposition_date IS NULL AND `status` <> 'Archive' ORDER BY name;"
+        list_properties, code = get_newco_properties_ids(sql)
+        list_communities = list_properties["data"]
+        if code == 500:
+            print(list_properties["errors"][0])
+            list_errors.append({"type":"ERROR", "message":f"Newco database returned an unhandled error, it is necesary for creation of data dynamic", "info": {json.dumps(list_properties["errors"][0])}})
+            show_errors(list_errors)
+            return
 
-#         # Get assets
-#         assets_response = requests.request("GET", "https://api.sightmap.com/v1/assets", headers=get_headers())
-#         if assets_response.status_code != 200:
-#             list_errors.append({"type":"ERROR", "message":f"Sightmap: https://api.sightmap.com/v1/assets used to get assets returns status code not equal 200, it is necesary for creation of data dynamic: {assets_response}"})
-#             show_errors(list_errors)
-#             return
-#         assets_dict = json.loads(assets_response.text)
-#         list_assets = assets_dict["data"]
+        # Get assets
+        assets_response = requests.request("GET", "https://api.sightmap.com/v1/assets", headers=get_headers())
+        if assets_response.status_code != 200:
+            list_errors.append({"type":"ERROR", "message":f"Sightmap: https://api.sightmap.com/v1/assets used to get assets returns status code not equal 200, it is necesary for creation of data dynamic: {assets_response}"})
+            show_errors(list_errors)
+            return
+        assets_dict = json.loads(assets_response.text)
+        list_assets = assets_dict["data"]
+
+        # List to save the properties information
+        properties_list = []
         
-#         # List to save the properties information
-#         properties_list = []
+        # Fill the "properties_list" (name, assetId)
+        for community in list_communities:
+            is_valid_community, asset = check_asset_by_community(community, list_assets)
+            if is_valid_community:
+                new_item = {
+                    "name":community["name"],
+                    "assetId":asset["id"],
+                    "pricingId":"",
+                    "propertyId": f'{community["propertyId"]}', # Number as string
+                }
+                properties_list.append(new_item)
+
+        print(f"Engrain Push: Properties list: {len(properties_list)}")
+        # Fill the "properties_list" (pricingId)
+        for item in properties_list:
+
+            # Get pricing of asset
+            pricing_url_endpoint = f"https://api.sightmap.com/v1/assets/{item['assetId']}/multifamily/pricing"
+            pricing_response = requests.request("GET", pricing_url_endpoint,  headers=get_headers())
+            print(f"Engrain Push: Pricing response: {pricing_response.status_code}, pricing_url_endpoint: {pricing_url_endpoint}")
+            if pricing_response.status_code == 200:
+                pricing_dict = json.loads(pricing_response.text)
+                print(f"Engrain Push: Pricing dict: {pricing_dict}")
+
+                # If outgoing returns empty data   
+                if len(pricing_dict["data"]) == 0:
+                    list_errors.append({"type":"ERROR", "message":f"Sightmap: {pricing_url_endpoint} used to get pricing process returns empty data: {pricing_response}, Item: {item}"})
+                else:
+                    list_pricing = pricing_dict["data"]
+                    for price in list_pricing:
+                        if price["type"] == "push":
+                            item["pricingId"] = price["id"]
+
+                    # Validate if don't found pricing type (push) to show a warning
+                    if item["pricingId"] == "":
+                        list_errors.append({"type":"ERROR", "message":f"Price type push not found using this information: {item}"})
+            else:
+                # If outgoing don't returns 200, will capture the error
+                list_errors.append({"type":"ERROR", "message":f"Sightmap: {pricing_url_endpoint} used to get pricing process returns status code not equal to 200: {pricing_response}"})
+
+        print(f"Engrain Push: Properties list with pricing: {len(properties_list)}")
+        # Here data dynamic is already generated 
+        # now going to execute engrain logic to populate sightmap
+        update_engrain(properties_list, list_errors)
         
-#         # Fill the "properties_list" (name, assetId)
-#         for community in list_communities:
-#             is_valid_community, asset = check_asset_by_community(community, list_assets)
-#             if is_valid_community:
-#                 new_item = {
-#                     "name":community["name"],
-#                     "assetId":asset["id"],
-#                     "pricingId":"",
-#                     "propertyId": f'{community["propertyId"]}', # Number as string
-#                 }
-#                 properties_list.append(new_item)
+    except Exception as e:
+        # Show errors
+        list_errors.append({"type":"ERROR", "message":f"Unhandled error in creation of data dynamic: {e}"})
+        show_errors(list_errors)
 
 
-#         # Fill the "properties_list" (pricingId)
-#         for item in properties_list:
-#             params = {
-#                 "asset_id": item["assetId"]
-#             }
-#             # Get pricing of asset
-#             endpoint_pricing = self.outgoing.plain_http["[Engrain Push] Pricing process"]
-#             pricing_response = endpoint_pricing.conn.get(self.cid, params, headers=get_headers())
-            
-#             if pricing_response.status_code == 200:
-#                 pricing_dict = json.loads(pricing_response.text)
-#                 # If outgoing returns empty data   
-#                 if len(pricing_dict["data"]) == 0:
-#                     list_errors.append({"type":"ERROR", "message":f"Sightmap: https://api.sightmap.com/v1/assets/{item['assetId']}/multifamily/pricing used to get pricing process returns empty data: {pricing_response}, Item: {item}"})
-#                 else:
-#                     list_pricing = pricing_dict["data"]
-#                     for price in list_pricing:
-#                         if price["type"] == "push":
-#                             item["pricingId"] = price["id"]
+# ---------------------------------------------------------------------------------------------------  
+def show_errors(list_errors):
+    index = 1
+    info="INFORMATION:"
+    warnings="WARNINGS:"
+    errors=""
+    for error in list_errors:
+        if(error["type"] == "ERROR"):
+            errors+=f"\n{error['message']}"
+        elif(error["type"] == "WARNING"):
+            warnings+=f"\n{index}: {error['message']}"
+        else:
+            info+=f"\n{index}: {error['message']}"
+        index+=1
 
-#                     # Validate if don't found pricing type (push) to show a warning
-#                     if item["pricingId"] == "":
-#                         list_errors.append({"type":"ERROR", "message":f"Price type push not found using this information: {item}"})
-#             else:
-#                 # If outgoing don't returns 200, will capture the error
-#                 list_errors.append({"type":"ERROR", "message":f"Sightmap: https://api.sightmap.com/v1/assets/{item['assetId']}/multifamily/pricing used to get pricing process returns status code not equal to 200: {pricing_response}"})
-
-#         # Here data dynamic is already generated 
-#         # now going to execute engrain logic to populate sightmap
-#         update_engrain(properties_list, list_errors)
-        
-#     except Exception as e:
-#         # Show errors
-#         list_errors.append({"type":"ERROR", "message":f"Unhandled error in creation of data dynamic: {e}"})
-#         show_errors(list_errors)
+    print(info)
+    print(warnings)
+    print(f"Errors: {errors}")
 
 
-# # ---------------------------------------------------------------------------------------------------  
-# def show_errors(self, list_errors):
-#     index = 1
-#     info="INFORMATION:"
-#     warnings="WARNINGS:"
-#     errors=""
-#     for error in list_errors:
-#         if(error["type"] == "ERROR"):
-#             errors+=f"\n{error['message']}"
-#         elif(error["type"] == "WARNING"):
-#             warnings+=f"\n{index}: {error['message']}"
-#         else:
-#             info+=f"\n{index}: {error['message']}"
-#         index+=1
-
-#     print(info)
-#     print(warnings)
-#     print(f"Errors: {errors}")
-
-
-# # ---------------------------------------------------------------------------------------------------    
-# def check_asset_by_community(community, list_assets):
-#     """Method to validate if community has assets
-#     Args:
-#         community (dict): this is a community from "[Engrain Push] General Communities" outgoing
-#         list_assets (list): this is the response of "[Engrain Push] List assets" outgoing
-#     Returns:
-#         tuple: (True, asset) if exist else (False, {})
-#     """
-#     for asset in list_assets:
-#         c_name = community["name"].strip().lower() 
-#         a_name = asset["name"].strip().lower()
-#         if not "delete" in a_name: 
-#             if c_name in a_name or c_name == a_name:
-#                 return True, asset
-#     return False, {}
+# ---------------------------------------------------------------------------------------------------    
+def check_asset_by_community(community, list_assets):
+    """Method to validate if community has assets
+    Args:
+        community (dict): this is a community from "[Engrain Push] General Communities" outgoing
+        list_assets (list): this is the response of "[Engrain Push] List assets" outgoing
+    Returns:
+        tuple: (True, asset) if exist else (False, {})
+    """
+    for asset in list_assets:
+        c_name = community["name"].strip().lower() 
+        a_name = asset["name"].strip().lower()
+        if not "delete" in a_name: 
+            if c_name in a_name or c_name == a_name:
+                return True, asset
+    return False, {}
     
-# # ---------------------------------------------------------------------------------------------------
-# def get_newco_properties_ids(sql):
-#     """Method to get list of properties from newco db
-#     Args:
-#         sql (str): Query to get id, name
-#     Returns:
-#         tuple(dict, int): data, status code
-#     """
-#     try:
-#         with closing(self.outgoing.sql.get('Newco DB (Internal)').session()) as session:
-#             result = session.execute(sql)        
-#             data = []
-#             for row in result:
-#                 data.append(dict(row.items()) )
+# ---------------------------------------------------------------------------------------------------
+def get_newco_properties_ids(sql):
+    """Method to get list of properties from newco db
+    Args:
+        sql (str): Query to get id, name
+    Returns:
+        tuple(dict, int): data, status code
+    """
+    try:
+        with closing(NewcoDatabase.get_db_session()) as session:
+            cursor = session.cursor()
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            data = []
+            for row in result:
+                data.append(dict(zip(cursor.column_names, row)))
 
-#         response = { "data": data, "errors": [] }
-#         return response, 200
+        response = { "data": data, "errors": [] }
+        return response, 200
 
-#     except Exception as e:
-#         response = { "data": [], "errors": [{"message": e}]}
-#         return response, 500   
+    except Exception as e:
+        response = { "data": [], "errors": [{"message": str(e)}]}
+        return response, 500   
 
-# # ---------------------------------------------------------------------------------------------------
-# def update_engrain(properties_list, list_errors):
+# ---------------------------------------------------------------------------------------------------
+def update_engrain(properties_list, list_errors):
+    print("update_engrain")
+    show_errors(list_errors)
+
+
 #     # List to save transactions info
 #     list_transactions=[]
 #     index = 0
@@ -248,16 +258,16 @@ def lambda_handler(event, context):
 #     print(f"Engrain Push: Finish Job")
 
 
-# # ---------------------------------------------------------------------------------------------------
-# def get_headers():
-#     """Generate headers for the outgoings
-#     Returns:
-#         dict: headers
-#     """
-#     return {
-#         'Content-Type': 'application/json',
-#         'API-Key': config["api_key"]
-#     }
+# ---------------------------------------------------------------------------------------------------
+def get_headers():
+    """Generate headers for the outgoings
+    Returns:
+        dict: headers
+    """
+    return {
+        'Content-Type': 'application/json',
+        'API-Key': config["api_key"]
+    }
 
 # # ---------------------------------------------------------------------------------------------------
 # def get_transaction_id(item):
@@ -285,49 +295,52 @@ def lambda_handler(event, context):
 #         print(f"Engrain Push: Transaction pending, code: {transaction_url_response.status_code}, info: {json.dumps(item)}")
 #         return -1, {"type":"ERROR", "message":f"Engrain Push: Error to get the Transaction Id, {json.loads(transaction_url_response.text)}", "info": json.dumps(item)}
 
-# # ---------------------------------------------------------------------------------------------------
-# def data_from_newco(sql, parameters, item):
-#     """Method to get data from newco database
-#     Args:
-#         sql (str): this is a query to get data from newco bd
-#         parameters (dict): this dict will have the propertyId used in sql
-#         item (dict): this is the information of every item of zato (key/value) db
-    
-#     Returns:
-#         tuple: response of database and code (sucess = 200, error = 500)
-#     """
-#     try:
-#         with closing(self.outgoing.sql.get('Newco DB (Internal)').session()) as session:
-#             result = session.execute(sql, parameters)        
-#             data = []
-#             for row in result:
-#                 info = dict(row.items()) 
-#                 info['assetId'] = item['assetId']
-#                 info['pricingId'] = item['pricingId']
-#                 data.append(info)
+# ---------------------------------------------------------------------------------------------------
+def data_from_newco(sql, parameters, item):
+    """
+    Method to get data from Newco database.
+    Args:
+        sql (str): This is the query to retrieve data from Newco DB.
+        parameters (dict): This dictionary will have the propertyId used in the SQL query.
+        item (dict): This is the information of every item of Zato (key/value) DB.
+    Returns:
+        tuple: Response of the database and code (success = 200, error = 500).
+    """
+    try:
+        with closing(NewcoDatabase.get_db_session()) as session:
+            cursor = session.cursor()
+            cursor.execute(sql, parameters)
+            result = cursor.fetchall()
 
-#         response = { "data": data, "errors": [] }
-#         return response, 200
+            data = []
+            column_names = cursor.column_names
+            for row in result:
+                info = dict(zip(column_names, row))
+                info['assetId'] = item['assetId']
+                info['pricingId'] = item['pricingId']
+                data.append(info)
 
-#     except Exception as e:
-#         response = { "data": [], "errors": [{"message": e}]}
-#         return response, 500
+        response = {"data": data, "errors": []}
+        return response, 200
 
-# # ---------------------------------------------------------------------------------------------------    
-# def check_integer_value(self, value):
-#     """Check if string number can be int
-    
-#     Args:
-#         value (str): This should be a number in string format
-    
-#     Returns:
-#         Int: The value as Int
-#         None: If value can't be cast returns None
-#     """
-#     try:
-#         return int(value)
-#     except Exception:
-#         return None
+    except Exception as e:
+        response = {"data": [], "errors": [{"message": str(e)}]}
+        return response, 500
+
+
+# ---------------------------------------------------------------------------------------------------    
+def check_integer_value(value):
+    """Check if string number can be int
+    Args:
+        value (str): This should be a number in string format
+    Returns:
+        Int: The value as Int
+        None: If value can't be cast returns None
+    """
+    try:
+        return int(value)
+    except Exception:
+        return None
 
 # # ---------------------------------------------------------------------------------------------------
 # def post_transactions(data, property_info):

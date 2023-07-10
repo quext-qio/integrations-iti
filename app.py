@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import boto3
 import aws_cdk as cdk
 from src.stacks.integrations.guestcards_stack.guestcards_stack import GuestcardsStack
 from src.stacks.integrations.units_stack.units_stack import UnitsStack
@@ -41,10 +42,10 @@ print(f"Stage seleted: {stage.value}")
 # --------------------------------------------------------------------
 # Tags for all resources
 server_name = "aws-integration-engine"
-cdk.Tags.of(app).add("Project", 'quext')
-cdk.Tags.of(app).add("Team", 'integration')
-cdk.Tags.of(app).add("Environment", stage.value)
-cdk.Tags.of(app).add("Service", server_name)
+cdk.Tags.of(app).add(key="Project", value='quext', priority=300)
+cdk.Tags.of(app).add(key="Team", value='integration', priority=300)
+cdk.Tags.of(app).add(key="Environment", value=stage.value, priority=300)
+cdk.Tags.of(app).add(key="Service", value=server_name, priority=300)
 
 # --------------------------------------------------------------------
 # Role for quext-shared-services
@@ -220,10 +221,12 @@ EngrainStack(
     environment=environment,
     description="Stack for Engrain Job",
     layers=[
+        mysql_layer,
         pip_packages_layer,
         shared_layer,
     ],
 )
+
 # --------------------------------------------------------------------
 # Stack for Tours endpoints
 TourAvailabilityStack(

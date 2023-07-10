@@ -3,15 +3,18 @@ from aws_cdk import (
     aws_lambda as lambda_,
     aws_events as events_,
     aws_events_targets as targets_,
-    Tags,
+    Tag,
+    Duration,
 )
 from constructs import Construct
 import boto3
 
 class EngrainStack(Stack):
-    
     def __init__(self, scope: Construct, construct_id: str, environment: dict[str, str],  layers:list, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        # Set maximun timeout for lambda functions
+        timeout=Duration.minutes(15)
         
         # --------------------------------------------------------------------
         # Create a Lambda function
@@ -25,6 +28,7 @@ class EngrainStack(Stack):
             handler="lambda_function.lambda_handler",
             function_name="Engrain_Job_Function",
             layers=layers,
+            timeout=timeout,
         )
 
         # Create a CloudWatch Event Rule
@@ -32,7 +36,7 @@ class EngrainStack(Stack):
             self,
             f"FiveMinutesScheduledEvent",
             schedule=events_.Schedule.cron(minute="*/5"),
-            description="CloudWatch Event Rule for Engrain Job",
+            description="CloudWatch Event Rule for execute Engrain Job every 5 minutes",
         )
 
         # Add the Lambda function as a target to the event rule
