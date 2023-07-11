@@ -102,7 +102,7 @@ pipeline {
                         script {
                             sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 273056594042.dkr.ecr.us-east-1.amazonaws.com"
                             docker.image("${ecr_repository_uri}:${imageTag}").inside() {
-                                jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/quext-dev-integrationApi-assume-role"
+                                jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/quext-${DEPLOY_ENVIRONMENT}-integrationApi-assume-role"
                                 def AWS_KEYS = sh(returnStdout: true, script: """
                                     aws sts assume-role --role-arn $jenkinsRole \
                                     --role-session-name cdk \
