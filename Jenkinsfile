@@ -96,7 +96,6 @@ pipeline {
                         input "Deploy to ${DEPLOY_ENVIRONMENT}?"
                     }
                 }
-
                 stage('deploy'){
                     steps {
                         script {
