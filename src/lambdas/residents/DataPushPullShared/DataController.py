@@ -1,4 +1,4 @@
-import sys
+
 class DataController:
     
     def __init__(self, partner, partner_response, errors):
@@ -7,8 +7,9 @@ class DataController:
         self.partner = partner
 
     def built_response(self):
+        print(type(self.partner_response))
         # build proper response structure for every partner
-        print(sys.path)
+        code = 200 if len(self.errors) == 0 else 502
         response = { 
                     "data": {   
                         "provenance": [ self.partner ],   
@@ -16,4 +17,6 @@ class DataController:
                         },  
                     "errors": self.errors    
                     }
-        return response
+        print(response)
+        print(type(response))
+        return code, response

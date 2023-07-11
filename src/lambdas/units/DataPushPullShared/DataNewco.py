@@ -22,11 +22,11 @@ class DataNewco:
                 # Get the units data
                 units_data = self.get_units_data(cursor, parameters, event)
 
-            return property_data, models_data, units_data , 200
+            return property_data, models_data, units_data , []
         
         except Exception as e:
             logging.error(f"An error occurred while retrieving unit availability: {str(e)}")
-            return 500, f"An error occurred while retrieving unit availability: {str(e)}"
+            return [],[],[], [{"error":f"An error occurred while retrieving unit availability: {str(e)}"}]
 
 
     def get_property_data(self, cursor, parameters):
@@ -39,7 +39,7 @@ class DataNewco:
         cursor.execute(output, parameters)
         row = cursor.fetchone()
         property_data =  dict(zip(cursor.column_names, row)) if row else {}
-        print(property_data)
+    
         return property_data
 
     def get_models_data(self, cursor, parameters):

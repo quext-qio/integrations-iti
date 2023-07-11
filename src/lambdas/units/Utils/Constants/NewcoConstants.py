@@ -2,7 +2,6 @@
 
 class NewcoConstants:
 
-    NEWCO_EXTERNAL = "Newco DB (Internal)"
     AVAILABLE = "available"
     MARKET_RATE_UNIT_TYPE_AVAIL = "market_rate_unit_type_avail"
     MARKET_RENT_UNIT_TYPE = "market_rent_unit_type"
