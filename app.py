@@ -11,6 +11,7 @@ from src.stacks.integrations.customers_stack.customers_stack import CustomersSta
 from src.stacks.integrations.residents_stack.residents_stack import ResidentsStack
 from src.stacks.integrations.engrain_stack.engrain_stack import EngrainStack
 from src.stacks.integrations.tour_availability_stack.tour_availability_stack import TourAvailabilityStack
+from src.stacks.integrations.conservice_stack.conservice_stack import ConserviceStack
 from src.stacks.shared.api_stack.api_stack import APIStack
 from src.stacks.shared.layers_stack.layers_stack import LayersStack
 from src.stacks.shared.env_stack.env_stack import EnvStack
@@ -240,6 +241,20 @@ TourAvailabilityStack(
     ],
     environment=environment,
     description="Stack for Tour availability endpoints",
+)
+
+# --------------------------------------------------------------------
+# Stack for Conservice endpoints
+ConserviceStack(
+    app, 
+    f"{stage.value}-{server_name}-conserviceStack", 
+    api=api_v1, 
+    environment=environment,
+    description="Stack for conservice endpoints",
+    layers=[
+        pip_packages_layer,
+        shared_layer,
+    ]
 )
 
 
