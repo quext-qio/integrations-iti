@@ -33,7 +33,7 @@ pipeline {
     parameters {
         choice(
           name: 'ENVIRONMENT',
-          choices:  ['none'] + DEPLOY_ENVIRONMENT,
+          choices:  ['none'] + envsToBuildAndDeploy,
           description: 'Environment to deploy',
         )
         booleanParam(
