@@ -4,28 +4,29 @@ from .DataEntrata import DataEntrata
 from .DataEngrain import DataEngrain
 from .DataRealpage import DataRealpage
 from .ResmanData import DataResman
-from Utils.IPSController import IPSController
-from Utils.AccessControl import AccessUtils as AccessControl
+from IPSController import IPSController
+from AccessControl import AccessUtils as AccessControl
 
-import json
+import json, logging
 
 class DataControllerFactory:
 
-    def create_data_controller(self, input):
-        code, ips_response =  IPSController().get_partner(input["communityUUID"],input["customerUUID"],"units")
+    def create_data_controller(self, input, wsgi_input):
+        code, ips_response =  IPSController().get_platform_data(input["communityUUID"],input["customerUUID"],"units")
+        print(wsgi_input)
         ips_response = json.loads(ips_response.text)
+        
         partner = ""
-       
         if "platformData" in ips_response and "platform" in ips_response["platformData"]:
             partner = ips_response["platformData"]["platform"]
         else:
              return  500, { "errors": [ { "message": ips_response } ] }
              
          # Get credentials
-        # credentials, status = AccessControl.externalCredentials(event, [] , partner)
-        # if status != "good":
-        #         response = { "data": { "provenance": [partner] }, "errors": status }
-        #         return response, 500
+        res, res_code= AccessControl.check_access_control_v2(wsgi_input)
+        if res_code != 200:
+            return res_code, res
+        
         if partner == "Newco":
             property_data, models_data, units_data, errors = DataNewco().get_unit_availability(ips_response, input)
             return Controller("NewCo", errors).built_response(property_data, models_data, units_data)    

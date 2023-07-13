@@ -1,14 +1,15 @@
 import json
 import requests
 import os
-
+from AccessControl import AccessUtils as AccessControl
 class DataController:
     def __init__(self, logger):
         self.logger = logger
 
-    def get_communities(self, customer_uuid):
+    def get_communities(self, customer_uuid, wsgi_input):
         errors = []
-        auth_host = os.environ.get('AUTH_HOST')
+        parameter_store = json.loads(os.environ.get("parameter_store"))
+        auth_host = parameter_store['AUTH_HOST']
         url = f'{auth_host}/service/api/v1/customers/{customer_uuid}/communities'
                 
         payload = {}
@@ -17,6 +18,11 @@ class DataController:
         }
         # Lógica para obtener los datos de las comunidades utilizando self.outgoing_channel y customer_uuid
         authChannelResponse = requests.request("GET", url, headers=headers, data=payload)
+
+         # Get credentials
+        res, res_code= AccessControl.check_access_control(wsgi_input)
+        if res_code != 200:
+            return res_code, res
 
         # Expect only 200 status codes here, let's do some error handling
         communities = []
@@ -84,4 +90,4 @@ class DataController:
             "errors": errors
         }
 
-        return response
+        return authChannelResponse.status_code, response

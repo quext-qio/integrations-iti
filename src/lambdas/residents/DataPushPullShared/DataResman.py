@@ -1,81 +1,55 @@
-from Utils.Constants.RealpageConstants import RealpageConstants
 from urllib.parse import urlencode
 import xml.etree.ElementTree as etree
-import os
 import datetime, re
-import requests
-
+from AccessControl import AccessUtils
 
 class DataResman:
 
-    def get_unit_availability(self, ips, event):
+    def get_resident_data(self, ips, event, wsgi_input):
    
+       
         code = 200
         errors = []
 
-        # These get replaced into the url template.
-        _params = { 
-            "interface": "MITS",
-            "method": "GetMarketing4_0",          
-        }
-        
-        body = {}
-        if code:
-            body = { 
-                "PropertyID": ips["platformData"]["foreign_community_id"],
-                "AccountID": ips["platformData"]["foreign_customer_id"],
-                "IntegrationPartnerID": "20422",
-                "ApiKey": "01mu8cUPjJUeTZtaPwyFGAhAtou70859"
-            }
-        else:
-            #Depending on the application hitting this endpoint, we may need to send different credentials, so look those up.
-            credentials, status = AccessUtils.externalCredentials(self.wsgi_environ, self.logger, "ResMan")
-            if status != "good":
-                errors.append({ "status": "error", "message": status })
-                response = { "data": { "provenance": ["resman"] }, "errors": errors }
-                return response, 500
+        # Depending on the application hitting this endpoint, we may need to send different credentials, so look those up.
+        credentials, status = AccessUtils.externalCredentials(wsgi_input, "ResMan")
+        if status != "good":
+            errors.append({ "status": "error", "message": status })
+            response = {"errors": errors }
+            return response, 500
 
-            body = { 
-                "IntegrationPartnerID": credentials["body"]["IntegrationPartnerID"],
-                "ApiKey": credentials["body"]["ApiKey"],
-                "PropertyID": ips["platformData"]["foreign_community_id"],
-                "AccountID": ips["platformData"]["foreign_customer_id"]
-            }
-          
-        base_url = 'https://api.myresman.com'
-        interface = 'MITS'
-        method = 'GetMarketing4_0'
-        url = f'{base_url}/{interface}/{method}'
-        _body = urlencode(body, {"Content-type": "application/x-www-form-urlencoded"})
-    
-        # Prepare the headers
-        headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Accept': 'application/json',
-            'Content-Length': str(len(_body))
+        # These get replaced into the url template.
+        _params = { "interface": "MITS",
+                    "method": "GetMarketing4_0",          
         }
-    
-        # Send the HTTP POST request
-        resmanChannelResponse = requests.post(url, data=_body, headers=headers)
-        # json_xml = json.loads(Converter(resmanChannelResponse.text).xml_to_json())
-        # return [json_xml], 200    
+        # Actual payload.
+        body = { "AccountID": credentials["body"]["AccountID"],
+                 "IntegrationPartnerID": credentials["body"]["IntegrationPartnerID"],
+                 "ApiKey": credentials["body"]["ApiKey"],
+                 "PropertyID": ips["platformData"]["foreign_community_id"]
+        }
+        _body = urlencode(body, {"Content-type": "application/x-www-form-urlencoded"})
+
+        # Headers. Probably doesn't need Accept, but blows up without Content-Length for sure.
+        headers = {'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json', 'Content-Length': str(len(str(_body)))}
+
+        resmanChannel = self.outgoing.plain_http['ResMan (External)']
+        resmanChannelResponse = resmanChannel.conn.post(self.cid, _body, _params, headers=headers)
 
         xml = etree.fromstring(resmanChannelResponse.text)
+
         if resmanChannelResponse.status_code != 200:
+            self.logger.info(resmanChannelResponse.status_code)
             errors.append({ "status_code": resmanChannelResponse.status_code, 
                             "status": xml.findall('Status')[0].text, 
                             "message": xml.findall('ErrorDescription')[0].text })
             response = { "data": { "provenance": ["resman"] }, "errors": errors }
             code = 502
-        elif xml.findall("ErrorDescription"):
-            code = 502
-            errors.append({ "status": "error", "message": xml.findall("./ErrorDescription")[0].text })
-            response = { "data": { "provenance": ["resman"], }, "errors": errors }
         else:
-            property, models, units = self.translateResmanXML(xml, "MITS/GetMarketing4_0", ips, event)
+            property, models, units = self.translateResmanXML(xml, "Leasing/GetCurrentResidents", ips, event)
             response = { "data": { "provenance": ["resman"], "property": property, "models": models, "units": units }, "errors": errors }
-   
-        return property, models, units, code
+
+        return errors, response
 
    
     def translateResmanXML(self, xml, method, ips, event):

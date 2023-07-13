@@ -6,6 +6,7 @@ from Config.Config import config
 def lambda_handler(event, context):
     query_params = event['queryStringParameters']
     is_valid, input_errors = SchemaRequestGet(query_params).is_valid()
+
     if is_valid:
         try:
             place.api_key = config['ApiKey']
