@@ -86,6 +86,7 @@ resman_resource_v1 = api_v1.add_resource("resman")
 general_resource_v1 = api_v1.add_resource("general")
 transunion_resource_v1 = api_v1.add_resource("transunion")
 tour_resource_v1 = api_v1.add_resource("tour")
+engrain_resource_v1 = api_v1.add_resource("engrain")
 
 # --------------------------------------------------------------------
 # Suported third party services v2
@@ -94,6 +95,7 @@ resman_resource_v2 = api_v2.add_resource("resman")
 general_resource_v2 = api_v2.add_resource("general")
 transunion_resource_v2 = api_v2.add_resource("transunion")
 tour_resource_v2 = api_v2.add_resource("tour")
+engrain_resource_v2 = api_v2.add_resource("engrain")
 
 # --------------------------------------------------------------------
 # Load all layers to share between lambda's functions
@@ -221,6 +223,7 @@ EngrainStack(
     f"{stage.value}-{server_name}-engrainStack",
     environment=environment,
     description="Stack for Engrain Job",
+    api=engrain_resource_v1,
     layers=[
         mysql_layer,
         pip_packages_layer,
