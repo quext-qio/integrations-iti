@@ -43,10 +43,11 @@ print(f"Stage seleted: {stage.value}")
 # --------------------------------------------------------------------
 # Tags for all resources
 server_name = "aws-integration-engine"
+service_name = "integrationApi"
 cdk.Tags.of(app).add(key="Project", value='quext', priority=300)
 cdk.Tags.of(app).add(key="Team", value='integration', priority=300)
 cdk.Tags.of(app).add(key="Environment", value=stage.value, priority=300)
-cdk.Tags.of(app).add(key="Service", value=server_name, priority=300)
+cdk.Tags.of(app).add(key="Service", value=service_name, priority=300)
 
 # --------------------------------------------------------------------
 # Role for quext-shared-services
