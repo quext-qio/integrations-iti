@@ -1,6 +1,7 @@
 from aws_cdk import (
     Stack,
     aws_apigateway as apigateway_,
+    aws_certificatemanager as acm_,
 )
 from constructs import Construct
 from src.utils.enums.stage_name import StageName
@@ -12,6 +13,15 @@ class APIStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, stage_name: StageName, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
+        # --------------------------------------------------------------------
+        # Create a certificate from ACM
+        domain_name = "api.aws-integration-engine.com"
+        certificate = acm_.Certificate(
+            self, f"{stage_name.name}-Integrations_Certificate",
+            domain_name=domain_name,
+            validation=acm_.CertificateValidation.from_dns(),
+        )
+
 
         # --------------------------------------------------------------------
         # Create a Rest API instance
@@ -26,6 +36,10 @@ class APIStack(Stack):
             ),
             endpoint_configuration=apigateway_.EndpointConfiguration(
                 types=[apigateway_.EndpointType.REGIONAL]
+            ),
+            domain_name=apigateway_.DomainNameOptions(
+                certificate=certificate,
+                domain_name=domain_name,
             ),
         )
         self.api = base_api.root.add_resource("api")
