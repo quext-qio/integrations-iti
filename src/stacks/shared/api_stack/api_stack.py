@@ -30,10 +30,6 @@ class APIStack(Stack):
             endpoint_configuration=apigateway_.EndpointConfiguration(
                 types=[apigateway_.EndpointType.REGIONAL]
             ),
-            domain_name=apigateway_.DomainNameOptions(
-                certificate=certificate,
-                domain_name=domain_name,
-            ),
         )
 
         # --------------------------------------------------------------------
@@ -49,14 +45,18 @@ class APIStack(Stack):
         # Get ARN of certificate
         certificate_arn = response['CertificateArn']
 
+        domain_name_options = apigateway_.DomainNameOptions(
+            certificate=acm_.Certificate.from_certificate_arn(
+                self, f"{stage_name.name}-AwsIntegrationEngine-CustomDomainCertificate",
+                certificate_arn
+            ),
+            domain_name=domain_name
+        )
+
         # Create the custom domain name
         domain_name = base_api.add_domain_name(
             f"{stage_name.name}-AwsIntegrationEngine-CustomDomainName",
-            domain_name=domain_name,
-            certificate=acm.Certificate.from_certificate_arn(
-                self, f"{stage_name.name}-AwsIntegrationEngine-CustomDomainCertificate", 
-                certificate_arn
-            ),
+            domain_name_options=domain_name_options,
         )
 
         # Add the domain name as an output
