@@ -130,7 +130,7 @@ pipeline {
                     steps {
                         script {
                             docker.image("${ecr_repository_uri}:${imageTag}").inside() {
-                                if (params."CDK destroy" != 'true') {
+                                if (params."CDK destroy" != true) {
                                     jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/quext-${DEPLOY_ENVIRONMENT}-integrationApi-assume-role"
                                     def AWS_KEYS = sh(returnStdout: true, script: """
                                         aws sts assume-role --role-arn $jenkinsRole \
