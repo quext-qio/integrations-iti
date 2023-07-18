@@ -38,7 +38,7 @@ pipeline {
         )
         booleanParam(
           name: 'CDK destroy',
-          defaultValue: true,
+          defaultValue: false,
           description: 'CDK destroy command before deployment process',
         )           
         booleanParam(
