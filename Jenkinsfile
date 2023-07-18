@@ -104,7 +104,7 @@ pipeline {
                         env.AWS_SESSION_TOKEN=AWS_KEYS[2]
                         sh "ROLE_ARN=arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters"
                         sh "export STAGE=${DEPLOY_ENVIRONMENT}"
-                        sh "cdk destroy dev-aws-integration-engine-apiStack --force --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
+                        sh "cdk destroy ${DEPLOY_ENVIRONMENT}-aws-integration-engine-apiStack --force --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
                         sh "cdk destroy --all --force --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
                     }
                 }
