@@ -67,6 +67,7 @@ pipeline {
                     env.ACCOUNT_ID = accounts.get(DEPLOY_ENVIRONMENT)
                     env.REGION = defaultRegion
                     env.imageTag = "latest"
+                    sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 273056594042.dkr.ecr.us-east-1.amazonaws.com"
                 }
             }
         }
@@ -90,7 +91,6 @@ pipeline {
             }
             steps {
                 script {
-                    sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 273056594042.dkr.ecr.us-east-1.amazonaws.com"
                     docker.image("${ecr_repository_uri}:${imageTag}").inside() {
                         jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/quext-${DEPLOY_ENVIRONMENT}-integrationApi-assume-role"
                         def AWS_KEYS = sh(returnStdout: true, script: """
@@ -104,7 +104,7 @@ pipeline {
                         env.AWS_SESSION_TOKEN=AWS_KEYS[2]
                         sh "ROLE_ARN=arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters"
                         sh "export STAGE=${DEPLOY_ENVIRONMENT}"
-                        sh "cdk destroy --all --require-approval never --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
+                        sh "cdk destroy --all --force --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
                     }
                 }
             }  
@@ -129,7 +129,6 @@ pipeline {
                 stage('deploy'){
                     steps {
                         script {
-                            sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 273056594042.dkr.ecr.us-east-1.amazonaws.com"
                             docker.image("${ecr_repository_uri}:${imageTag}").inside() {
                                 jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/quext-${DEPLOY_ENVIRONMENT}-integrationApi-assume-role"
                                 def AWS_KEYS = sh(returnStdout: true, script: """
