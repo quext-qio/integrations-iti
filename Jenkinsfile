@@ -37,6 +37,11 @@ pipeline {
           description: 'Environment to deploy',
         )
         booleanParam(
+          name: 'CDK destroy',
+          defaultValue: false,
+          description: 'CDK destroy command before deployment process',
+        )           
+        booleanParam(
           name: 'Rebuild image',
           defaultValue: false,
           description: 'Rebuild the base docker image to install the latest requirements and dependencies',
@@ -79,6 +84,15 @@ pipeline {
                 }
             }
         }
+        stage('CDK destroy') {
+            when {
+                expression { params."CDK destroy" }
+            }
+            steps {
+                script { 
+                    sh "cdk destroy --all --require-approval never --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
+                }
+            }      
         stage('CDK deploy') {
             when {
                 expression { 
