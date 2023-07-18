@@ -46,7 +46,7 @@ class APIStack(Stack):
         certificate_arn = response['CertificateArn']
 
         domain_name_options = apigateway_.DomainNameOptions(
-            certificate=acm_.Certificate.from_certificate_arn(
+            certificate=acm.Certificate.from_certificate_arn(
                 self, f"{stage_name.name}-AwsIntegrationEngine-CustomDomainCertificate",
                 certificate_arn
             ),
