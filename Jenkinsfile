@@ -92,7 +92,8 @@ pipeline {
                 script { 
                     sh "cdk destroy --all --require-approval never --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
                 }
-            }      
+            }  
+        }    
         stage('CDK deploy') {
             when {
                 expression { 
