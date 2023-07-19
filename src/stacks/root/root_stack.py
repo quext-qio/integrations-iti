@@ -43,7 +43,7 @@ class RootStack(Stack):
         # Load all layers to share between lambda's functions
         layer_stack =  LayersStack(
             main_app, 
-            f"{stage.value}-{server_name}-layersStack",
+            f"{stage.value}-{server_name}-layerStack",
             description="Stack load all layers to share between lambda's functions", 
         )
         place_api_layer = layer_stack.get_place_api_layer
