@@ -10,17 +10,22 @@ class APIStack(Stack):
     @property
     def get_api(self):
         return self.api
+    
+    @property
+    def get_resources(self):
+        return self.resources
+    
 
     def __init__(self, scope: Construct, construct_id: str, stage_name: StageName, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         # --------------------------------------------------------------------
         # Create a certificate from ACM
-        domain_name = "api.aws-integration-engine.com"
-        certificate = acm_.Certificate(
-            self, f"{stage_name.name}-Integrations_Certificate",
-            domain_name=domain_name,
-            validation=acm_.CertificateValidation.from_dns(),
-        )
+        # domain_name = "api.aws-integration-engine.com"
+        # certificate = acm_.Certificate(
+        #     self, f"{stage_name.name}-Integrations_Certificate",
+        #     domain_name=domain_name,
+        #     validation=acm_.CertificateValidation.from_dns(),
+        # )
 
 
         # --------------------------------------------------------------------
@@ -37,10 +42,59 @@ class APIStack(Stack):
             endpoint_configuration=apigateway_.EndpointConfiguration(
                 types=[apigateway_.EndpointType.REGIONAL]
             ),
-            domain_name=apigateway_.DomainNameOptions(
-                certificate=certificate,
-                domain_name=domain_name,
-            ),
+            # domain_name=apigateway_.DomainNameOptions(
+            #     certificate=certificate,
+            #     domain_name=domain_name,
+            # ),
         )
-        self.api = base_api.root.add_resource("api")
+
+        # Standard root resource
+        api_resource = base_api.root.add_resource("api")
+        self.api = api_resource
+
+        # Current supported versions
+        api_v1 = api_resource.add_resource("v1")
+        api_v2 = api_resource.add_resource("v2")
+
+        # Suported third party services v1
+        placepay_resource_v1 = api_v1.add_resource("placepay")
+        resman_resource_v1 = api_v1.add_resource("resman")
+        transunion_resource_v1 = api_v1.add_resource("transunion")
+        general_resource_v1 = api_v1.add_resource("general")
+        engrain_resource_v1 = api_v1.add_resource("engrain")
+        tour_resource_v1 = api_v1.add_resource("tour")
+
+        # Create a dictionary of all the resources of v1
+        dict_v1 = {
+            "placepay": placepay_resource_v1,
+            "resman": resman_resource_v1,
+            "transunion": transunion_resource_v1,
+            "general": general_resource_v1,
+            "engrain": engrain_resource_v1,
+            "tour": tour_resource_v1,
+        }
+
+        # Suported third party services v2
+        placepay_resource_v2 = api_v2.add_resource("placepay")
+        resman_resource_v2 = api_v2.add_resource("resman")
+        transunion_resource_v2 = api_v2.add_resource("transunion")
+        general_resource_v2 = api_v2.add_resource("general")
+        engrain_resource_v2 = api_v2.add_resource("engrain")
+        tour_resource_v2 = api_v2.add_resource("tour")
+
+        # Create a dictionary of all the resources of v2
+        dict_v2 = {
+            "placepay": placepay_resource_v2,
+            "resman": resman_resource_v2,
+            "transunion": transunion_resource_v2,
+            "general": general_resource_v2,
+            "engrain": engrain_resource_v2,
+            "tour": tour_resource_v2,
+        }
+
+        # Create a dictionary of all the resources and versions
+        self.resources = {
+            "v1": dict_v1,
+            "v2": dict_v2,
+        }
     

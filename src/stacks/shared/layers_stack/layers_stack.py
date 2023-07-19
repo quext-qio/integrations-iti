@@ -36,14 +36,18 @@ class LayersStack(Stack):
     def get_crypto_layer(self):
         return self.crypto_layer
     
-    def __init__(self, scope: Construct, construct_id: str, should_create_dynamic_packages: bool, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         
         # --------------------------------------------------------------------
         # Create a layer called [shared_layer] in complilation time
         self.create_shared_layer()
-        
-        if should_create_dynamic_packages:
+
+        # Setting the environment variable PACKAGES to True will 
+        # re-create the package for [pip_packages_layer]
+        should_create_dynamic_packages = os.getenv('PACKAGES', False)
+
+        if str(should_create_dynamic_packages) == "True":
             # Create a layer with all the pip packages defined in [requirements-all-lambdas.txt]
             self.create_pip_packages_as_layer_zip()
 

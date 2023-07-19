@@ -1,5 +1,5 @@
 from aws_cdk import (
-    Stack,
+    NestedStack,
     Duration,
     aws_lambda as lambda_,
     aws_apigateway as apigateway_
@@ -8,7 +8,7 @@ from aws_cdk import (
 from constructs import Construct
 
 
-class TransUnionStack(Stack):
+class TransUnionStack(NestedStack):
 
     def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers: list, environment: dict, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
