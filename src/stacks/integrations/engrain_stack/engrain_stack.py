@@ -1,5 +1,5 @@
 from aws_cdk import (
-    Stack,
+    NestedStack,
     aws_lambda as lambda_,
     aws_events as events_,
     aws_events_targets as targets_,
@@ -9,7 +9,7 @@ from aws_cdk import (
 from constructs import Construct
 import boto3
 
-class EngrainStack(Stack):
+class EngrainStack(NestedStack):
     def __init__(self, scope: Construct, construct_id: str, environment: dict[str, str], api: apigateway_.RestApi, layers:list, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 

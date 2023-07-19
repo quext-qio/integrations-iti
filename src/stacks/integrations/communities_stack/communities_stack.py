@@ -1,12 +1,12 @@
 from aws_cdk import (
-    Stack,
+    NestedStack,
     Duration,
     aws_lambda as lambda_,
     aws_apigateway as apigateway_,
 )
 from constructs import Construct
 
-class CommunitiesStack(Stack):
+class CommunitiesStack(NestedStack):
 
     def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)

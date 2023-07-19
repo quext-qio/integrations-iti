@@ -1,8 +1,6 @@
-from aws_cdk import (
-    Stack
-)
-import boto3
 import os
+import boto3
+from aws_cdk import Stack
 from constructs import Construct
 from src.utils.enums.stage_name import StageName
 
@@ -11,7 +9,7 @@ class EnvStack(Stack):
     def get_env(self):
         return self.env
 
-    def __init__(self, scope: Construct, construct_id: str, stage_name: StageName, role_arn: str, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, stage_name: StageName, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # --------------------------------------------------------------------
@@ -39,6 +37,8 @@ class EnvStack(Stack):
         
         # Create a client to interact with the STS (Security Token Service)
         sts_client = session.client("sts")
+
+        role_arn = os.getenv('ROLE_ARN', 'arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters')
         
         # Assume the IAM role
         response = sts_client.assume_role(
