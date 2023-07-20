@@ -21,7 +21,7 @@ from src.stacks.integrations.conservice_stack.conservice_stack import Conservice
 # [RootStack] is the main stack for the project
 # This stack is responsible for load all stacks and share resources between them
 class RootStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, stage: StageName, main_app: App, server_name:str, **kwargs):
+    def __init__(self, scope: Construct, construct_id: str, stage: StageName, server_name:str, **kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
         # --------------------------------------------------------------------
@@ -29,7 +29,7 @@ class RootStack(Stack):
         # --------------------------------------------------------------------
         # Environment variables for share with all lambda's functions
         env_stack = EnvStack(
-            main_app, 
+            self, 
             f"{stage.value}-{server_name}-envStack", 
             stage_name=stage,
             description="Stack load environment variables for all lambda's functions",
@@ -42,7 +42,7 @@ class RootStack(Stack):
         # --------------------------------------------------------------------
         # Load all layers to share between lambda's functions
         layer_stack =  LayersStack(
-            main_app, 
+            self, 
             f"{stage.value}-{server_name}-layerStack",
             description="Stack load all layers to share between lambda's functions", 
         )
@@ -60,9 +60,9 @@ class RootStack(Stack):
         # --------------------------------------------------------------------
         # API Gateway for all project
         api_stack = APIStack(
-            main_app, 
+            self, 
             f"{stage.value}-{server_name}-apiStack", 
-            stage_name=stage,
+            stage=stage,
             description="Stack load API Gateway for all lambda's functions",
         )
         resources = api_stack.get_resources
@@ -85,18 +85,11 @@ class RootStack(Stack):
         tour_resource_v2 = api_v2["tour"]
 
 
+
         # --------------------------------------------------------------------
-        # [NestedStack]
+        # INTEGRATIONS
         # --------------------------------------------------------------------
-        # The purpose of using a NestedStack is to modularize and encapsulate 
-        # a specific set of resources within a larger CloudFormation stack. 
-        # It promotes modularity, reusability, and scalability by breaking down 
-        # complex stacks into smaller components. NestedStacks simplify resource 
-        # management, enable independent updates and deletion, and provide 
-        # clearer visualization of stack structure and dependencies.
-        # --------------------------------------------------------------------
-        
-        
+
         # --------------------------------------------------------------------
         # Placepay endpoints
         # --------------------------------------------------------------------
@@ -112,6 +105,7 @@ class RootStack(Stack):
                 pip_packages_layer,
             ],
         )
+        
         
         # --------------------------------------------------------------------
         # Guestcards endpoints

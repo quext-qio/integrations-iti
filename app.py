@@ -48,7 +48,6 @@ root_stack = RootStack(
     app, 
     f"{stage.value}-{server_name}-RootStack",
     stage=stage,
-    main_app=app,
     server_name=server_name,
 )
 
