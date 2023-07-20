@@ -1,7 +1,7 @@
-import json
 import place
-from Schemas.SchemaRequestGet import SchemaRequestGet
-from Config.Config import config
+import json
+from schemas.schema_request_get import SchemaRequestGet
+from config.config import config
 
 def lambda_handler(event, context):
     query_params = event['queryStringParameters']

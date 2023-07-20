@@ -46,8 +46,6 @@ class PlacepayStack(NestedStack):
         )
 
         # --------------------------------------------------------------------
-        # Add base resource to API Gateway
-        
         # Resource to create new account (POST)
         post_endpoint = api.add_resource(
             "new-account",

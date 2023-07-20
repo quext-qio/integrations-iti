@@ -1,6 +1,6 @@
 from cerberus import Validator
-from Utils.Abstract.IValidator import IValidator
-from Utils.CustomErrorHandler import CustomErrorHandler
+from utils.abstract.i_validator import IValidator
+from utils.custom_error_handler import CustomErrorHandler
 
 class ValidationConstants:
     EMAIL = '(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'

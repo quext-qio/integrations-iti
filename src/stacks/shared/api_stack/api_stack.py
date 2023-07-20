@@ -1,10 +1,27 @@
 from aws_cdk import (
     NestedStack,
     aws_apigateway as apigateway_,
-    aws_certificatemanager as acm_,
+    aws_lambda as lambda_,
+    aws_events as events_,
+    aws_events_targets as targets_,
 )
 from constructs import Construct
 from src.utils.enums.stage_name import StageName
+
+# Lambda function to store the API URL after deployment
+def print_api_url_lambda(scope: Construct, api_url: str, stage: StageName):
+    return lambda_.Function(
+        scope,
+        f"{stage.name}-ApiUrlFunction",
+        runtime=lambda_.Runtime.PYTHON_3_8,
+        handler="index.handler",
+        code=lambda_.Code.from_inline(
+            "import os\n"
+            "def handler(event, context):\n"
+            f"    print('API URL for Aws Integration Engine in stage ({stage.name}):', '{api_url}')"
+        ),
+    )
+
 
 class APIStack(NestedStack):
     @property
@@ -14,43 +31,32 @@ class APIStack(NestedStack):
     @property
     def get_resources(self):
         return self.resources
-    
+
 
     def __init__(self, scope: Construct, construct_id: str, stage: StageName, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-        # --------------------------------------------------------------------
-        # Create a certificate from ACM
-        # domain_name = "api.aws-integration-engine.com"
-        # certificate = acm_.Certificate(
-        #     self, f"{stage_name.name}-Integrations_Certificate",
-        #     domain_name=domain_name,
-        #     validation=acm_.CertificateValidation.from_dns(),
-        # )
-
 
         # --------------------------------------------------------------------
         # Create a Rest API instance
-        base_api = apigateway_.RestApi(
+        self.api = apigateway_.RestApi(
             self, "Integrations_Api", 
             rest_api_name="Integrations_Api", 
             description="Base API Gateway for Zato to AWS Migration",
+            deploy=True,
             deploy_options=apigateway_.StageOptions(
                 stage_name=stage.value, 
                 logging_level=apigateway_.MethodLoggingLevel.INFO,
                 data_trace_enabled=True,
+                metrics_enabled=True,
+                tracing_enabled=True,
             ),
             endpoint_configuration=apigateway_.EndpointConfiguration(
                 types=[apigateway_.EndpointType.REGIONAL]
             ),
-            # domain_name=apigateway_.DomainNameOptions(
-            #     certificate=certificate,
-            #     domain_name=domain_name,
-            # ),
         )
 
         # Standard root resource
-        api_resource = base_api.root.add_resource("api")
-        self.api = api_resource
+        api_resource = self.api.root.add_resource("api")
 
         # Current supported versions
         api_v1 = api_resource.add_resource("v1")
@@ -99,6 +105,17 @@ class APIStack(NestedStack):
         }
 
         # --------------------------------------------------------------------
+        # TODO: Remove logic when custom domain is ready
+        # Create a Lambda function for Store API URL after deployment
+        api_url = self.api.url
+        print_url_lambda = print_api_url_lambda(self, api_url, stage)
+        rule = events_.Rule(self, f"{stage.name}-PrintApiUrlRule", schedule=events_.Schedule.expression('rate(365 days)'))
+        rule.add_target(targets_.LambdaFunction(print_url_lambda, event=events_.RuleTargetInput.from_object({})))
+   
+       
+
+        # --------------------------------------------------------------------
+        # Test 1: Create a custom domain name for the API
         # stage_name = stage.value.lower()
         # custom_domain_name = f"{stage_name}-api-integration-engine"
         # domain_name = f"{custom_domain_name}.{self.region}.amazonaws.com"
@@ -119,7 +136,7 @@ class APIStack(NestedStack):
 
 
         # --------------------------------------------------------------------
-        # Create a custom domain name for the API
+        # Test 2: Create a custom domain name for the API
         # Use the default ACM certificate for the domain name
         # certificate = acm_.Certificate.from_certificate_arn(
         #     self, "DefaultCertificate", 
