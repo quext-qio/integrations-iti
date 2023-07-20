@@ -62,7 +62,7 @@ class RootStack(Stack):
         api_stack = APIStack(
             main_app, 
             f"{stage.value}-{server_name}-apiStack", 
-            stage_name=stage,
+            stage=stage,
             description="Stack load API Gateway for all lambda's functions",
         )
         resources = api_stack.get_resources

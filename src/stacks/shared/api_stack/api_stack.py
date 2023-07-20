@@ -16,7 +16,7 @@ class APIStack(Stack):
         return self.resources
     
 
-    def __init__(self, scope: Construct, construct_id: str, stage_name: StageName, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, stage: StageName, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         # --------------------------------------------------------------------
         # Create a certificate from ACM
@@ -35,7 +35,7 @@ class APIStack(Stack):
             rest_api_name="Integrations_Api", 
             description="Base API Gateway for Zato to AWS Migration",
             deploy_options=apigateway_.StageOptions(
-                stage_name=stage_name.value, 
+                stage_name=stage.value, 
                 logging_level=apigateway_.MethodLoggingLevel.INFO,
                 data_trace_enabled=True,
             ),
@@ -97,4 +97,54 @@ class APIStack(Stack):
             "v1": dict_v1,
             "v2": dict_v2,
         }
+
+
+        # --------------------------------------------------------------------
+        # Create a custom domain name for the API
+        # Use the default ACM certificate for the domain name
+        # certificate = acm_.Certificate.from_certificate_arn(
+        #     self, "DefaultCertificate", 
+        #     certificate_arn=f"arn:aws:acm:{self.region}:{self.account}:certificate/default"
+        # )
+
+        stage_name = stage.value.lower()
+        custom_domain_name = f"{stage_name}-api-integration-engine"
+        domain_name = f"{custom_domain_name}.{self.region}.amazonaws.com"
+
+        # Create a certificate from ACM
+        certificate = acm_.Certificate(
+            self, f"{stage.name}-Integrations_Certificate",
+            domain_name=domain_name,
+            validation=acm_.CertificateValidation.from_dns(),
+        )
+
+        base_api.add_domain_name(
+            f"{stage_name}-MyCustomDomainName",
+            domain_name=domain_name,
+            certificate=certificate,
+            endpoint_type=apigateway_.EndpointType.REGIONAL,
+        )
+
+
+
+        # Create the subdomain mapping for the API
+        # subdomain = f"integrations-api-custom-{stage.value.lower()}"
+        # domain = "execute-api"
+        # suffix = f"{self.region}.amazonaws.com"
+        # domain_name = f"{subdomain}.{domain}.{suffix}"
+        # apigateway_.DomainName(
+        #     self,
+        #     f"{stage.value}-IntegrationsDomainName",
+        #     domain_name=domain_name,
+        #     certificate=default_certificate,
+        #     mapping=base_api
+        # )
+
+        # base_api.add_domain_name(
+        #     f"{stage_name.value.lower()}-MyCustomDomainName",
+        #     domain_name=custom_domain.domain_name,
+        #     certificate_name=custom_domain.certificate.certificate_name
+        # )
+    
+
     
