@@ -1,7 +1,4 @@
-from aws_cdk import (
-    App,
-    Stack,
-)
+from aws_cdk import Stack
 from constructs import Construct
 from src.utils.enums.stage_name import StageName
 from src.stacks.shared.env_stack.env_stack import EnvStack
@@ -18,16 +15,17 @@ from src.stacks.integrations.engrain_stack.engrain_stack import EngrainStack
 from src.stacks.integrations.tour_availability_stack.tour_availability_stack import TourAvailabilityStack
 from src.stacks.integrations.conservice_stack.conservice_stack import ConserviceStack
 
-# [RootStack] is the main stack for the project
-# This stack is responsible for load all stacks and share resources between them
+# [RootStack] is the main [Stack] for the project
+# It is responsible for load all [NestedStack] and share resources between them
 class RootStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, stage: StageName, server_name:str, **kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
         # --------------------------------------------------------------------
-        # 1) Env Stack
+        # [Shared] Env Stack
         # --------------------------------------------------------------------
-        # Environment variables for share with all lambda's functions
+        # This nestedstack is responsible for load all environment variables 
+        # It assume a role to read the secrets from AWS Secrets Manager's shared account
         env_stack = EnvStack(
             self, 
             f"{stage.value}-{server_name}-envStack", 
@@ -38,9 +36,17 @@ class RootStack(Stack):
         
 
         # --------------------------------------------------------------------
-        # 2) Layers Stack
+        # [Shared] Layers Stack
         # --------------------------------------------------------------------
-        # Load all layers to share between lambda's functions
+        # It nestedstack is responsible for load all layers of project
+        # All layers used in lambda's functions should be added here
+        #
+        # The [shared_layer] is a layer created from all code in [src/utils/shared] folder it is automatically updated every time the project is deployed
+        #
+        # The [pip_packages_layer] is a layer created from all pip packages in [src/stacks/shared/layers_stack/requirements-all-lambdas.txt] file, 
+        # we should add only pip packages used in lambda's functions, for better performance we should keep the environment variable 
+        # [PACKAGES] = False by default, and only set it to [PACKAGES] = True when we need to update the pip_packages_layer (development mode), 
+        # and also commit the new file [src/utils/layers/pip_packages_layer.zip] to the repository
         layer_stack =  LayersStack(
             self, 
             f"{stage.value}-{server_name}-layerStack",
@@ -56,9 +62,11 @@ class RootStack(Stack):
 
 
         # --------------------------------------------------------------------
-        # 3) API Stack
+        # [Shared] API Stack
         # --------------------------------------------------------------------
         # API Gateway for all project
+        # It is responsible for load all endpoints of project
+        # the value of [get_resources] will return a dictionary with all resources of API Gateway
         api_stack = APIStack(
             self, 
             f"{stage.value}-{server_name}-apiStack", 
@@ -66,7 +74,7 @@ class RootStack(Stack):
             description="Stack load API Gateway for all lambda's functions",
         )
         resources = api_stack.get_resources
-        #api = api_stack.get_api
+
         
         # Current supported versions of our API
         api_v1 = resources["v1"]
@@ -85,9 +93,11 @@ class RootStack(Stack):
         tour_resource_v2 = api_v2["tour"]
 
 
-
         # --------------------------------------------------------------------
-        # INTEGRATIONS
+        # [ENDPOINTS]: It is a group of [NestedStacks] responsibles 
+        # for load all endpoints of project, each [NestedStack] will determine 
+        # the resources necessary for each endpoint to reduce the size of 
+        # resorces loaded in each lambda's function
         # --------------------------------------------------------------------
 
         # --------------------------------------------------------------------
@@ -247,3 +257,6 @@ class RootStack(Stack):
                 shared_layer,
             ]
         )
+
+
+

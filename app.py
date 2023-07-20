@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import os
-import boto3
 import aws_cdk as cdk
 from src.stacks.integrations.guestcards_stack.guestcards_stack import GuestcardsStack
 from src.stacks.integrations.units_stack.units_stack import UnitsStack

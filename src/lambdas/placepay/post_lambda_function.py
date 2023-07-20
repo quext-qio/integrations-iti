@@ -1,7 +1,7 @@
-import json
 import place
-from Schemas.SchemaRequestPost import SchemaRequestPost
-from Config.Config import config
+import json
+from schemas.schema_request_post import SchemaRequestPost
+from config.config import config
 
 def lambda_handler(event, context):
     input = json.loads(event['body'])
