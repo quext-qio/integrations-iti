@@ -1,12 +1,12 @@
 from aws_cdk import (
-    Stack,
+    NestedStack,
     aws_apigateway as apigateway_,
     aws_certificatemanager as acm_,
 )
 from constructs import Construct
 from src.utils.enums.stage_name import StageName
 
-class APIStack(Stack):
+class APIStack(NestedStack):
     @property
     def get_api(self):
         return self.api
@@ -98,6 +98,25 @@ class APIStack(Stack):
             "v2": dict_v2,
         }
 
+        # --------------------------------------------------------------------
+        # stage_name = stage.value.lower()
+        # custom_domain_name = f"{stage_name}-api-integration-engine"
+        # domain_name = f"{custom_domain_name}.{self.region}.amazonaws.com"
+
+        # # Create a certificate from ACM
+        # certificate = acm_.Certificate(
+        #     self, f"{stage.name}-Integrations_Certificate",
+        #     domain_name=domain_name,
+        #     validation=acm_.CertificateValidation.from_dns(),
+        # )
+
+        # base_api.add_domain_name(
+        #     f"{stage_name}-MyCustomDomainName",
+        #     domain_name=domain_name,
+        #     certificate=certificate,
+        #     endpoint_type=apigateway_.EndpointType.REGIONAL,
+        # )
+
 
         # --------------------------------------------------------------------
         # Create a custom domain name for the API
@@ -106,26 +125,6 @@ class APIStack(Stack):
         #     self, "DefaultCertificate", 
         #     certificate_arn=f"arn:aws:acm:{self.region}:{self.account}:certificate/default"
         # )
-
-        stage_name = stage.value.lower()
-        custom_domain_name = f"{stage_name}-api-integration-engine"
-        domain_name = f"{custom_domain_name}.{self.region}.amazonaws.com"
-
-        # Create a certificate from ACM
-        certificate = acm_.Certificate(
-            self, f"{stage.name}-Integrations_Certificate",
-            domain_name=domain_name,
-            validation=acm_.CertificateValidation.from_dns(),
-        )
-
-        base_api.add_domain_name(
-            f"{stage_name}-MyCustomDomainName",
-            domain_name=domain_name,
-            certificate=certificate,
-            endpoint_type=apigateway_.EndpointType.REGIONAL,
-        )
-
-
 
         # Create the subdomain mapping for the API
         # subdomain = f"integrations-api-custom-{stage.value.lower()}"

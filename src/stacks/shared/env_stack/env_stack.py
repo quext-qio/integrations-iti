@@ -1,10 +1,10 @@
 import os
 import boto3
-from aws_cdk import Stack
+from aws_cdk import NestedStack
 from constructs import Construct
 from src.utils.enums.stage_name import StageName
 
-class EnvStack(Stack):
+class EnvStack(NestedStack):
     @property
     def get_env(self):
         return self.env

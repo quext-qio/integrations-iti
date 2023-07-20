@@ -3,11 +3,11 @@ import zipfile
 import os
 from constructs import Construct
 from aws_cdk import (
-    Stack,
+    NestedStack,
     aws_lambda as lambda_,
 )
 
-class LayersStack(Stack):
+class LayersStack(NestedStack):
     @property
     def get_place_api_layer(self):
         return self.place_api_layer
