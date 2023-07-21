@@ -14,7 +14,7 @@ class PlacepayStack(NestedStack):
         # -----------------------------------------------------------------------
         # Constants
         timeout=Duration.seconds(900)
-        allow_methods=['OPTIONS', 'POST']
+        allow_methods=['OPTIONS', 'POST', 'GET']
         
         # --------------------------------------------------------------------
         # Create lambda function instance for (# POST /placepay/new-account)
