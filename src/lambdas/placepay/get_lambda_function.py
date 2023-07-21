@@ -1,7 +1,7 @@
 import place
 import json
 from schemas.schema_request_get import SchemaRequestGet
-from config.config import placepay_config
+from global_config.config import placepay_config
 
 def lambda_handler(event, context):
     query_params = event['queryStringParameters']

@@ -1,7 +1,7 @@
 import place
 import json
 from schemas.schema_request_post import SchemaRequestPost
-from config.config import placepay_config
+from global_config.config import placepay_config
 
 def lambda_handler(event, context):
     input = json.loads(event['body'])
