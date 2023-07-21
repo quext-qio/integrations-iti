@@ -1,7 +1,7 @@
 import place
 import json
 from schemas.schema_request_get import SchemaRequestGet
-from config.config import config
+from config.config import placepay_config
 
 def lambda_handler(event, context):
     query_params = event['queryStringParameters']
@@ -9,7 +9,7 @@ def lambda_handler(event, context):
 
     if is_valid:
         try:
-            place.api_key = config['ApiKey']
+            place.api_key = placepay_config['ApiKey']
             access_token = place.AccessToken.create(
                 account_id = query_params["accountId"],
                 type='session_access'

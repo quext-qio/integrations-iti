@@ -1,14 +1,14 @@
 import place
 import json
 from schemas.schema_request_post import SchemaRequestPost
-from config.config import config
+from config.config import placepay_config
 
 def lambda_handler(event, context):
     input = json.loads(event['body'])
     is_valid, input_errors = SchemaRequestPost(input).is_valid()
     if is_valid:
         try:
-            place.api_key = f"{config['ApiKey']}"
+            place.api_key = f"{placepay_config['ApiKey']}"
             account = place.Account.create(
                 email = input["email"],
                 full_name = input["fullName"],
