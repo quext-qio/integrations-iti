@@ -1,0 +1,19 @@
+class FunnelConstants:
+    FOREIGN_COMMUNITY_ID = "communityid"
+    FUNNEL_OUTGOING_GET = '[Funnel] Availability Times'
+    FUNNEL_OUTGOING_POST = '[Funnel] Schedule Tour'
+    FUNNEL_OUTGOING_GC_ONLY = '[Funnel] Guest Card'
+    GCID = "guestCardId"
+    SUCCESS = "SUCCESS"
+    FAILURE = "FAILURE"
+    RESULT = "result"
+    INSERT = "INSERT"
+    STATUS = "NEW"
+    DH = "DH"
+    WS = "WS"
+    DATA = "data"
+    ID = "id"
+    DATA = "data"
+    APPOINTMENT = "appointment"
+    ERRORS = "errors"
+    CLIENT = "client"
