@@ -2,18 +2,18 @@ import requests, json, os
 
 class IPSController:
 
-    def get_platform_data(self, community_id, customer_id, purpose):
+    def get_platform_data(self, community_id:str, customer_id:str, purpose:str):
         try:
+            print(f"Start reading Parameter Store")
             parameter_store = json.loads(os.environ.get("parameter_store"))
+            print(f"End reading Parameter Store")
             ips_host = parameter_store['IPS_HOST']
             url = f'{ips_host}/api/read-configuration/{customer_id}/{community_id}/{purpose}'
-            payload = {}
+            print(f"IPS URL: {url}")
             headers = {
-            'Content-Type': 'application/json'
+                'Content-Type': 'application/json'
             }
-
-            response = requests.request("GET", url, headers=headers, data=payload)
-
+            response = requests.request("GET", url, headers=headers)
             return 200, response
         except Exception as e:
             print(f"Error IPS endpoint: {e}")

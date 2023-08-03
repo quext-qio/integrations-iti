@@ -1,3 +1,4 @@
+from abstract.service_interface import ServiceInterface
 from utils.service_enum import ServiceType
 from services.entrata_service import EntrataService
 from services.funnel_service import FunnelService
@@ -8,10 +9,10 @@ from services.realpage_ilm_service import RealPageILMService
 
 class ServiceFactory:
     @staticmethod
-    def get_service(service_type_name):
+    def get_service(service_type_name: str) -> ServiceInterface:
         # Validate service type using enum constructor
         try:
-            service_type = ServiceType(service_type_name.toLowerCase())
+            service_type = ServiceType(service_type_name.lower())
         except ValueError:
             raise Exception(f"Unsupported service type for GuestCards: {service_type_name}")
         
@@ -26,6 +27,5 @@ class ServiceFactory:
             return ResManService()
         elif service_type == ServiceType.YARDI:
             return YardiService()
-        elif service_type == ServiceType.REALPAGEILM:
+        elif service_type == ServiceType.REALPAGEILM or service_type == ServiceType.REALPAGEL2L:
             return RealPageILMService()
-        

@@ -33,7 +33,7 @@ class RootStack(Stack):
             description="Stack load environment variables for all lambda's functions",
         )
         environment=env_stack.get_env
-        
+
 
         # --------------------------------------------------------------------
         # [Shared] Layers Stack
@@ -123,8 +123,9 @@ class RootStack(Stack):
         GuestcardsStack(
             self, 
             f"{stage.value}-{server_name}-guestcardsStack", 
-            api=resman_resource_v1,
             description="Stack for guestcards endpoints",
+            api=general_resource_v2,
+            environment=environment,
             layers=[
                 pip_packages_layer,
                 shared_layer,

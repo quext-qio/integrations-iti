@@ -8,20 +8,16 @@ from constructs import Construct
 
 class GuestcardsStack(NestedStack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], **kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
         # Guestcards
-        environment={
-            "LOG_LEVEL": "INFO",
-            "PLACE_PAY_API_KEY": "test_private_key__-yK6oFDnaJFwIrhVcCfI5r",
-        }
         timeout=Duration.seconds(900)
         allow_methods=['OPTIONS', 'POST']
 
         # --------------------------------------------------------------------
-        # Create lambda function instance for (# POST /resman/postleadmanagement4_0)
+        # Create lambda function instance for (# POST /general/guestcards)
         lambda_function = lambda_.Function(
             self, 
             "Resman_Guestcards_Lambda_Function",
@@ -37,11 +33,9 @@ class GuestcardsStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Add base resource to API Gateway
-        #api = api.add_resource("resman")
-
         # Resource to save prospects (POST)
         post_endpoint = api.add_resource(
-            "postleadmanagement4_0",
+            "guestcards",
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
                 allow_origins=apigateway_.Cors.ALL_ORIGINS
