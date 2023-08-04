@@ -4,6 +4,7 @@ from aws_cdk import (
     aws_lambda as lambda_,
     aws_events as events_,
     aws_events_targets as targets_,
+    aws_certificatemanager as acm_,
 )
 from constructs import Construct
 from src.utils.enums.stage_name import StageName
@@ -116,23 +117,23 @@ class APIStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Test 1: Create a custom domain name for the API
-        # stage_name = stage.value.lower()
-        # custom_domain_name = f"{stage_name}-api-integration-engine"
-        # domain_name = f"{custom_domain_name}.{self.region}.amazonaws.com"
+        stage_name = stage.value.lower()
+        custom_domain_name = f"{stage_name}-api-integration-engine"
+        domain_name = f"{custom_domain_name}.{self.region}.amazonaws.com"
 
-        # # Create a certificate from ACM
-        # certificate = acm_.Certificate(
-        #     self, f"{stage.name}-Integrations_Certificate",
-        #     domain_name=domain_name,
-        #     validation=acm_.CertificateValidation.from_dns(),
-        # )
+        # Create a certificate from ACM
+        certificate = acm_.Certificate(
+            self, f"{stage.name}-Integrations_Certificate",
+            domain_name=domain_name,
+            validation=acm_.CertificateValidation.from_dns(),
+        )
 
-        # base_api.add_domain_name(
-        #     f"{stage_name}-MyCustomDomainName",
-        #     domain_name=domain_name,
-        #     certificate=certificate,
-        #     endpoint_type=apigateway_.EndpointType.REGIONAL,
-        # )
+        self.api.add_domain_name(
+            f"{stage_name}-MyCustomDomainName",
+            domain_name=domain_name,
+            certificate=certificate,
+            endpoint_type=apigateway_.EndpointType.REGIONAL,
+        )
 
 
         # --------------------------------------------------------------------
