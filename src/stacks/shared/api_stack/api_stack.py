@@ -115,53 +115,53 @@ class APIStack(NestedStack):
    
        
 
-        # --------------------------------------------------------------------
-        # Test 1: Create a custom domain name for the API
-        stage_name = stage.value.lower()
-        custom_domain_name = f"{stage_name}-api-integration-engine"
-        domain_name = f"{custom_domain_name}.{self.region}.amazonaws.com"
+        # # --------------------------------------------------------------------
+        # # Test 1: Create a custom domain name for the API
+        # stage_name = stage.value.lower()
+        # custom_domain_name = f"{stage_name}-api-integration-engine"
+        # domain_name = f"{custom_domain_name}.{self.region}.amazonaws.com"
 
-        # Create a certificate from ACM
-        certificate = acm_.Certificate(
-            self, f"{stage.name}-Integrations_Certificate",
-            domain_name=domain_name,
-            validation=acm_.CertificateValidation.from_dns(),
-        )
+        # # Create a certificate from ACM
+        # certificate = acm_.Certificate(
+        #     self, f"{stage.name}-Integrations_Certificate",
+        #     domain_name=domain_name,
+        #     validation=acm_.CertificateValidation.from_dns(),
+        # )
 
-        self.api.add_domain_name(
-            f"{stage_name}-MyCustomDomainName",
-            domain_name=domain_name,
-            certificate=certificate,
-            endpoint_type=apigateway_.EndpointType.REGIONAL,
-        )
+        # self.api.add_domain_name(
+        #     f"{stage_name}-MyCustomDomainName",
+        #     domain_name=domain_name,
+        #     certificate=certificate,
+        #     endpoint_type=apigateway_.EndpointType.REGIONAL,
+        # )
 
 
         # --------------------------------------------------------------------
         # Test 2: Create a custom domain name for the API
         # Use the default ACM certificate for the domain name
-        # certificate = acm_.Certificate.from_certificate_arn(
-        #     self, "DefaultCertificate", 
-        #     certificate_arn=f"arn:aws:acm:{self.region}:{self.account}:certificate/default"
-        # )
+        default_certificate = acm_.Certificate.from_certificate_arn(
+            self, "DefaultCertificate", 
+            certificate_arn=f"arn:aws:acm:{self.region}:{self.account}:certificate/default"
+        )
 
         # Create the subdomain mapping for the API
-        # subdomain = f"integrations-api-custom-{stage.value.lower()}"
-        # domain = "execute-api"
-        # suffix = f"{self.region}.amazonaws.com"
-        # domain_name = f"{subdomain}.{domain}.{suffix}"
-        # apigateway_.DomainName(
-        #     self,
-        #     f"{stage.value}-IntegrationsDomainName",
-        #     domain_name=domain_name,
-        #     certificate=default_certificate,
-        #     mapping=base_api
-        # )
+        subdomain = f"integrations-api-custom-{stage.value.lower()}"
+        domain = "execute-api"
+        suffix = f"{self.region}.amazonaws.com"
+        domain_name = f"{subdomain}.{domain}.{suffix}"
+        custom_domain = apigateway_.DomainName(
+            self,
+            f"{stage.value}-IntegrationsDomainName",
+            domain_name=domain_name,
+            certificate=default_certificate,
+            mapping=self.api,
+        )
 
-        # base_api.add_domain_name(
-        #     f"{stage_name.value.lower()}-MyCustomDomainName",
-        #     domain_name=custom_domain.domain_name,
-        #     certificate_name=custom_domain.certificate.certificate_name
-        # )
+        self.api.add_domain_name(
+            f"{stage.name}-MyCustomDomainName",
+            domain_name=custom_domain.domain_name,
+            certificate_name=custom_domain.certificate.certificate_name
+        )
     
 
     
