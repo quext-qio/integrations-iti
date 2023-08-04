@@ -133,35 +133,4 @@ class APIStack(NestedStack):
         #     domain_name=domain_name,
         #     certificate=certificate,
         #     endpoint_type=apigateway_.EndpointType.REGIONAL,
-        # )
-
-
-        # --------------------------------------------------------------------
-        # Test 2: Create a custom domain name for the API
-        # Use the default ACM certificate for the domain name
-        default_certificate = acm_.Certificate.from_certificate_arn(
-            self, "DefaultCertificate", 
-            certificate_arn=f"arn:aws:acm:{self.region}:{self.account}:certificate/default"
-        )
-
-        # Create the subdomain mapping for the API
-        subdomain = f"integrations-api-custom-{stage.value.lower()}"
-        domain = "execute-api"
-        suffix = f"{self.region}.amazonaws.com"
-        domain_name = f"{subdomain}.{domain}.{suffix}"
-        custom_domain = apigateway_.DomainName(
-            self,
-            f"{stage.value}-IntegrationsDomainName",
-            domain_name=domain_name,
-            certificate=default_certificate,
-            mapping=self.api,
-        )
-
-        self.api.add_domain_name(
-            f"{stage.name}-MyCustomDomainName",
-            domain_name=custom_domain.domain_name,
-            certificate_name=custom_domain.certificate.certificate_name
-        )
-    
-
-    
+        # )    
