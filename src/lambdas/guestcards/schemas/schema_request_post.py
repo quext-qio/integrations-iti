@@ -126,6 +126,11 @@ class SchemaRequestPost(IValidator):
                 'required': False,
                 'type': 'string',
                 'empty': False
+            },
+            "tourScheduleData": {
+                "type": "dict",
+                "required": False,
+                "empty": False,
             }
         }
         self.data = _data

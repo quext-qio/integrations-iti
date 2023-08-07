@@ -2,7 +2,7 @@ import json
 from abstract.service_interface import ServiceInterface
 
 class EntrataService(ServiceInterface):
-    def get_data(self, body):
+    def get_data(self, body: dict, ips_response: dict):
         return {
             'statusCode': "200",
             'body': json.dumps({

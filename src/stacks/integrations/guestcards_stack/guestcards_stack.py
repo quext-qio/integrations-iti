@@ -20,7 +20,7 @@ class GuestcardsStack(NestedStack):
         # Create lambda function instance for (# POST /general/guestcards)
         lambda_function = lambda_.Function(
             self, 
-            "Resman_Guestcards_Lambda_Function",
+            "Guestcards_Lambda_Function",
             description="Guestcards Lambda is responsible save prospects information", 
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
@@ -28,7 +28,7 @@ class GuestcardsStack(NestedStack):
             code=lambda_.Code.from_asset("./src/lambdas/guestcards"),
             handler="lambda_function.lambda_handler",
             layers=layers,
-            function_name="Resman_Guestcards_Lambda_Function",
+            function_name="Guestcards_Lambda_Function",
         )
 
         # --------------------------------------------------------------------
