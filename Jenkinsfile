@@ -52,6 +52,30 @@ pipeline {
         )           
     }
     stages {
+        stage('Extract Jira Issue Key') {
+            steps {
+                script {
+                    try {
+                        def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                        def matcher = (commitMessage =~ /^[A-Za-z]+-\d+/) // Updated regex pattern
+                        if (matcher) {
+                            env.JIRA_ISSUE_KEY = matcher[0]
+                        } else {
+                            env.JIRA_ISSUE_KEY = ''
+                            try {
+                                slackSend (channel: "#alerts", color: "danger", message: "No Jira issue key was found in the last commit of ${env.JOB_NAME} #${env.BUILD_NUMBER}. Please ensure commits reference Jira issues!")
+                            } catch (Exception e) {
+                                echo "Error sending Slack notification: ${e.getMessage()}"
+                                // Log the error and continue
+                            }
+                        }
+                    } catch (Exception e) {
+                        echo "Error extracting Jira issue key: ${e.getMessage()}"
+                        // Log the error and continue
+                    }
+                }
+            }
+        }
         stage('Initialization') {
             when {
                 beforeAgent true
@@ -157,10 +181,29 @@ pipeline {
             }
         }
     }
-    post{
+    post {
         always {
-            cleanWs()
+           cleanWs()
+        }
+        unstable {
+            script {
+                try {
+                    slackSend (channel: "#alerts", color: "warning", message: "Build unstable for ${env.JOB_NAME} #${env.BUILD_NUMBER}. Jira issue: ${env.JIRA_ISSUE_KEY}. Check <${env.BUILD_URL}|here>.")
+                } catch (Exception e) {
+                    echo "Error sending Slack notification: ${e.getMessage()}"
+                    // Log the error and continue
+                }
+            }
+        }
+        failure {
+            script {
+                try {
+                    slackSend (channel: "#alerts", color: "danger", message: "Build failed for ${env.JOB_NAME} #${env.BUILD_NUMBER}. Jira issue: ${env.JIRA_ISSUE_KEY}. Check <${env.BUILD_URL}|here>.")
+                } catch (Exception e) {
+                    echo "Error sending Slack notification: ${e.getMessage()}"
+                    // Log the error and continue
+                }
+            }
         }
     }
-
 }
