@@ -14,6 +14,7 @@ from src.stacks.integrations.residents_stack.residents_stack import ResidentsSta
 from src.stacks.integrations.engrain_stack.engrain_stack import EngrainStack
 from src.stacks.integrations.tour_availability_stack.tour_availability_stack import TourAvailabilityStack
 from src.stacks.integrations.conservice_stack.conservice_stack import ConserviceStack
+from src.stacks.integrations.salesforce_stack.salesforce_stack import SalesforceStack
 
 # [RootStack] is the main [Stack] for the project
 # It is responsible for load all [NestedStack] and share resources between them
@@ -33,7 +34,7 @@ class RootStack(Stack):
             description="Stack load environment variables for all lambda's functions",
         )
         environment=env_stack.get_env
-        
+
 
         # --------------------------------------------------------------------
         # [Shared] Layers Stack
@@ -59,6 +60,7 @@ class RootStack(Stack):
         shared_layer = layer_stack.get_shared_layer
         pip_packages_layer = layer_stack.get_pip_packages_layer
         crypto_layer = layer_stack.get_crypto_layer
+        salesforce_layer = layer_stack.get_salesforce_layer
 
 
         # --------------------------------------------------------------------
@@ -86,6 +88,7 @@ class RootStack(Stack):
         transunion_resource_v1 = api_v1["transunion"]
         general_resource_v1 = api_v1["general"]
         engrain_resource_v1 = api_v1["engrain"]
+        salesforce_resource_v1 = api_v1["salesforce"]
         
 
         # API Gateway [V2] resources necessary for NestedStacks
@@ -123,8 +126,9 @@ class RootStack(Stack):
         GuestcardsStack(
             self, 
             f"{stage.value}-{server_name}-guestcardsStack", 
-            api=resman_resource_v1,
             description="Stack for guestcards endpoints",
+            api=general_resource_v2,
+            environment=environment,
             layers=[
                 pip_packages_layer,
                 shared_layer,
@@ -258,5 +262,19 @@ class RootStack(Stack):
             ]
         )
 
-
+        # --------------------------------------------------------------------
+        # Salesforce endpoints
+        # --------------------------------------------------------------------
+        SalesforceStack(
+            self,
+            f"{stage.value}-{server_name}-salesforceStack",
+            description="Stack for salesforce endpoints",
+            api=salesforce_resource_v1,
+            environment=environment,
+            layers=[
+                salesforce_layer,
+                shared_layer,
+                pip_packages_layer,
+            ],
+        )
 
