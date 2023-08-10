@@ -21,6 +21,10 @@ class EnvStack(NestedStack):
             parameter_name = "/stage/integrations/aws/migration"
         elif stage_name == StageName.PROD:
             parameter_name = "/prod/integrations/aws/migration"
+        elif stage_name == StageName.RC:
+            parameter_name = "/stage/integrations/aws/migration"
+        elif stage_name == StageName.QA:
+            parameter_name = "/dev/integrations/aws/migration"
         else:
             raise Exception("Invalid stage name")
 

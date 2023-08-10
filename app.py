@@ -28,6 +28,10 @@ if current_stage == 'stage':
     stage = StageName.STAGE
 elif current_stage == 'prod':
     stage = StageName.PROD
+elif current_stage == 'rc':
+    stage = StageName.RC
+elif current_stage == 'qa':
+    stage = StageName.QA
 else:
     stage = StageName.DEV
 print(f"Stage seleted: {stage.value}")

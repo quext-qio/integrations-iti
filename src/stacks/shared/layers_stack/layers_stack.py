@@ -36,6 +36,10 @@ class LayersStack(NestedStack):
     def get_crypto_layer(self):
         return self.crypto_layer
     
+    @property
+    def get_salesforce_layer(self):
+        return self.salesforce_layer
+    
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         
@@ -156,6 +160,24 @@ class LayersStack(NestedStack):
         )
         self.crypto_layer = crypto_layer  
 
+        # --------------------------------------------------------------------
+        # Salesforce Layer 
+        salesforce_layer = lambda_.LayerVersion(
+            self, "SalesforceLayer",
+            layer_version_name="SalesforceLayer",
+            description="Package documentation: hhttps://pypi.org/project/simple-salesforce/",
+            code=lambda_.Code.from_asset("./src/utils/layers/salesforce_layer.zip"),
+            compatible_runtimes=[
+                lambda_.Runtime.PYTHON_3_8,
+                lambda_.Runtime.PYTHON_3_7,
+                lambda_.Runtime.PYTHON_3_6,
+            ],
+            compatible_architectures=[
+                lambda_.Architecture.ARM_64,
+                lambda_.Architecture.X86_64,
+            ],
+        )
+        self.salesforce_layer = salesforce_layer  
 
         # --------------------------------------------------------------------
         # Create Custom Shared Layer 
