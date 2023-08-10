@@ -39,13 +39,12 @@ def lambda_handler(event, context):
 
         # Execute query
         query_result = sf.query_all(input['query'])
-        json_result = json.dumps(query_result)
-        
+
         # Case: Success
         return {
             'statusCode': "200",
             'body': json.dumps({
-                'data': json_result,
+                'data': query_result,
                 'errors': [],
             }),
             'headers': {

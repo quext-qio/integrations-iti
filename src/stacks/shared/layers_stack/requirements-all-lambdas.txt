@@ -1,4 +1,3 @@
 cerberus
 requests
 xmltodict
-simple-salesforce

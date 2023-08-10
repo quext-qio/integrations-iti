@@ -23,7 +23,7 @@ class SalesforceStack(NestedStack):
             "Salesforce_Dynamic_Lambda_Function",
             description="Salesforce Lambda is responsible retrieving data from Salesforce using simple_salesforce library.", 
             environment=environment,
-            runtime=lambda_.Runtime.PYTHON_3_10,
+            runtime=lambda_.Runtime.PYTHON_3_8,
             timeout=timeout,
             code=lambda_.Code.from_asset("./src/lambdas/salesforce"),
             handler="lambda_function.lambda_handler",

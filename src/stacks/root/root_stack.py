@@ -60,6 +60,7 @@ class RootStack(Stack):
         shared_layer = layer_stack.get_shared_layer
         pip_packages_layer = layer_stack.get_pip_packages_layer
         crypto_layer = layer_stack.get_crypto_layer
+        salesforce_layer = layer_stack.get_salesforce_layer
 
 
         # --------------------------------------------------------------------
@@ -271,6 +272,7 @@ class RootStack(Stack):
             api=salesforce_resource_v1,
             environment=environment,
             layers=[
+                salesforce_layer,
                 shared_layer,
                 pip_packages_layer,
             ],
