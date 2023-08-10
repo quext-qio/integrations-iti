@@ -1,8 +1,8 @@
 import json, requests, logging
 from datetime import datetime
 from abstract.service_interface import ServiceInterface
-from Utils.shared.config import config
-from Utils.shared.payload_handler import PayladHandler
+from utils.shared.config import config
+from utils.shared.payload_handler import PayladHandler
 from Converter import Converter
 
 class ResManService(ServiceInterface):
