@@ -4,6 +4,7 @@ from aws_cdk import (
     aws_lambda as lambda_,
     aws_events as events_,
     aws_events_targets as targets_,
+    aws_certificatemanager as acm_,
 )
 from constructs import Construct
 from src.utils.enums.stage_name import StageName
@@ -69,6 +70,7 @@ class APIStack(NestedStack):
         general_resource_v1 = api_v1.add_resource("general")
         engrain_resource_v1 = api_v1.add_resource("engrain")
         tour_resource_v1 = api_v1.add_resource("tour")
+        salesforce_resource_v1 = api_v1.add_resource("salesforce")
 
         # Create a dictionary of all the resources of v1
         dict_v1 = {
@@ -78,6 +80,7 @@ class APIStack(NestedStack):
             "general": general_resource_v1,
             "engrain": engrain_resource_v1,
             "tour": tour_resource_v1,
+            "salesforce": salesforce_resource_v1,
         }
 
         # Suported third party services v2
@@ -87,6 +90,7 @@ class APIStack(NestedStack):
         general_resource_v2 = api_v2.add_resource("general")
         engrain_resource_v2 = api_v2.add_resource("engrain")
         tour_resource_v2 = api_v2.add_resource("tour")
+        salesforce_resource_v2 = api_v2.add_resource("salesforce")
 
         # Create a dictionary of all the resources of v2
         dict_v2 = {
@@ -96,6 +100,7 @@ class APIStack(NestedStack):
             "general": general_resource_v2,
             "engrain": engrain_resource_v2,
             "tour": tour_resource_v2,
+            "salesforce": salesforce_resource_v2,
         }
 
         # Create a dictionary of all the resources and versions
@@ -114,8 +119,8 @@ class APIStack(NestedStack):
    
        
 
-        # --------------------------------------------------------------------
-        # Test 1: Create a custom domain name for the API
+        # # --------------------------------------------------------------------
+        # # Test 1: Create a custom domain name for the API
         # stage_name = stage.value.lower()
         # custom_domain_name = f"{stage_name}-api-integration-engine"
         # domain_name = f"{custom_domain_name}.{self.region}.amazonaws.com"
@@ -127,40 +132,9 @@ class APIStack(NestedStack):
         #     validation=acm_.CertificateValidation.from_dns(),
         # )
 
-        # base_api.add_domain_name(
+        # self.api.add_domain_name(
         #     f"{stage_name}-MyCustomDomainName",
         #     domain_name=domain_name,
         #     certificate=certificate,
         #     endpoint_type=apigateway_.EndpointType.REGIONAL,
-        # )
-
-
-        # --------------------------------------------------------------------
-        # Test 2: Create a custom domain name for the API
-        # Use the default ACM certificate for the domain name
-        # certificate = acm_.Certificate.from_certificate_arn(
-        #     self, "DefaultCertificate", 
-        #     certificate_arn=f"arn:aws:acm:{self.region}:{self.account}:certificate/default"
-        # )
-
-        # Create the subdomain mapping for the API
-        # subdomain = f"integrations-api-custom-{stage.value.lower()}"
-        # domain = "execute-api"
-        # suffix = f"{self.region}.amazonaws.com"
-        # domain_name = f"{subdomain}.{domain}.{suffix}"
-        # apigateway_.DomainName(
-        #     self,
-        #     f"{stage.value}-IntegrationsDomainName",
-        #     domain_name=domain_name,
-        #     certificate=default_certificate,
-        #     mapping=base_api
-        # )
-
-        # base_api.add_domain_name(
-        #     f"{stage_name.value.lower()}-MyCustomDomainName",
-        #     domain_name=custom_domain.domain_name,
-        #     certificate_name=custom_domain.certificate.certificate_name
-        # )
-    
-
-    
+        # )    
