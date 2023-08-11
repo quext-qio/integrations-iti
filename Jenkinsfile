@@ -108,6 +108,7 @@ pipeline {
                         env.AWS_ACCESS_KEY_ID=AWS_KEYS[0]
                         env.AWS_SECRET_ACCESS_KEY=AWS_KEYS[1]
                         env.AWS_SESSION_TOKEN=AWS_KEYS[2]
+                        sh "env"
                         sh "cdk destroy --all --force --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
                     }
                 }
@@ -133,7 +134,7 @@ pipeline {
                 stage('deploy'){
                     steps {
                         script {
-                            withEnv(["STAGE=dev"]) {
+                            withEnv(["STAGE=${DEPLOY_ENVIRONMENT}"]) {
                                 docker.image("${ecr_repository_uri}:${imageTag}").inside() {
                                     if (params."CDK destroy" != true) {
                                         jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/quext-${DEPLOY_ENVIRONMENT}-integrationApi-assume-role"
@@ -147,6 +148,7 @@ pipeline {
                                         env.AWS_SECRET_ACCESS_KEY=AWS_KEYS[1]
                                         env.AWS_SESSION_TOKEN=AWS_KEYS[2]
                                     }
+                                    sh "env"
                                     sh "cdk deploy --all --require-approval never --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
                                 }
                             }
