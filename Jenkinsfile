@@ -71,6 +71,8 @@ pipeline {
                     env.ACCOUNT_ID = accounts.get(DEPLOY_ENVIRONMENT)
                     env.REGION = defaultRegion
                     env.imageTag = "latest"
+                    env.STAGE = "${DEPLOY_ENVIRONMENT}"
+                    env.ROLE_ARN = "arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters"
                     sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 273056594042.dkr.ecr.us-east-1.amazonaws.com"
                 }
             }
@@ -106,9 +108,6 @@ pipeline {
                         env.AWS_ACCESS_KEY_ID=AWS_KEYS[0]
                         env.AWS_SECRET_ACCESS_KEY=AWS_KEYS[1]
                         env.AWS_SESSION_TOKEN=AWS_KEYS[2]
-                        sh "ROLE_ARN=arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters"
-                        sh "export STAGE=${DEPLOY_ENVIRONMENT}"
-                        sh "cdk destroy ${DEPLOY_ENVIRONMENT}-aws-integration-engine-apiStack --force --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
                         sh "cdk destroy --all --force --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
                     }
                 }
@@ -134,22 +133,22 @@ pipeline {
                 stage('deploy'){
                     steps {
                         script {
-                            docker.image("${ecr_repository_uri}:${imageTag}").inside() {
-                                if (params."CDK destroy" != true) {
-                                    jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/quext-${DEPLOY_ENVIRONMENT}-integrationApi-assume-role"
-                                    def AWS_KEYS = sh(returnStdout: true, script: """
-                                        aws sts assume-role --role-arn $jenkinsRole \
-                                        --role-session-name cdk \
-                                        --query '[Credentials.AccessKeyId,Credentials.SecretAccessKey,Credentials.SessionToken]' \
-                                        --output text""")
-                                    AWS_KEYS = AWS_KEYS.split("\\s+")
-                                    env.AWS_ACCESS_KEY_ID=AWS_KEYS[0]
-                                    env.AWS_SECRET_ACCESS_KEY=AWS_KEYS[1]
-                                    env.AWS_SESSION_TOKEN=AWS_KEYS[2]
+                            withEnv(["STAGE=${DEPLOY_ENVIRONMENT}"]) {
+                                docker.image("${ecr_repository_uri}:${imageTag}").inside() {
+                                    if (params."CDK destroy" != true) {
+                                        jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/quext-${DEPLOY_ENVIRONMENT}-integrationApi-assume-role"
+                                        def AWS_KEYS = sh(returnStdout: true, script: """
+                                            aws sts assume-role --role-arn $jenkinsRole \
+                                            --role-session-name cdk \
+                                            --query '[Credentials.AccessKeyId,Credentials.SecretAccessKey,Credentials.SessionToken]' \
+                                            --output text""")
+                                        AWS_KEYS = AWS_KEYS.split("\\s+")
+                                        env.AWS_ACCESS_KEY_ID=AWS_KEYS[0]
+                                        env.AWS_SECRET_ACCESS_KEY=AWS_KEYS[1]
+                                        env.AWS_SESSION_TOKEN=AWS_KEYS[2]
+                                    }
+                                    sh "cdk deploy --all --require-approval never --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
                                 }
-                                sh "ROLE_ARN=arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters"
-                                sh "export STAGE=${DEPLOY_ENVIRONMENT}"
-                                sh "cdk deploy --all --require-approval never --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
                             }
                         }
                     }
