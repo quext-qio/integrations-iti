@@ -133,7 +133,7 @@ pipeline {
                 stage('deploy'){
                     steps {
                         script {
-                            withEnv(["STAGE=${DEPLOY_ENVIRONMENT}"]) {
+                            withEnv(["STAGE=dev"]) {
                                 docker.image("${ecr_repository_uri}:${imageTag}").inside() {
                                     if (params."CDK destroy" != true) {
                                         jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/quext-${DEPLOY_ENVIRONMENT}-integrationApi-assume-role"
