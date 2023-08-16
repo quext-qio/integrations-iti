@@ -117,8 +117,8 @@ class APIStack(NestedStack):
         assumed_session = self.assume_role(role_arn, stage)
 
         # Use the assumed_session to create the ACM certificate instance
-        acm_certificate_arn = "arn:aws:acm:us-east-1:633546161654:certificate/508f9e50-9da2-4519-8714-4836b74a9e05"
-        custom_domain_name = "d-89yb7oio2c.execute-api.us-east-1.amazonaws.com"
+        acm_certificate_arn = "arn:aws:acm:us-east-1:633546161654:certificate/eb1794a2-4724-475a-9aad-b9e5bdaa38e3"
+        custom_domain_name = "d-kept97rbkf.execute-api.us-east-1.amazonaws.com"
         acm_client = assumed_session.client('acm', region_name='us-east-1')
         certificate = acm_client.get_certificate(CertificateArn=acm_certificate_arn)
 
