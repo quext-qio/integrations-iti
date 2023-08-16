@@ -1,3 +1,7 @@
+import os
+import boto3
+from constructs import Construct
+from src.utils.enums.stage_name import StageName
 from aws_cdk import (
     NestedStack,
     aws_apigateway as apigateway_,
@@ -6,8 +10,6 @@ from aws_cdk import (
     aws_events_targets as targets_,
     aws_certificatemanager as acm_,
 )
-from constructs import Construct
-from src.utils.enums.stage_name import StageName
 
 # Lambda function to store the API URL after deployment
 def print_api_url_lambda(scope: Construct, api_url: str, stage: StageName):
@@ -110,31 +112,75 @@ class APIStack(NestedStack):
         }
 
         # --------------------------------------------------------------------
+        # Assume the IAM role
+        role_arn = os.getenv('ROLE_ARN', 'arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters')
+        assumed_session = self.assume_role(role_arn, stage)
+
+        # Use the assumed_session to create the ACM certificate instance
+        acm_certificate_arn = "arn:aws:acm:us-east-1:633546161654:certificate/508f9e50-9da2-4519-8714-4836b74a9e05"
+        custom_domain_name = "d-89yb7oio2c.execute-api.us-east-1.amazonaws.com"
+        acm_client = assumed_session.client('acm', region_name='us-east-1')
+        certificate = acm_client.get_certificate(CertificateArn=acm_certificate_arn)
+
+
+        # Create a DomainName resource
+        domain_name = apigateway_.DomainName(
+            self, f"{stage.value}-CustomDomainName",
+            domain_name=custom_domain_name,
+            certificate=certificate,
+            endpoint_type=apigateway_.EndpointType.REGIONAL,
+        )
+
+        # Create a BasePathMapping to associate the DomainName with your API stages
+        for custom_stage_name, stage_resources in self.resources.items():
+            for resource_key, resource in stage_resources.items():
+                base_path_mapping = apigateway_.BasePathMapping(
+                    self, f"{custom_stage_name}-{resource_key}-Mapping",
+                    domain_name=domain_name,
+                    rest_api=self.api,
+                    stage=resource.node.try_get_context('stage_name'),
+                    base_path=resource_key
+                )
+
+        
+        # --------------------------------------------------------------------
         # TODO: Remove logic when custom domain is ready
         # Create a Lambda function for Store API URL after deployment
         api_url = self.api.url
         print_url_lambda = print_api_url_lambda(self, api_url, stage)
         rule = events_.Rule(self, f"{stage.name}-PrintApiUrlRule", schedule=events_.Schedule.expression('rate(365 days)'))
         rule.add_target(targets_.LambdaFunction(print_url_lambda, event=events_.RuleTargetInput.from_object({})))
-   
-       
 
-        # # --------------------------------------------------------------------
-        # # Test 1: Create a custom domain name for the API
-        # stage_name = stage.value.lower()
-        # custom_domain_name = f"{stage_name}-api-integration-engine"
-        # domain_name = f"{custom_domain_name}.{self.region}.amazonaws.com"
 
-        # # Create a certificate from ACM
-        # certificate = acm_.Certificate(
-        #     self, f"{stage.name}-Integrations_Certificate",
-        #     domain_name=domain_name,
-        #     validation=acm_.CertificateValidation.from_dns(),
-        # )
+    # Method to assume a role and return a new session
+    def assume_role(self, role_arn: str, stage_name: StageName):
+        aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+        aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+        aws_session_token = os.getenv('AWS_SESSION_TOKEN')
 
-        # self.api.add_domain_name(
-        #     f"{stage_name}-MyCustomDomainName",
-        #     domain_name=domain_name,
-        #     certificate=certificate,
-        #     endpoint_type=apigateway_.EndpointType.REGIONAL,
-        # )    
+        session = boto3.Session(
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
+        )
+
+        # Create a client to interact with the STS (Security Token Service)
+        sts_client = session.client("sts")
+
+        # Assume the IAM role
+        response = sts_client.assume_role(
+            RoleArn=role_arn,
+            RoleSessionName=f"apigateway-{stage_name.value}-assumed-session"
+        )
+
+        # Extract the temporary credentials from the response
+        credentials = response['Credentials']
+
+        # Create a new session using the temporary credentials
+        new_session = boto3.Session(
+            aws_access_key_id=credentials['AccessKeyId'],
+            aws_secret_access_key=credentials['SecretAccessKey'],
+            aws_session_token=credentials['SessionToken'],
+        )
+
+        return new_session
