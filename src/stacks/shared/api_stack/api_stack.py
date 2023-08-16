@@ -9,6 +9,7 @@ from aws_cdk import (
     aws_events as events_,
     aws_events_targets as targets_,
     aws_certificatemanager as acm_,
+    aws_iam as iam_,
 )
 
 # Lambda function to store the API URL after deployment
@@ -115,6 +116,18 @@ class APIStack(NestedStack):
         # Assume the IAM role
         role_arn = os.getenv('ROLE_ARN', 'arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters')
         assumed_session = self.assume_role(role_arn, stage)
+        acm_policy = iam_.PolicyDocument(
+            statements=[
+                iam_.PolicyStatement(
+                    actions=["acm:GetCertificate"],
+                    resources=[
+                        "arn:aws:acm:us-east-1:633546161654:certificate/eb1794a2-4724-475a-9aad-b9e5bdaa38e3"
+                    ],
+                )
+            ]
+        )
+        assumed_session.add_to_policy(acm_policy)
+
 
         # Use the assumed_session to create the ACM certificate instance
         acm_certificate_arn = "arn:aws:acm:us-east-1:633546161654:certificate/eb1794a2-4724-475a-9aad-b9e5bdaa38e3"
