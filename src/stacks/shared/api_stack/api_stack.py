@@ -10,6 +10,9 @@ from aws_cdk import (
     aws_events_targets as targets_,
     aws_certificatemanager as acm_,
     aws_iam as iam_,
+    aws_route53 as route53_,
+    aws_route53_targets as route53targets_,
+    CfnOutput,
 )
 
 # Lambda function to store the API URL after deployment
@@ -112,48 +115,71 @@ class APIStack(NestedStack):
             "v2": dict_v2,
         }
 
+        # # --------------------------------------------------------------------
+        # # Assume the IAM role
+        # role_arn = os.getenv('ROLE_ARN', 'arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters')
+        # assumed_session = self.assume_role(role_arn, stage)
+
+
+        # # Use the assumed_session to create the ACM certificate instance
+        # acm_certificate_arn = "arn:aws:acm:us-east-1:633546161654:certificate/eb1794a2-4724-475a-9aad-b9e5bdaa38e3"
+        # custom_domain_name = "d-kept97rbkf.execute-api.us-east-1.amazonaws.com"
+        # acm_client = assumed_session.client('acm', region_name='us-east-1')
+        # certificate = acm_client.get_certificate(CertificateArn=acm_certificate_arn)
+
+
+        # # Create a DomainName resource
+        # domain_name = apigateway_.DomainName(
+        #     self, f"{stage.value}-CustomDomainName",
+        #     domain_name=custom_domain_name,
+        #     certificate=certificate,
+        #     endpoint_type=apigateway_.EndpointType.REGIONAL,
+        # )
+
+        # # Create a BasePathMapping to associate the DomainName with your API stages
+        # for custom_stage_name, stage_resources in self.resources.items():
+        #     for resource_key, resource in stage_resources.items():
+        #         base_path_mapping = apigateway_.BasePathMapping(
+        #             self, f"{custom_stage_name}-{resource_key}-Mapping",
+        #             domain_name=domain_name,
+        #             rest_api=self.api,
+        #             stage=resource.node.try_get_context('stage_name'),
+        #             base_path=resource_key
+        #         )
+
         # --------------------------------------------------------------------
-        # Assume the IAM role
+        # Test custom domain
+        domain_name = "d-kept97rbkf.execute-api.us-east-1.amazonaws.com"
+        hosted_zone_id = "Z1UJRXOUMOOFQ8"
+        certificate_arn = "arn:aws:acm:us-east-1:633546161654:certificate/eb1794a2-4724-475a-9aad-b9e5bdaa38e3"
+        
         role_arn = os.getenv('ROLE_ARN', 'arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters')
         assumed_session = self.assume_role(role_arn, stage)
-        acm_policy = iam_.PolicyDocument(
-            statements=[
-                iam_.PolicyStatement(
-                    actions=["acm:GetCertificate"],
-                    resources=[
-                        "arn:aws:acm:us-east-1:633546161654:certificate/eb1794a2-4724-475a-9aad-b9e5bdaa38e3"
-                    ],
-                )
-            ]
-        )
-        assumed_session.add_to_policy(acm_policy)
-
-
-        # Use the assumed_session to create the ACM certificate instance
-        acm_certificate_arn = "arn:aws:acm:us-east-1:633546161654:certificate/eb1794a2-4724-475a-9aad-b9e5bdaa38e3"
-        custom_domain_name = "d-kept97rbkf.execute-api.us-east-1.amazonaws.com"
         acm_client = assumed_session.client('acm', region_name='us-east-1')
-        certificate = acm_client.get_certificate(CertificateArn=acm_certificate_arn)
-
-
-        # Create a DomainName resource
-        domain_name = apigateway_.DomainName(
-            self, f"{stage.value}-CustomDomainName",
-            domain_name=custom_domain_name,
+        certificate = acm_.Certificate.from_certificate_arn(self, "MyCertificate", certificate_arn)
+        
+        custom_domain = self.api.add_domain_name("CustomDomain",
+            domain_name=domain_name,
             certificate=certificate,
             endpoint_type=apigateway_.EndpointType.REGIONAL,
+            security_policy=apigateway_.SecurityPolicy.TLS_1_2
         )
 
-        # Create a BasePathMapping to associate the DomainName with your API stages
-        for custom_stage_name, stage_resources in self.resources.items():
-            for resource_key, resource in stage_resources.items():
-                base_path_mapping = apigateway_.BasePathMapping(
-                    self, f"{custom_stage_name}-{resource_key}-Mapping",
-                    domain_name=domain_name,
-                    rest_api=self.api,
-                    stage=resource.node.try_get_context('stage_name'),
-                    base_path=resource_key
-                )
+        hosted_zone = route53_.HostedZone.from_hosted_zone_attributes(self, "HostedZone",
+            hosted_zone_id=hosted_zone_id,
+            zone_name="integrations-api.dev.quext.io"
+        )
+
+        route53_.ARecord(self, "ApiGatewayAliasRecord",
+            target=route53_.RecordTarget.from_alias(route53targets_.ApiGatewayDomain(custom_domain)),
+            zone=hosted_zone
+        )
+
+        CfnOutput(self, "ApiUrl",
+            value=custom_domain.domain_name + "/{proxy+}",
+            description="URL of the API with custom domain"
+        )
+
 
         
         # --------------------------------------------------------------------
