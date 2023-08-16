@@ -94,12 +94,20 @@ class APIStack(NestedStack):
             endpoint_configuration=apigateway_.EndpointConfiguration(
                 types=[apigateway_.EndpointType.REGIONAL],
             ),
-            domain_name=apigateway_.DomainNameOptions(
-                domain_name=domain_name,
-                certificate=certificate,
-                endpoint_type=apigateway_.EndpointType.REGIONAL,
-            ),
         )
+        # --------------------------------------------------------------------
+        custom_domain_name = apigateway_.DomainName.from_domain_name_attributes(self, "DomainName",
+            domain_name=domain_name,
+            domain_name_alias_hosted_zone_id=hosted_zone_id,
+            domain_name_alias_target=domain_name
+        )
+
+        apigateway_.BasePathMapping(self, "BasePathMapping",
+            domain_name=custom_domain_name,
+            rest_api=self.api
+        )
+
+        # --------------------------------------------------------------------
 
         # Standard root resource
         api_resource = self.api.root.add_resource("api")
