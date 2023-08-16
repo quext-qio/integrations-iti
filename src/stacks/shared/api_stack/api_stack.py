@@ -42,6 +42,40 @@ class APIStack(NestedStack):
 
     def __init__(self, scope: Construct, construct_id: str, stage: StageName, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
+        # --------------------------------------------------------------------
+        # --------------------------------------------------------------------
+        # Test custom domain
+        domain_name = "d-kept97rbkf.execute-api.us-east-1.amazonaws.com"
+        hosted_zone_id = "Z1UJRXOUMOOFQ8"
+        certificate_arn = "arn:aws:acm:us-east-1:633546161654:certificate/eb1794a2-4724-475a-9aad-b9e5bdaa38e3"
+        
+        role_arn = os.getenv('ROLE_ARN', 'arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters')
+        assumed_session = self.assume_role(role_arn, stage)
+        acm_client = assumed_session.client('acm', region_name='us-east-1')
+        certificate = acm_.Certificate.from_certificate_arn(self, "MyCertificate", certificate_arn)
+        
+        # custom_domain = self.api.add_domain_name("CustomDomain",
+        #     domain_name=domain_name,
+        #     certificate=certificate,
+        #     endpoint_type=apigateway_.EndpointType.REGIONAL,
+        #     security_policy=apigateway_.SecurityPolicy.TLS_1_2
+        # )
+
+        # hosted_zone = route53_.HostedZone.from_hosted_zone_attributes(self, "HostedZone",
+        #     hosted_zone_id=hosted_zone_id,
+        #     zone_name="integrations-api.dev.quext.io"
+        # )
+
+        # route53_.ARecord(self, "ApiGatewayAliasRecord",
+        #     target=route53_.RecordTarget.from_alias(route53targets_.ApiGatewayDomain(custom_domain)),
+        #     zone=hosted_zone
+        # )
+
+        # CfnOutput(self, "ApiUrl",
+        #     value=custom_domain.domain_name + "/{proxy+}",
+        #     description="URL of the API with custom domain"
+        # )
+
 
         # --------------------------------------------------------------------
         # Create a Rest API instance
@@ -58,7 +92,12 @@ class APIStack(NestedStack):
                 tracing_enabled=True,
             ),
             endpoint_configuration=apigateway_.EndpointConfiguration(
-                types=[apigateway_.EndpointType.REGIONAL]
+                types=[apigateway_.EndpointType.REGIONAL],
+            ),
+            domain_name=apigateway_.DomainNameOptions(
+                domain_name=domain_name,
+                certificate=certificate,
+                endpoint_type=apigateway_.EndpointType.REGIONAL,
             ),
         )
 
@@ -146,41 +185,6 @@ class APIStack(NestedStack):
         #             stage=resource.node.try_get_context('stage_name'),
         #             base_path=resource_key
         #         )
-
-        # --------------------------------------------------------------------
-        # Test custom domain
-        domain_name = "d-kept97rbkf.execute-api.us-east-1.amazonaws.com"
-        hosted_zone_id = "Z1UJRXOUMOOFQ8"
-        certificate_arn = "arn:aws:acm:us-east-1:633546161654:certificate/eb1794a2-4724-475a-9aad-b9e5bdaa38e3"
-        
-        role_arn = os.getenv('ROLE_ARN', 'arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters')
-        assumed_session = self.assume_role(role_arn, stage)
-        acm_client = assumed_session.client('acm', region_name='us-east-1')
-        certificate = acm_.Certificate.from_certificate_arn(self, "MyCertificate", certificate_arn)
-        
-        custom_domain = self.api.add_domain_name("CustomDomain",
-            domain_name=domain_name,
-            certificate=certificate,
-            endpoint_type=apigateway_.EndpointType.REGIONAL,
-            security_policy=apigateway_.SecurityPolicy.TLS_1_2
-        )
-
-        hosted_zone = route53_.HostedZone.from_hosted_zone_attributes(self, "HostedZone",
-            hosted_zone_id=hosted_zone_id,
-            zone_name="integrations-api.dev.quext.io"
-        )
-
-        route53_.ARecord(self, "ApiGatewayAliasRecord",
-            target=route53_.RecordTarget.from_alias(route53targets_.ApiGatewayDomain(custom_domain)),
-            zone=hosted_zone
-        )
-
-        CfnOutput(self, "ApiUrl",
-            value=custom_domain.domain_name + "/{proxy+}",
-            description="URL of the API with custom domain"
-        )
-
-
         
         # --------------------------------------------------------------------
         # TODO: Remove logic when custom domain is ready
