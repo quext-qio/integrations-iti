@@ -11,14 +11,14 @@ class StageName(Enum):
         if self == StageName.DEV:
             return {
                 "hosted_zone_id" : "Z1UJRXOUMOOFQ8",
-                "domain_name_alias_target" : "integrations-api.dev.quext.io",
-                "custom_domain_name" : "dev.quext.io",
+                "domain_name_alias_target" : "dev.quext.io",
+                "custom_domain_name" : "integrations-api.dev.quext.io",
             }
         elif self == StageName.QA:
             return {
                 "hosted_zone_id" : "Z1UJRXOUMOOFQ8",
-                "domain_name_alias_target" : "integrations-api-qa.dev.quext.io",
-                "custom_domain_name" : "dev.quext.io",
+                "domain_name_alias_target" : "dev.quext.io",
+                "custom_domain_name" : "integrations-api-qa.dev.quext.io",
             }
         elif self == StageName.STAGE:
             raise Exception("Custom Domain Name not implemented for 'stage' yet") 
