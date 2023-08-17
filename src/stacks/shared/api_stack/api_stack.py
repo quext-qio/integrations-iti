@@ -82,7 +82,8 @@ class APIStack(NestedStack):
             domain_name_alias_target=domain_name_alias_target,
         )
 
-        apigateway_.BasePathMapping(self, "BasePathMapping",
+        apigateway_.BasePathMapping(
+            self, "BasePathMapping",
             domain_name=custom_domain_name,
             rest_api=self.api,
             stage=self.api.deployment_stage,
