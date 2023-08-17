@@ -71,8 +71,10 @@ class APIStack(NestedStack):
         # certificate = acm_.Certificate.from_certificate_arn(self, "MyCertificate", certificate_arn)
 
         hosted_zone_id = "Z1UJRXOUMOOFQ8"
-        domain_name_alias_target = "integrations-api.dev.quext.io"
-        custom_domain_name = "dev.quext.io"
+        #domain_name_alias_target = "integrations-api.dev.quext.io"
+        #custom_domain_name = "dev.quext.io"
+        domain_name_alias_target = "dev.quext.io"
+        custom_domain_name = "integrations-api.dev.quext.io"
         
         
         custom_domain_name = apigateway_.DomainName.from_domain_name_attributes(
