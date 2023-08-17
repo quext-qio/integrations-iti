@@ -69,22 +69,20 @@ class APIStack(NestedStack):
             domain_name_alias_target=domain_name_alias_target,
         )
 
-        # Check if the base mapping already exists
-        existing_base_mapping = self.api.add_base_path_mapping(
-            f"{stage.value}-BasePathMapping",
-            domain_name=api_domain,
-            stage=self.api.deployment_stage
-        )
-
-        # If the base mapping doesn't exist, create it
-        if not existing_base_mapping:
-            # Add the domain name to the API Gateway
+        try:
+            # Attempt to create the base mapping
             apigateway_.BasePathMapping(
                 self, f"{stage.value}-BasePathMapping",
                 domain_name=api_domain,
                 rest_api=self.api,
                 stage=self.api.deployment_stage,
             )
+        except apigateway_.CfnBasePathMappingAlreadyExistsException:
+            # If the base mapping already exists, catch the exception
+            # and proceed without creating a new one.
+            print("Base path mapping already exists.")
+            pass
+
         
         # --------------------------------------------------------------------
         # Standard root resource
