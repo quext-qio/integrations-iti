@@ -1,13 +1,22 @@
 from urllib.parse import urlencode
 import requests, json
-from Utils.shared.constants.guestcard_constants import GuestcardsConstants
-from Utils.shared.config import config
+from utils.shared.constants.guestcard_constants import GuestcardsConstants
+from utils.mapper.bedroom_mapping import bedroom_mapping
+from utils.shared.config import config
 
 class PayladHandler:
 
     def builder_payload(self, payload, events):
         guest = payload[GuestcardsConstants.GUEST]
         guest_preference = payload[GuestcardsConstants.GUEST_PREFERENCE]
+        # Get values of bedroooms
+        bedroooms_data = []
+        if "desiredBeds" in guest_preference:
+            # Map string to int using [bedroom_mapping]
+            for i in range(len(guest_preference["desiredBeds"])):
+                string_beds = guest_preference["desiredBeds"][i]
+                bedroooms_data.append(bedroom_mapping.get(string_beds, 0))
+
         builder_payload = {
                 "LeadManagement": {
                     "Prospects": {
@@ -32,7 +41,8 @@ class PayladHandler:
                                     "@Exact": str(guest_preference.get(GuestcardsConstants.DESIRED_RENT, ""))
                                 },
                                 "DesiredNumBedrooms": {
-                                    "@Exact": str(guest_preference[GuestcardsConstants.DESIRED_BEDS])
+                                        "Min": min(bedroooms_data) if len(bedroooms_data) > 0 else 0,
+                                        "Max": max(bedroooms_data) if len(bedroooms_data) > 0 else 0
                                 },
                                 "DesiredLeaseTerm": guest_preference.get(GuestcardsConstants.LEASE_TERM, 0),
                                 "NumberOfOccupants": guest_preference.get(GuestcardsConstants.OCCUPANTS, 0),
