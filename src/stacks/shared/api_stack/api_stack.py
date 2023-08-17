@@ -1,5 +1,3 @@
-import os
-import boto3
 from constructs import Construct
 from src.utils.enums.stage_name import StageName
 from aws_cdk import (
@@ -8,11 +6,6 @@ from aws_cdk import (
     aws_lambda as lambda_,
     aws_events as events_,
     aws_events_targets as targets_,
-    aws_certificatemanager as acm_,
-    aws_iam as iam_,
-    aws_route53 as route53_,
-    aws_route53_targets as route53targets_,
-    CfnOutput,
 )
 
 # Lambda function to store the API URL after deployment
@@ -62,36 +55,29 @@ class APIStack(NestedStack):
         )
 
         # --------------------------------------------------------------------
-        # Test custom domain
-        # TODO: Make for all stages
-        # domain_name = "d-kept97rbkf.execute-api.us-east-1.amazonaws.com"
-        # certificate_arn = "arn:aws:acm:us-east-1:633546161654:certificate/eb1794a2-4724-475a-9aad-b9e5bdaa38e3"
-        # custom_url = "integrations-api.dev.quext.io"
-        # certificate = acm_.Certificate.from_certificate_arn(self, "MyCertificate", certificate_arn)
-
-        hosted_zone_id = "Z1UJRXOUMOOFQ8"
-        domain_name_alias_target = "integrations-api.dev.quext.io"
-        custom_domain_name = "dev.quext.io"
+        # Set Custom Domain depending on the stage
+        domain_config = stage.get_api_domain_config()
+        hosted_zone_id = domain_config["hosted_zone_id"]
+        domain_name_alias_target = domain_config["domain_name_alias_target"]
+        custom_domain_name = domain_config["custom_domain_name"]
         
+        # Get the domain name from the attributes
         api_domain = apigateway_.DomainName.from_domain_name_attributes(
             self, f"{stage.value}-DomainName",
             domain_name=custom_domain_name,
             domain_name_alias_hosted_zone_id=hosted_zone_id,
             domain_name_alias_target=domain_name_alias_target,
         )
-    
-        base_path_mapping = apigateway_.BasePathMapping(
+
+        # Add the domain name to the API Gateway
+        apigateway_.BasePathMapping(
             self, f"{stage.value}-BasePathMapping",
             domain_name=api_domain,
             rest_api=self.api,
             stage=self.api.deployment_stage,
         )
-
-        CfnOutput(self, "CustomDomainHostedZone", export_name="MyCustomeZone", value=api_domain.domain_name_alias_hosted_zone_id)
-        CfnOutput(self, "CustomDomainAlias", export_name="MyCustomAlias", value=api_domain.domain_name_alias_domain_name)
-
+        
         # --------------------------------------------------------------------
-
         # Standard root resource
         api_resource = self.api.root.add_resource("api")
 
