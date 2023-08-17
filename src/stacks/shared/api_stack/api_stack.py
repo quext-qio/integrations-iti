@@ -64,48 +64,31 @@ class APIStack(NestedStack):
         # --------------------------------------------------------------------
         # Test custom domain
         # TODO: Make for all stages
-
         # domain_name = "d-kept97rbkf.execute-api.us-east-1.amazonaws.com"
         # certificate_arn = "arn:aws:acm:us-east-1:633546161654:certificate/eb1794a2-4724-475a-9aad-b9e5bdaa38e3"
         # custom_url = "integrations-api.dev.quext.io"
         # certificate = acm_.Certificate.from_certificate_arn(self, "MyCertificate", certificate_arn)
 
         hosted_zone_id = "Z1UJRXOUMOOFQ8"
-        #domain_name_alias_target = "integrations-api.dev.quext.io"
-        #custom_domain_name = "dev.quext.io"
-        domain_name_alias_target = "dev.quext.io"
-        custom_domain_name = "integrations-api.dev.quext.io"
+        domain_name_alias_target = "integrations-api.dev.quext.io"
+        custom_domain_name = "dev.quext.io"
         
-        
-        custom_domain_name = apigateway_.DomainName.from_domain_name_attributes(
-            self, "DomainName",
+        api_domain = apigateway_.DomainName.from_domain_name_attributes(
+            self, f"{stage.value}-DomainName",
             domain_name=custom_domain_name,
             domain_name_alias_hosted_zone_id=hosted_zone_id,
             domain_name_alias_target=domain_name_alias_target,
         )
+    
+        base_path_mapping = apigateway_.BasePathMapping(
+            self, f"{stage.value}-BasePathMapping",
+            domain_name=api_domain,
+            rest_api=self.api,
+            stage=self.api.deployment_stage,
+        )
 
-        # Obtén la URL del dominio personalizado
-        custom_domain_url = custom_domain_name.domain_name
-
-        # Realiza una solicitud HTTP GET a la URL del dominio personalizado
-        import requests
-        response = requests.get(f"https://{custom_domain_url}")
-
-        # Verifica el estado de la respuesta y muestra el contenido si es exitosa
-        if response.status_code == 200:
-            print("Solicitud exitosa a la URL del dominio personalizado.")
-            print("Contenido de la respuesta:")
-            print(response.text)
-        else:
-            print(f"Solicitud a la URL del dominio personalizado falló. Código de estado: {response.status_code}")
-
-
-        # apigateway_.BasePathMapping(
-        #     self, "BasePathMapping",
-        #     domain_name=custom_domain_name,
-        #     rest_api=self.api,
-        #     stage=self.api.deployment_stage,
-        # )
+        CfnOutput(self, "CustomDomainHostedZone", export_name="MyCustomeZone", value=api_domain.domain_name_alias_hosted_zone_id)
+        CfnOutput(self, "CustomDomainAlias", export_name="MyCustomAlias", value=api_domain.domain_name_alias_domain_name)
 
         # --------------------------------------------------------------------
 
@@ -161,20 +144,6 @@ class APIStack(NestedStack):
             "v1": dict_v1,
             "v2": dict_v2,
         }
-
-
-
-
-        apigateway_.BasePathMapping(
-            self, "BasePathMapping",
-            domain_name=custom_domain_name,
-            rest_api=self.api,
-            stage=self.api.deployment_stage,
-        )
-
-
-
-
         
         # --------------------------------------------------------------------
         # TODO: Remove logic when custom domain is ready
