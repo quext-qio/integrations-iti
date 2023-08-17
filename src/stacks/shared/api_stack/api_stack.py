@@ -69,13 +69,22 @@ class APIStack(NestedStack):
             domain_name_alias_target=domain_name_alias_target,
         )
 
-        # Add the domain name to the API Gateway
-        apigateway_.BasePathMapping(
-            self, f"{stage.value}-BasePathMapping",
+        # Check if the base mapping already exists
+        existing_base_mapping = self.api.add_base_path_mapping(
+            f"{stage.value}-BasePathMapping",
             domain_name=api_domain,
-            rest_api=self.api,
-            stage=self.api.deployment_stage,
+            stage=self.api.deployment_stage
         )
+
+        # If the base mapping doesn't exist, create it
+        if not existing_base_mapping:
+            # Add the domain name to the API Gateway
+            apigateway_.BasePathMapping(
+                self, f"{stage.value}-BasePathMapping",
+                domain_name=api_domain,
+                rest_api=self.api,
+                stage=self.api.deployment_stage,
+            )
         
         # --------------------------------------------------------------------
         # Standard root resource
