@@ -82,12 +82,13 @@ class APIStack(NestedStack):
             domain_name_alias_target=domain_name_alias_target,
         )
 
-        apigateway_.BasePathMapping(
-            self, "BasePathMapping",
-            domain_name=custom_domain_name,
-            rest_api=self.api,
-            stage=self.api.deployment_stage,
-        )
+
+        # apigateway_.BasePathMapping(
+        #     self, "BasePathMapping",
+        #     domain_name=custom_domain_name,
+        #     rest_api=self.api,
+        #     stage=self.api.deployment_stage,
+        # )
 
         # --------------------------------------------------------------------
 
@@ -144,6 +145,20 @@ class APIStack(NestedStack):
             "v2": dict_v2,
         }
 
+
+
+
+        apigateway_.BasePathMapping(
+            self, "BasePathMapping",
+            domain_name=custom_domain_name,
+            rest_api=self.api,
+            stage=self.api.deployment_stage,
+        )
+
+
+
+
+        
         # --------------------------------------------------------------------
         # TODO: Remove logic when custom domain is ready
         # Create a Lambda function for Store API URL after deployment
