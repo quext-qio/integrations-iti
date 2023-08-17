@@ -17,7 +17,7 @@ class SalesforceStack(NestedStack):
         allow_methods=['OPTIONS', 'POST']
         
         # --------------------------------------------------------------------
-        # Create lambda function instance for (# POST /placepay/new-account)
+        # Create lambda function instance for (# POST /salesforce/query)
         post_lambda_function = lambda_.Function(
             self, 
             "Salesforce_Dynamic_Lambda_Function",
@@ -32,7 +32,7 @@ class SalesforceStack(NestedStack):
         )
 
         # --------------------------------------------------------------------
-        # Resource to create new account (POST)
+        # Resource to execute query (POST)
         post_endpoint = api.add_resource(
             "query",
             default_cors_preflight_options=apigateway_.CorsOptions(

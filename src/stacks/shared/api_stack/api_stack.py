@@ -83,6 +83,37 @@ class APIStack(NestedStack):
             print("Base path mapping already exists.")
             pass
 
+        # --------------------------------------------------------------------
+        # Asocaite API Key for the API Gateway
+        # api_key = apigateway_.ApiKey(
+        #     self, f"{stage.value}-ApiKey",
+        #     api_key_name=f"{stage.value}-ApiKey",
+        #     description=f"API Key for {stage.value} stage",
+        #     enabled=True,
+        #     value=stage.get_api_key(),
+        # )
+
+        api_key = self.api.add_api_key(stage.get_api_key())
+        #plan = self.api.add_usage_plan(f"{stage.value}-UsagePlan")
+        usage_plan = apigateway_.UsagePlan(
+            self, f"{stage.value}-UsagePlan",
+            name=f"{stage.value}-UsagePlan",
+            description=f"Usage Plan for {stage.value} stage",
+            quota=apigateway_.QuotaSettings(
+                limit=10000,
+                period=apigateway_.Period.MONTH,
+            ),
+            throttle=apigateway_.ThrottleSettings(
+                burst_limit=200,
+                rate_limit=100,
+            ),
+        )
+
+        usage_plan.add_api_stage(stage=self.api.deployment_stage)
+        usage_plan.add_api_key(api_key)
+        
+        #plan.add_api_stage(self.api.deployment_stage)
+        #plan.add_api_key(api_key)
         
         # --------------------------------------------------------------------
         # Standard root resource

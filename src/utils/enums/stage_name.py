@@ -7,6 +7,7 @@ class StageName(Enum):
     RC = "rc"
     QA = "qa"
 
+    # Returns the custom domain config depend of the Stage
     def get_api_domain_config(self):
         if self == StageName.DEV:
             return {
@@ -26,5 +27,20 @@ class StageName(Enum):
             raise Exception("Custom Domain Name not implemented for 'rc' yet")
         elif self == StageName.PROD:
             raise Exception("Custom Domain Name not implemented for 'prod' yet")
+        else:
+            raise ValueError(f"Unknown stage: {self.value}")
+        
+    # Returns the API Key depending of the Stage
+    def get_api_key(self):
+        if self == StageName.DEV:
+            return "dev-api-key"
+        elif self == StageName.QA:
+            return "qa-api-key"
+        elif self == StageName.STAGE:
+            return "stage-api-key"
+        elif self == StageName.RC:
+            return "rc-api-key"
+        elif self == StageName.PROD:
+            return "prod-api-key"
         else:
             raise ValueError(f"Unknown stage: {self.value}")
