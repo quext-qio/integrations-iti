@@ -87,7 +87,7 @@ class APIStack(NestedStack):
 
         # Realiza una solicitud HTTP GET a la URL del dominio personalizado
         import requests
-        response = requests.get(custom_domain_url)
+        response = requests.get(f"https://{custom_domain_url}")
 
         # Verifica el estado de la respuesta y muestra el contenido si es exitosa
         if response.status_code == 200:
