@@ -82,6 +82,21 @@ class APIStack(NestedStack):
             domain_name_alias_target=domain_name_alias_target,
         )
 
+        # Obtén la URL del dominio personalizado
+        custom_domain_url = custom_domain_name.domain_name
+
+        # Realiza una solicitud HTTP GET a la URL del dominio personalizado
+        import requests
+        response = requests.get(custom_domain_url)
+
+        # Verifica el estado de la respuesta y muestra el contenido si es exitosa
+        if response.status_code == 200:
+            print("Solicitud exitosa a la URL del dominio personalizado.")
+            print("Contenido de la respuesta:")
+            print(response.text)
+        else:
+            print(f"Solicitud a la URL del dominio personalizado falló. Código de estado: {response.status_code}")
+
 
         # apigateway_.BasePathMapping(
         #     self, "BasePathMapping",
