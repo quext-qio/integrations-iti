@@ -59,8 +59,7 @@ class SalesforceStack(NestedStack):
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
                 allow_origins=apigateway_.Cors.ALL_ORIGINS
-            ),
-            request_model=request_model,   
+            ),  
         )
         
 
@@ -95,5 +94,6 @@ class SalesforceStack(NestedStack):
                     }
                 )
             ],
+            request_model=request_model,
         )
 
