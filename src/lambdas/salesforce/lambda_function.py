@@ -12,12 +12,25 @@ def lambda_handler(event, context):
     try:
         # ACL Validation
         headers = json.loads(event['headers'])
+        if 'x-api-key' not in headers:
+            return {
+                'statusCode': "401",
+                'body': json.dumps({
+                    'data': [],
+                    'errors': ["No API key header."],
+                }),
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',  
+                },
+                'isBase64Encoded': False
+            }
+        
         wsgi_input = {
-            'PATH_INFO': json.loads(event['resource']),
-            'REQUEST_METHOD': "POST"
+            'PATH_INFO': event['resource'],
+            'REQUEST_METHOD': event["httpMethod"],
+            'HTTP_X_API_KEY': event['headers']['x-api-key']
         }
-        if 'x-api-key' in headers:
-            wsgi_input['HTTP_X_API_KEY'] = headers['x-api-key']
 
         res, res_code= AccessControl.check_access_control(wsgi_input)
         if res_code != 200:
