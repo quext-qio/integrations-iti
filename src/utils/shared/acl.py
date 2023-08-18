@@ -19,13 +19,15 @@ class ACL:
         if not is_ok:
             return False, response
         
-        # Success case
+        # Success response from ACL endpoint
         for i in json.loads(response.text)["content"]:
             security_item = i["security"]
             if security_item["apiKey"] == api_key:
                 for e in security_item["endpoints"]:
                     if e["uri"] == endpoint and method in e["verbs"]:
+                        # Success case
                         return True, response
-                return False, response
+        
+        return False, response
         
         
