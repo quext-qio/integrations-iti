@@ -22,11 +22,14 @@ class ACL:
         # Success response from ACL endpoint
         for i in json.loads(response.text)["content"]:
             security_item = i["security"]
-            if "apiKey" in security_item and security_item["apiKey"] == api_key:
-                for e in security_item["endpoints"]:
-                    if e["uri"] == endpoint and method in e["verbs"]:
-                        # Success case
-                        return True, response
+            print(f"security_item: {security_item}")
+            if "apiKey" in security_item:
+                if security_item["apiKey"] == api_key:
+                    print(f"apiKey found: {security_item['apiKey']}")
+                    for e in security_item["endpoints"]:
+                        if e["uri"] == endpoint and method in e["verbs"]:
+                            # Success case
+                            return True, response
         
         return False, response
         

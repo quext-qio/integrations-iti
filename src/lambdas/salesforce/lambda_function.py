@@ -36,8 +36,8 @@ def lambda_handler(event, context):
     }
     print(f"Input for send to [AccessControl]: {wsgi_input}")
 
-    endpoint =  event["httpMethod"]
-    method = event['resource']
+    endpoint = event['resource']
+    method = event["httpMethod"]
     api_key = event['headers']['x-api-key']
     is_acl_valid, response_acl = ACL.check_permitions(endpoint, method, api_key)
     # Call AccessControl to validate API key
