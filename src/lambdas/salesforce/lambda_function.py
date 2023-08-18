@@ -5,12 +5,14 @@ from simple_salesforce import Salesforce
 from AccessControl import AccessUtils as AccessControl
 
 def lambda_handler(event, context):
-
+    # Validate input
+    input = json.loads(event['body'])
+    print(f"EVENT: {event}")
     try:
         # ACL Validation
-        headers = event['headers']
+        headers = json.loads(event['headers'])
         wsgi_input = {
-            'PATH_INFO': event['resource'],
+            'PATH_INFO': json.loads(event['resource']),
             'REQUEST_METHOD': "POST"
         }
         if 'x-api-key' in headers:
@@ -23,8 +25,6 @@ def lambda_handler(event, context):
         print(f"ACL Validation Error: {str(e)}")
         pass
 
-    # Validate input
-    input = json.loads(event['body'])
     is_valid, input_errors = SchemaRequestPost(input).is_valid()
     if not is_valid:
         # Case: Bad Request
@@ -77,7 +77,7 @@ def lambda_handler(event, context):
         return {
             'statusCode': "400",
             'body': json.dumps({
-                'data': None,
+                'data': {},
                 'errors': [str(e)],
             }),
             'headers': {
