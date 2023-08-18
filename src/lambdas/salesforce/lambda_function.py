@@ -2,7 +2,7 @@ import json
 from schemas.schema_request_post import SchemaRequestPost
 from global_config.config import salesforce_config
 from simple_salesforce import Salesforce
-from AccessControl import AccessUtils as AccessControl
+from acl import ACL
 
 def lambda_handler(event, context):
     print(f"Event: {event}, context: {context}")
@@ -10,56 +10,16 @@ def lambda_handler(event, context):
     # ---------------------------------------------------------------------------------------------
     # AccessControl
     # ---------------------------------------------------------------------------------------------
-
-    # Check if API key is present
-    if 'x-api-key' not in event['headers']:
-        print("Unauthorized: No API key header.")
-        return {
-            'statusCode': "401",
-            'body': json.dumps({
-                'data': {},
-                'errors': [{"message": "Unauthorized"}],
-            }),
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',  
-            },
-            'isBase64Encoded': False
-        }
-    
-    # Create WSGI input required for [AccessControl.check_access_control()]
-    wsgi_input = {
-        'PATH_INFO': event['resource'],
-        'REQUEST_METHOD': event["httpMethod"],
-        'HTTP_X_API_KEY': event['headers']['x-api-key']
-    }
-    print(f"Input for send to [AccessControl]: {wsgi_input}")
-
-    # Call AccessControl to validate API key
-    acl_response, acl_code= AccessControl.check_access_control(wsgi_input)
-    print(f"Result from [AccessControl]: {acl_code} = {acl_response}")
-
-    # If AccessControl return error, we will return the error
-    if acl_code != 200:
-        return {
-            'statusCode': f"{acl_code}",
-            'body': json.dumps({
-                'data': {},
-                'errors': [{"message": acl_response["error"] if "error" in acl_response else acl_response}],
-            }),
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',  
-            },
-            'isBase64Encoded': False
-        }
+    is_acl_valid, response_acl = ACL.check_permitions(event)
+    if not is_acl_valid:
+        return response_acl
 
     # ---------------------------------------------------------------------------------------------
     # Body validation
     # ---------------------------------------------------------------------------------------------
 
     # Validate body of request
-    input = event['body'] if 'body' in event else {}
+    input = json.loads(event['body'])
     is_valid, input_errors = SchemaRequestPost(input).is_valid()
     if not is_valid:
         # Case: Bad Request
@@ -67,7 +27,7 @@ def lambda_handler(event, context):
         return {
             'statusCode': "400",
             'body': json.dumps({
-                'data': [],
+                'data': {},
                 'errors': errors,
             }),
             'headers': {
