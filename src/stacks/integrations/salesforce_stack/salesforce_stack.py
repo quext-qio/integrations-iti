@@ -33,24 +33,24 @@ class SalesforceStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Define a model for the expected request body
-        request_model = apigateway_.Model(
-            self, "RequestModel",
-            rest_api=api,
-            schema=apigateway_.JsonSchema(
-                schema=apigateway_.JsonSchemaVersion.DRAFT4,
-                title="[Body]-/salesforce/query",
-                type=apigateway_.JsonSchemaType.OBJECT,
-                properties={
-                    "query": apigateway_.JsonSchema(
-                        type=apigateway_.JsonSchemaType.STRING,
-                        description="SOQL query to execute.",
-                    ),
-                },
-            ),
-            content_type="application/json",
-            description="Request model for [POST] /salesforce/query",
-            model_name=f"[Body]-/salesforce/query",
-        )
+        # request_model = apigateway_.Model(
+        #     self, "RequestModel",
+        #     rest_api=api,
+        #     schema=apigateway_.JsonSchema(
+        #         schema=apigateway_.JsonSchemaVersion.DRAFT4,
+        #         title="[Body]-/salesforce/query",
+        #         type=apigateway_.JsonSchemaType.OBJECT,
+        #         properties={
+        #             "query": apigateway_.JsonSchema(
+        #                 type=apigateway_.JsonSchemaType.STRING,
+        #                 description="SOQL query to execute.",
+        #             ),
+        #         },
+        #     ),
+        #     content_type="application/json",
+        #     description="Request model for [POST] /salesforce/query",
+        #     model_name=f"[Body]-/salesforce/query",
+        # )
 
         # --------------------------------------------------------------------
         # Resource to execute query (POST)
@@ -94,6 +94,6 @@ class SalesforceStack(NestedStack):
                     }
                 )
             ],
-            request_model=request_model,
+            api_key_required=True,
         )
 
