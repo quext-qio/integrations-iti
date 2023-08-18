@@ -30,27 +30,7 @@ class SalesforceStack(NestedStack):
             layers=layers,
             function_name="Salesforce_Dynamic_Lambda_Function",
         )
-
-        # --------------------------------------------------------------------
-        # Define a model for the expected request body
-        # request_model = apigateway_.Model(
-        #     self, "RequestModel",
-        #     rest_api=api,
-        #     schema=apigateway_.JsonSchema(
-        #         schema=apigateway_.JsonSchemaVersion.DRAFT4,
-        #         title="[Body]-/salesforce/query",
-        #         type=apigateway_.JsonSchemaType.OBJECT,
-        #         properties={
-        #             "query": apigateway_.JsonSchema(
-        #                 type=apigateway_.JsonSchemaType.STRING,
-        #                 description="SOQL query to execute.",
-        #             ),
-        #         },
-        #     ),
-        #     content_type="application/json",
-        #     description="Request model for [POST] /salesforce/query",
-        #     model_name=f"[Body]-/salesforce/query",
-        # )
+        
 
         # --------------------------------------------------------------------
         # Resource to execute query (POST)
@@ -77,13 +57,6 @@ class SalesforceStack(NestedStack):
                         'method.response.header.Access-Control-Allow-Origin': "'*'"
                     }
                 ),
-                apigateway_.IntegrationResponse(
-                    status_code="403",
-                    response_templates={"application/json": '{"data": {}, "errors": [{"message": "API key is required"}]}'},
-                    response_parameters={
-                        'method.response.header.Access-Control-Allow-Origin': "'*'"
-                    }
-                )
             ],
         )
 
@@ -101,6 +74,5 @@ class SalesforceStack(NestedStack):
                     }
                 ),
             ],
-            api_key_required=True,
+            #api_key_required=True,
         )
-
