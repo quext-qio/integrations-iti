@@ -28,16 +28,18 @@ class StageName(Enum):
                 "custom_domain_name" : "integrations-api.stage.quext.io",
             }
         elif self == StageName.RC:
-            return {
-                "hosted_zone_id" : "Z1UJRXOUMOOFQ8",
-                "domain_name_alias_target" : "stage.quext.io",
-                "custom_domain_name" : "integrations-api-rc.stage.quext.io",
-            }
+            # return {
+            #     "hosted_zone_id" : "Z1UJRXOUMOOFQ8",
+            #     "domain_name_alias_target" : "stage.quext.io",
+            #     "custom_domain_name" : "integrations-api-rc.stage.quext.io",
+            # }
+            raise NotImplementedError("RC is not implemented yet.")
         elif self == StageName.PROD:
-            return {
-                "hosted_zone_id" : "Z1UJRXOUMOOFQ8",
-                "domain_name_alias_target" : "quext.io",
-                "custom_domain_name" : "integrations-api.quext.io",
-            }
+            # return {
+            #     "hosted_zone_id" : "Z1UJRXOUMOOFQ8",
+            #     "domain_name_alias_target" : "quext.io",
+            #     "custom_domain_name" : "integrations-api.quext.io",
+            # }
+            raise NotImplementedError("PROD is not implemented yet.")
         else:
             raise ValueError(f"Unknown stage: {self.value}")
