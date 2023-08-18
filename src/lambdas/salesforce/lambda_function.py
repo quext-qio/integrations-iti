@@ -65,7 +65,7 @@ def lambda_handler(event, context):
     # ---------------------------------------------------------------------------------------------
 
     # Validate body of request
-    input = event['body'] if 'body' in event else {}
+    input = json.loads(event['body'])
     is_valid, input_errors = SchemaRequestPost(input).is_valid()
     if not is_valid:
         # Case: Bad Request
