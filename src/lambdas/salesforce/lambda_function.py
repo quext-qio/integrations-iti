@@ -11,13 +11,14 @@ def lambda_handler(event, context):
     print(f"EVENT: {event}")
     try:
         # ACL Validation
-        headers = json.loads(event['headers'])
-        if 'x-api-key' not in headers:
+        print(f"ACL Validation: {event['headers']}, type: {type(event['headers'])}")
+        if 'x-api-key' not in event['headers']:
+            print("No API key header.")
             return {
                 'statusCode': "401",
                 'body': json.dumps({
                     'data': [],
-                    'errors': [{"message": "No API key in headers"}],
+                    'errors': [{"message": "Unauthorized"}],
                 }),
                 'headers': {
                     'Content-Type': 'application/json',
@@ -31,8 +32,10 @@ def lambda_handler(event, context):
             'REQUEST_METHOD': event["httpMethod"],
             'HTTP_X_API_KEY': event['headers']['x-api-key']
         }
+        print(f"WSGI INPUT: {wsgi_input}")
 
         res, res_code= AccessControl.check_access_control(wsgi_input)
+        print(f"ACL Validation Result: {res}, {res_code}")
         if res_code != 200:
             return res_code, res
     except Exception as e:
