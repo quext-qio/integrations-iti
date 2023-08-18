@@ -12,8 +12,8 @@ shared_services_account_id = '273056594042'
 branch_env = [
         "dev"   : 'dev',
         "stage" : 'stage',
+        "qa"    : 'dev',
         "rc"    : 'rc',
-        "qa"    : 'qa',
         //"master"  : 'prod'
     ]
 
