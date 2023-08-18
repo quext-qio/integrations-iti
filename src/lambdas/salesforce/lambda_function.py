@@ -46,11 +46,12 @@ def lambda_handler(event, context):
 
     # If AccessControl return error, we will return the error
     if not is_acl_valid:
+        print(f"Unauthorized: {response_acl}")
         return {
             'statusCode': f"{response_acl.status_code}",
             'body': json.dumps({
                 'data': {},
-                'errors': [{"message": response_acl["error"] if "error" in response_acl else response_acl}],
+                'errors': [{"message": "Unauthorized"}],
             }),
             'headers': {
                 'Content-Type': 'application/json',
