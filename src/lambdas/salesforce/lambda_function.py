@@ -10,44 +10,9 @@ def lambda_handler(event, context):
     # ---------------------------------------------------------------------------------------------
     # AccessControl
     # ---------------------------------------------------------------------------------------------
-
-    # Check if API key is present
-    if 'x-api-key' not in event['headers']:
-        print("Unauthorized: No API key header.")
-        return {
-            'statusCode': "401",
-            'body': json.dumps({
-                'data': {},
-                'errors': [{"message": "Unauthorized"}],
-            }),
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',  
-            },
-            'isBase64Encoded': False
-        }
-    
-    # Create values required for [ACL.check_permitions]
-    endpoint = event['resource']
-    method = event["httpMethod"]
-    api_key = event['headers']['x-api-key']
-    is_acl_valid, response_acl = ACL.check_permitions(endpoint, method, api_key)
-
-    # If AccessControl return error, we will return the error
+    is_acl_valid, response_acl = ACL.check_permitions(event)
     if not is_acl_valid:
-        print(f"Unauthorized: {response_acl}")
-        return {
-            'statusCode': f"{response_acl.status_code}",
-            'body': json.dumps({
-                'data': {},
-                'errors': [{"message": "Unauthorized"}],
-            }),
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',  
-            },
-            'isBase64Encoded': False
-        }
+        return response_acl
 
     # ---------------------------------------------------------------------------------------------
     # Body validation
