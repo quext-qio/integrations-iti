@@ -30,6 +30,7 @@ class SalesforceStack(NestedStack):
             layers=layers,
             function_name="Salesforce_Dynamic_Lambda_Function",
         )
+        
 
         # --------------------------------------------------------------------
         # Resource to execute query (POST)
@@ -38,8 +39,9 @@ class SalesforceStack(NestedStack):
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
                 allow_origins=apigateway_.Cors.ALL_ORIGINS
-            ),    
+            ),  
         )
+        
 
         # --------------------------------------------------------------------
         # Create a Lambda integration instance
@@ -70,7 +72,7 @@ class SalesforceStack(NestedStack):
                     response_parameters={
                         'method.response.header.Access-Control-Allow-Origin': True
                     }
-                )
+                ),
             ],
+            #api_key_required=True,
         )
-
