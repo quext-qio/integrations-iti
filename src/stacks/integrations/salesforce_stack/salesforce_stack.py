@@ -32,28 +32,34 @@ class SalesforceStack(NestedStack):
         )
 
         # --------------------------------------------------------------------
+        # Define a model for the expected request body
+        request_model = apigateway_.Model(
+            self, 
+            "RequestModel",
+            rest_api=api,
+            content_type="application/json",
+            description="Request model for [POST] /salesforce/query",
+            model_name=f"[POST]-RequestModel",
+            schema={
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string"}
+                },
+                "required": ["query"]
+            }
+        )
+
+        # --------------------------------------------------------------------
         # Resource to execute query (POST)
         post_endpoint = api.add_resource(
             "query",
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
                 allow_origins=apigateway_.Cors.ALL_ORIGINS
-            ),    
+            ),
+            request_model=request_model,   
         )
-
-        # --------------------------------------------------------------------
-        # Define a model for the expected request body
-        request_model = api.add_model(
-            "RequestModel",
-            content_type="application/json",
-            schema={
-                "type": "object",
-                "properties": {
-                    "query": {"type": "string", "minLength": 1}
-                },
-                "required": ["query"]
-            }
-        )
+        
 
         # --------------------------------------------------------------------
         # Create a Lambda integration instance
@@ -61,7 +67,6 @@ class SalesforceStack(NestedStack):
         post_endpoint_lambda_integration = apigateway_.LambdaIntegration(
             post_lambda_function,
             proxy=True,
-            request_templates={"application/json": request_model.to_json_template()},
             integration_responses=[
                 apigateway_.IntegrationResponse(
                     status_code="200",
