@@ -144,11 +144,14 @@ class AccessUtils:
         acl_response = {
             "data": None
         }
-        if len(ACLs) == 0:
-            is_ok, acl_response, ACLs =  access_control.load_acls()
+
+        is_ok, acl_response, ACLs =  access_control.load_acls()
+        # if len(ACLs) == 0:
+        #     is_ok, acl_response, ACLs =  access_control.load_acls()
         if not is_ok:
             logging.warning(f"Error to load acls: {acl_response}")
-            return {"error": "Error to load acls"}, 500
+            return {"error": f"Error to load acls {acl_response}"}, acl_response.status_code
+        
         acl, status = access_util_obj.accessControl(wsgi_environ, ACLs)
         logging.info(status)
         response, status = access_util_obj.return_response(acl, status)

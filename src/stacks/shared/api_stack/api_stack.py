@@ -1,13 +1,12 @@
+from constructs import Construct
+from src.utils.enums.stage_name import StageName
 from aws_cdk import (
     NestedStack,
     aws_apigateway as apigateway_,
     aws_lambda as lambda_,
     aws_events as events_,
     aws_events_targets as targets_,
-    aws_certificatemanager as acm_,
 )
-from constructs import Construct
-from src.utils.enums.stage_name import StageName
 
 # Lambda function to store the API URL after deployment
 def print_api_url_lambda(scope: Construct, api_url: str, stage: StageName):
@@ -36,7 +35,6 @@ class APIStack(NestedStack):
 
     def __init__(self, scope: Construct, construct_id: str, stage: StageName, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
         # --------------------------------------------------------------------
         # Create a Rest API instance
         self.api = apigateway_.RestApi(
@@ -52,10 +50,53 @@ class APIStack(NestedStack):
                 tracing_enabled=True,
             ),
             endpoint_configuration=apigateway_.EndpointConfiguration(
-                types=[apigateway_.EndpointType.REGIONAL]
+                types=[apigateway_.EndpointType.REGIONAL],
             ),
         )
 
+        # --------------------------------------------------------------------
+        # Set Custom Domain depending on the stage
+        domain_config = stage.get_api_domain_config()
+        hosted_zone_id = domain_config["hosted_zone_id"]
+        domain_name_alias_target = domain_config["domain_name_alias_target"]
+        custom_domain_name = domain_config["custom_domain_name"]
+        
+        # Get the domain name from the attributes
+        api_domain = apigateway_.DomainName.from_domain_name_attributes(
+            self, f"{stage.value}-DomainName",
+            domain_name=custom_domain_name,
+            domain_name_alias_hosted_zone_id=hosted_zone_id,
+            domain_name_alias_target=domain_name_alias_target,
+        )
+
+        try:
+            # Attempt to create the base mapping
+            apigateway_.BasePathMapping(
+                self, f"{stage.value}-BasePathMapping",
+                domain_name=api_domain,
+                rest_api=self.api,
+                stage=self.api.deployment_stage,
+            )
+        except apigateway_.CfnBasePathMappingAlreadyExistsException:
+            # If the base mapping already exists, catch the exception
+            # and proceed without creating a new one.
+            print("Base path mapping already exists.")
+            pass
+
+        # --------------------------------------------------------------------
+        # Asocaite API Key for the API Gateway
+        # api_key = apigateway_.ApiKey(
+        #     self, f"{stage.value}-ApiKey",
+        #     api_key_name=f"{stage.value}-ApiKey",
+        #     description=f"API Key for {stage.value} stage",
+        #     enabled=True,
+        #     value=stage.get_api_key(),
+        # )
+
+        #api_key = self.api.add_api_key(stage.get_api_key())
+        
+        
+        # --------------------------------------------------------------------
         # Standard root resource
         api_resource = self.api.root.add_resource("api")
 
@@ -108,7 +149,7 @@ class APIStack(NestedStack):
             "v1": dict_v1,
             "v2": dict_v2,
         }
-
+        
         # --------------------------------------------------------------------
         # TODO: Remove logic when custom domain is ready
         # Create a Lambda function for Store API URL after deployment
@@ -116,25 +157,3 @@ class APIStack(NestedStack):
         print_url_lambda = print_api_url_lambda(self, api_url, stage)
         rule = events_.Rule(self, f"{stage.name}-PrintApiUrlRule", schedule=events_.Schedule.expression('rate(365 days)'))
         rule.add_target(targets_.LambdaFunction(print_url_lambda, event=events_.RuleTargetInput.from_object({})))
-   
-       
-
-        # # --------------------------------------------------------------------
-        # # Test 1: Create a custom domain name for the API
-        # stage_name = stage.value.lower()
-        # custom_domain_name = f"{stage_name}-api-integration-engine"
-        # domain_name = f"{custom_domain_name}.{self.region}.amazonaws.com"
-
-        # # Create a certificate from ACM
-        # certificate = acm_.Certificate(
-        #     self, f"{stage.name}-Integrations_Certificate",
-        #     domain_name=domain_name,
-        #     validation=acm_.CertificateValidation.from_dns(),
-        # )
-
-        # self.api.add_domain_name(
-        #     f"{stage_name}-MyCustomDomainName",
-        #     domain_name=domain_name,
-        #     certificate=certificate,
-        #     endpoint_type=apigateway_.EndpointType.REGIONAL,
-        # )    
