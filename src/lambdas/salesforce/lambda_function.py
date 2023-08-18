@@ -17,7 +17,7 @@ def lambda_handler(event, context):
                 'statusCode': "401",
                 'body': json.dumps({
                     'data': [],
-                    'errors': ["No API key header."],
+                    'errors': [{"message": "No API key in headers"}],
                 }),
                 'headers': {
                     'Content-Type': 'application/json',
