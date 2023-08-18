@@ -7,6 +7,7 @@ from AccessControl import AccessUtils as AccessControl
 def lambda_handler(event, context):
     # Validate input
     input = json.loads(event['body'])
+    
     print(f"EVENT: {event}")
     try:
         # ACL Validation
@@ -25,6 +26,7 @@ def lambda_handler(event, context):
         print(f"ACL Validation Error: {str(e)}")
         pass
 
+    # Validate body of request
     is_valid, input_errors = SchemaRequestPost(input).is_valid()
     if not is_valid:
         # Case: Bad Request
