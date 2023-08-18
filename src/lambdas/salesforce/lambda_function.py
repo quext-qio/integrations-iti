@@ -2,8 +2,23 @@ import json
 from schemas.schema_request_post import SchemaRequestPost
 from global_config.config import salesforce_config
 from simple_salesforce import Salesforce
+from AccessControl import AccessUtils as AccessControl
 
 def lambda_handler(event, context):
+    # ACL Validation
+    headers = event['headers']
+    wsgi_input = {
+        'PATH_INFO': event['resource'],
+        'REQUEST_METHOD': "POST"
+    }
+    if 'x-api-key' in headers:
+        wsgi_input['HTTP_X_API_KEY'] = headers['x-api-key']
+
+    res, res_code= AccessControl.check_access_control(wsgi_input)
+    if res_code != 200:
+        return res_code, res
+
+    # Validate input
     input = json.loads(event['body'])
     is_valid, input_errors = SchemaRequestPost(input).is_valid()
     if not is_valid:
