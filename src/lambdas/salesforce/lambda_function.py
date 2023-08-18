@@ -13,7 +13,6 @@ def lambda_handler(event, context):
         # ACL Validation
         print(f"ACL Validation: {event['headers']}, type: {type(event['headers'])}")
         if 'x-api-key' not in event['headers']:
-            print("No API key header.")
             return {
                 'statusCode': "401",
                 'body': json.dumps({
@@ -37,7 +36,19 @@ def lambda_handler(event, context):
         res, res_code= AccessControl.check_access_control(wsgi_input)
         print(f"ACL Validation Result: {res}, {res_code}")
         if res_code != 200:
-            return res_code, res
+            return {
+                'statusCode': f"{res_code}",
+                'body': json.dumps({
+                    'data': [],
+                    'errors': [{"message": res["error"]}],
+                }),
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',  
+                },
+                'isBase64Encoded': False
+            }
+
     except Exception as e:
         print(f"ACL Validation Error: {str(e)}")
         pass
