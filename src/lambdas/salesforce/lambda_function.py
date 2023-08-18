@@ -2,7 +2,6 @@ import json
 from schemas.schema_request_post import SchemaRequestPost
 from global_config.config import salesforce_config
 from simple_salesforce import Salesforce
-from AccessControl import AccessUtils as AccessControl
 from acl import ACL
 
 def lambda_handler(event, context):
@@ -28,21 +27,11 @@ def lambda_handler(event, context):
             'isBase64Encoded': False
         }
     
-    # Create WSGI input required for [AccessControl.check_access_control()]
-    wsgi_input = {
-        'PATH_INFO': event['resource'],
-        'REQUEST_METHOD': event["httpMethod"],
-        'HTTP_X_API_KEY': event['headers']['x-api-key']
-    }
-    print(f"Input for send to [AccessControl]: {wsgi_input}")
-
+    # Create values required for [ACL.check_permitions]
     endpoint = event['resource']
     method = event["httpMethod"]
     api_key = event['headers']['x-api-key']
     is_acl_valid, response_acl = ACL.check_permitions(endpoint, method, api_key)
-    # Call AccessControl to validate API key
-    # acl_response, acl_code= AccessControl.check_access_control(wsgi_input)
-    # print(f"Result from [AccessControl]: {acl_code} = {acl_response}")
 
     # If AccessControl return error, we will return the error
     if not is_acl_valid:

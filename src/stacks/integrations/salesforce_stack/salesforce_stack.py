@@ -42,11 +42,26 @@ class SalesforceStack(NestedStack):
         )
 
         # --------------------------------------------------------------------
+        # Define a model for the expected request body
+        request_model = api.add_model(
+            "RequestModel",
+            content_type="application/json",
+            schema={
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "minLength": 1}
+                },
+                "required": ["query"]
+            }
+        )
+
+        # --------------------------------------------------------------------
         # Create a Lambda integration instance
         # POST
         post_endpoint_lambda_integration = apigateway_.LambdaIntegration(
             post_lambda_function,
             proxy=True,
+            request_templates={"application/json": request_model.to_json_template()},
             integration_responses=[
                 apigateway_.IntegrationResponse(
                     status_code="200",
