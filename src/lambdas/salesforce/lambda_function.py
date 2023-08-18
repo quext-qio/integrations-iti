@@ -5,55 +5,61 @@ from simple_salesforce import Salesforce
 from AccessControl import AccessUtils as AccessControl
 
 def lambda_handler(event, context):
-    # Validate input
-    input = json.loads(event['body'])
+    print(f"Event: {event}, context: {context}")
     
-    print(f"EVENT: {event}")
-    try:
-        # ACL Validation
-        print(f"ACL Validation: {event['headers']}, type: {type(event['headers'])}")
-        if 'x-api-key' not in event['headers']:
-            return {
-                'statusCode': "401",
-                'body': json.dumps({
-                    'data': [],
-                    'errors': [{"message": "Unauthorized"}],
-                }),
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',  
-                },
-                'isBase64Encoded': False
-            }
-        
-        wsgi_input = {
-            'PATH_INFO': event['resource'],
-            'REQUEST_METHOD': event["httpMethod"],
-            'HTTP_X_API_KEY': event['headers']['x-api-key']
+    # ---------------------------------------------------------------------------------------------
+    # AccessControl
+    # ---------------------------------------------------------------------------------------------
+
+    # Check if API key is present
+    if 'x-api-key' not in event['headers']:
+        print("Unauthorized: No API key header.")
+        return {
+            'statusCode': "401",
+            'body': json.dumps({
+                'data': {},
+                'errors': [{"message": "Unauthorized"}],
+            }),
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',  
+            },
+            'isBase64Encoded': False
         }
-        print(f"WSGI INPUT: {wsgi_input}")
+    
+    # Create WSGI input required for [AccessControl.check_access_control()]
+    wsgi_input = {
+        'PATH_INFO': event['resource'],
+        'REQUEST_METHOD': event["httpMethod"],
+        'HTTP_X_API_KEY': event['headers']['x-api-key']
+    }
+    print(f"Input for send to [AccessControl]: {wsgi_input}")
 
-        res, res_code= AccessControl.check_access_control(wsgi_input)
-        print(f"ACL Validation Result: {res}, {res_code}")
-        if res_code != 200:
-            return {
-                'statusCode': f"{res_code}",
-                'body': json.dumps({
-                    'data': [],
-                    'errors': [{"message": res["error"]}],
-                }),
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',  
-                },
-                'isBase64Encoded': False
-            }
+    # Call AccessControl to validate API key
+    acl_response, acl_code= AccessControl.check_access_control(wsgi_input)
+    print(f"Result from [AccessControl]: {acl_code} = {acl_response}")
 
-    except Exception as e:
-        print(f"ACL Validation Error: {str(e)}")
-        pass
+    # If AccessControl return error, we will return the error
+    if acl_code != 200:
+        return {
+            'statusCode': f"{acl_code}",
+            'body': json.dumps({
+                'data': {},
+                'errors': [{"message": acl_response["error"] if "error" in acl_response else acl_response}],
+            }),
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',  
+            },
+            'isBase64Encoded': False
+        }
+
+    # ---------------------------------------------------------------------------------------------
+    # Body validation
+    # ---------------------------------------------------------------------------------------------
 
     # Validate body of request
+    input = event['body'] if 'body' in event else {}
     is_valid, input_errors = SchemaRequestPost(input).is_valid()
     if not is_valid:
         # Case: Bad Request
@@ -71,23 +77,25 @@ def lambda_handler(event, context):
             'isBase64Encoded': False  
         }
 
+    # ---------------------------------------------------------------------------------------------
     # Salesforce flow
+    # ---------------------------------------------------------------------------------------------
     try:
-        # Get config from parameter store
+        # Get config from parameter store to connect to Salesforce
         username = salesforce_config['username']
         password = salesforce_config['password']
         security_token = salesforce_config['security_token']
         current_env = salesforce_config['current_env']
         
-        # Salesforce connection
-        sf = None
+        # Salesforce authentication
+        salesforce = None
         if current_env == 'prod':
-            sf = Salesforce(username=username, password=password, security_token=security_token)
+            salesforce = Salesforce(username=username, password=password, security_token=security_token)
         else:    
-            sf = Salesforce(username=username, password=password, security_token=security_token, domain='test')
+            salesforce = Salesforce(username=username, password=password, security_token=security_token, domain='test')
 
         # Execute query
-        query_result = sf.query_all(input['query'])
+        query_result = salesforce.query_all(input['query'])
 
         # Case: Success
         return {
@@ -102,9 +110,12 @@ def lambda_handler(event, context):
             },
             'isBase64Encoded': False  
         }
+    
     except Exception as e:
+        # Case: Internal Server Error
+        print(f"Unhandled exception in [Salesforce flow]: {e}")
         return {
-            'statusCode': "400",
+            'statusCode': "500",
             'body': json.dumps({
                 'data': {},
                 'errors': [str(e)],
