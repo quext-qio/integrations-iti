@@ -1,10 +1,11 @@
 import json, os, requests
 
 class ACL:
-    def _loadSecurity(self, partner) -> tuple:
+    @staticmethod
+    def _loadSecurity() -> tuple:
         parameter_store = json.loads(os.environ.get("parameter_store"))
         host = parameter_store['ACL_HOST']
-        url = f'{host}/api/partners/security/{partner}?redacted=off'
+        url = f'{host}/api/partners/security?redacted=off'
         response = requests.get(url)
         if response.status_code == 200:
             return True, response
@@ -14,7 +15,7 @@ class ACL:
     @staticmethod
     def check_permitions(endpoint, method, api_key):
         # Load security from ACL
-        is_ok, response = ACL()._loadSecurity()
+        is_ok, response = ACL._loadSecurity()
         if not is_ok:
             return False, response
         
