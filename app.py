@@ -28,6 +28,10 @@ if current_stage == 'stage':
     stage = StageName.STAGE
 elif current_stage == 'prod':
     stage = StageName.PROD
+elif current_stage == 'rc':
+    stage = StageName.RC
+elif current_stage == 'qa':
+    stage = StageName.QA
 else:
     stage = StageName.DEV
 print(f"Stage seleted: {stage.value}")
@@ -36,10 +40,10 @@ print(f"Stage seleted: {stage.value}")
 # Tags for all resources
 server_name = "aws-integration-engine"
 service_name = "integrationApi"
-cdk.Tags.of(app).add(key="Project", value='quext', priority=300)
-cdk.Tags.of(app).add(key="Team", value='integration', priority=300)
-cdk.Tags.of(app).add(key="Environment", value=stage.value, priority=300)
-cdk.Tags.of(app).add(key="Service", value=service_name, priority=300)
+cdk.Tags.of(app).add(key="project", value='quext', priority=300)
+cdk.Tags.of(app).add(key="team", value='integration', priority=300)
+cdk.Tags.of(app).add(key="environment", value=stage.value, priority=300)
+cdk.Tags.of(app).add(key="service", value=service_name, priority=300)
 
 # --------------------------------------------------------------------
 # Root stack

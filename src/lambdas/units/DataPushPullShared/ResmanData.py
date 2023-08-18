@@ -5,8 +5,8 @@ import os
 import datetime, re
 import requests
 from Utils.Config.Config import config
-from Utils.AccessControl import AccessUtils as AccessControl
 from Utils.Constants.ResmanConstants import ResmanConstants
+from AccessControl import AccessUtils as AccessControl
 
 class DataResman:
 

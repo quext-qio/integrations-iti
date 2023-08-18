@@ -1,4 +1,4 @@
-import json, requests, os
+import json, requests
 from configuration.realpage.realpage_config import ilm_config
 
 class QuextTourService:

@@ -1,4 +1,3 @@
-from urllib.parse import urlencode
 import requests, json
 from utils.shared.constants.guestcard_constants import GuestcardsConstants
 from utils.mapper.bedroom_mapping import bedroom_mapping
