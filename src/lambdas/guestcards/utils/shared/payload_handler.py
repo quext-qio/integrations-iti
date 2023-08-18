@@ -65,6 +65,10 @@ class PayladHandler:
                             "Event": {
                                 "@EventType": data[GuestcardsConstants.EVENT_TYPE],
                                 "@EventDate": data[GuestcardsConstants.EVENT_DATE],
+                                "EventID": {
+                                    "@IDValue": "",
+                                    "@IDType":  data.get("unitID", "")
+                                },
                                 "Agent": {
                                     "AgentID": {
                                         "@IDValue": agent_id
@@ -75,7 +79,8 @@ class PayladHandler:
                                     }
                                 },
                                 "FirstContact": "true",
-                                "Comments": data.get(GuestcardsConstants.GUEST_COMMENT, "")
+                                "Comments": data.get(GuestcardsConstants.GUEST_COMMENT, ""),
+                                "TransactionSource": data.get("TransactionSourceid")
                             }
                     } 
             
