@@ -3,6 +3,7 @@ from schemas.schema_request_post import SchemaRequestPost
 from global_config.config import salesforce_config
 from simple_salesforce import Salesforce
 from AccessControl import AccessUtils as AccessControl
+from acl import ACL
 
 def lambda_handler(event, context):
     print(f"Event: {event}, context: {context}")
@@ -35,17 +36,21 @@ def lambda_handler(event, context):
     }
     print(f"Input for send to [AccessControl]: {wsgi_input}")
 
+    endpoint =  event["httpMethod"]
+    method = event['resource']
+    api_key = event['headers']['x-api-key']
+    is_acl_valid, response_acl = ACL.check_permitions(endpoint, method, api_key)
     # Call AccessControl to validate API key
-    acl_response, acl_code= AccessControl.check_access_control(wsgi_input)
-    print(f"Result from [AccessControl]: {acl_code} = {acl_response}")
+    # acl_response, acl_code= AccessControl.check_access_control(wsgi_input)
+    # print(f"Result from [AccessControl]: {acl_code} = {acl_response}")
 
     # If AccessControl return error, we will return the error
-    if acl_code != 200:
+    if not is_acl_valid:
         return {
-            'statusCode': f"{acl_code}",
+            'statusCode': f"{response_acl.status_code}",
             'body': json.dumps({
                 'data': {},
-                'errors': [{"message": acl_response["error"] if "error" in acl_response else acl_response}],
+                'errors': [{"message": response_acl["error"] if "error" in response_acl else response_acl}],
             }),
             'headers': {
                 'Content-Type': 'application/json',
