@@ -12,9 +12,9 @@ class ACL:
             return False, response
 
     @staticmethod
-    def check_permitions(self, endpoint, method, api_key):
+    def check_permitions(endpoint, method, api_key):
         # Load security from ACL
-        is_ok, response = self._loadSecurity()
+        is_ok, response = ACL()._loadSecurity()
         if not is_ok:
             return False, response
         
