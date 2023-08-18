@@ -92,6 +92,10 @@ class SalesforceStack(NestedStack):
                     response_parameters={
                         'method.response.header.Access-Control-Allow-Origin': True
                     }
+                ),
+                apigateway_.IntegrationResponse(
+                    status_code="403",
+                    response_templates={"application/json": '{"data": {}, "errors": [{"message": "API key is required"}]}'}
                 )
             ],
             api_key_required=True,
