@@ -100,10 +100,13 @@ class SpherexxService:
                 "tourError": tour_error
             }
         # Format response of RealPage ILM
+        is_success = True if "true" in res.text else False
         serviceResponse = ServiceResponse(
-            guest_card_id=res.text,
+            guest_card_id=str(uuid.uuid4()) if is_success else "",
             first_name=body["guest"]["first_name"],
             last_name=body["guest"]["last_name"],
+            message= "" if is_success else "The Data sent is invalid" ,
+            result= "SUCCESS" if is_success else "FAILED",
             tour_information=tour_information,
         ).format_response()
 
