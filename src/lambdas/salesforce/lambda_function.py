@@ -50,7 +50,7 @@ def lambda_handler(event, context):
         
         # Salesforce authentication
         salesforce = None
-        if current_env == 'prod':
+        if current_env == 'prod' or current_env == 'stage':
             salesforce = Salesforce(username=username, password=password, security_token=security_token)
         else:    
             salesforce = Salesforce(username=username, password=password, security_token=security_token, domain='test')
