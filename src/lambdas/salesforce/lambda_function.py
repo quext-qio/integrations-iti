@@ -10,9 +10,10 @@ def lambda_handler(event, context):
     # ---------------------------------------------------------------------------------------------
     # AccessControl
     # ---------------------------------------------------------------------------------------------
-    is_acl_valid, response_acl = ACL.check_permitions(event)
-    if not is_acl_valid:
-        return response_acl
+    # TODO: Uncomment when ACL is ready for stage and prod
+    # is_acl_valid, response_acl = ACL.check_permitions(event)
+    # if not is_acl_valid:
+    #     return response_acl
 
     # ---------------------------------------------------------------------------------------------
     # Body validation
