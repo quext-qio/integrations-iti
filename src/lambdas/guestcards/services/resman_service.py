@@ -4,7 +4,7 @@ from abstract.service_interface import ServiceInterface
 from utils.shared.config import config
 from utils.shared.payload_handler import PayladHandler
 from services.shared.quext_tour_service import QuextTourService
-from utils.shared.constants.resman_constants import *
+from constants.resman_constants import *
 from Converter import Converter
 from utils.service_response import ServiceResponse
 
