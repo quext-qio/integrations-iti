@@ -5,10 +5,11 @@ from aws_cdk import (
     aws_apigateway as apigateway_,
 )
 from constructs import Construct
+from src.utils.enums.app_environment import AppEnvironment
 
 class ConserviceStack(NestedStack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict, app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
@@ -20,7 +21,7 @@ class ConserviceStack(NestedStack):
         # Create lambda function instance for (# POST /conservice)
         lambda_function = lambda_.Function(
             self, 
-            "Conservice_Lambda_Function",
+            f"{app_environment.get_stage_name()}-conservice-lambda-function",
             description="Handles the Conservice endpoint requests", 
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
@@ -28,7 +29,7 @@ class ConserviceStack(NestedStack):
             code=lambda_.Code.from_asset("./src/lambdas/conservice"),
             handler="lambda_function.lambda_handler",
             layers=layers,
-            function_name="Conservice_Lambda_Function",
+            function_name=f"{app_environment.get_stage_name()}-conservice-lambda-function",
         )
 
         # -------------------------------------------------------------------- 

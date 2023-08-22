@@ -5,10 +5,11 @@ from aws_cdk import (
     aws_apigateway as apigateway_,
 )
 from constructs import Construct
+from src.utils.enums.app_environment import AppEnvironment
 
 class CommunitiesStack(NestedStack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
@@ -19,7 +20,7 @@ class CommunitiesStack(NestedStack):
         # Create lambda function instance for (# POST /placepay/new-account)
         lambda_function = lambda_.Function(
             self, 
-            "Auth_Get_Communities",
+            f"{app_environment.get_stage_name()}-auth-get-communities",
             description="This Lambda is responsible to get a communities list according to a specific customerUUID", 
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
@@ -27,7 +28,7 @@ class CommunitiesStack(NestedStack):
             code=lambda_.Code.from_asset("./src/lambdas/communities"),
             handler="lambda_function.lambda_handler",
             layers=layers,
-            function_name="Auth_Get_Communities",
+            function_name=f"{app_environment.get_stage_name()}-auth-get-communities",
         )
 
         # -------------------------------------------------------------------- 

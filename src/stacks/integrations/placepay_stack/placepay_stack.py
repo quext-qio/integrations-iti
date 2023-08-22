@@ -5,10 +5,11 @@ from aws_cdk import (
     aws_apigateway as apigateway_,
 )
 from constructs import Construct
+from src.utils.enums.app_environment import AppEnvironment
 
 class PlacepayStack(NestedStack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], **kwargs):
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
@@ -20,7 +21,7 @@ class PlacepayStack(NestedStack):
         # Create lambda function instance for (# POST /placepay/new-account)
         post_lambda_function = lambda_.Function(
             self, 
-            "Placepay_New_Account_Lambda_Function",
+            f"{app_environment.get_stage_name()}-placepay-new-account-lambda-function",
             description="Placepay Lambda is responsible create new accounts using placepay package", 
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
@@ -28,13 +29,13 @@ class PlacepayStack(NestedStack):
             code=lambda_.Code.from_asset("./src/lambdas/placepay"),
             handler="post_lambda_function.lambda_handler",
             layers=layers,
-            function_name="Placepay_New_Account_Lambda_Function",
+            function_name=f"{app_environment.get_stage_name()}-placepay-new-account-lambda-function",
         )
         
         # Create lambda function instance for (# GET /placepay/token?accountId=)
         get_lambda_function = lambda_.Function(
             self, 
-            "Placepay_Token_Lambda_Function",
+            f"{app_environment.get_stage_name()}-placepay-token-lambda-function",
             description="Placepay Lambda is responsible create new access token placepay package", 
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
@@ -42,7 +43,7 @@ class PlacepayStack(NestedStack):
             code=lambda_.Code.from_asset("./src/lambdas/placepay"),
             handler="get_lambda_function.lambda_handler",
             layers=layers,
-            function_name="Placepay_Token_Lambda_Function",
+            function_name=f"{app_environment.get_stage_name()}-placepay-token-lambda-function",
         )
 
         # --------------------------------------------------------------------
