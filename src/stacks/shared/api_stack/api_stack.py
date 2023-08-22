@@ -41,18 +41,77 @@ class APIStack(NestedStack):
             self, f"Integrations_Api", 
             rest_api_name="Integrations_Api", 
             description="Base API Gateway for Zato to AWS Migration",
-            deploy=True,
-            deploy_options=apigateway_.StageOptions(
-                stage_name=app_environment.get_stage_name(), 
-                logging_level=apigateway_.MethodLoggingLevel.INFO,
-                data_trace_enabled=True,
-                metrics_enabled=True,
-                tracing_enabled=True,
-            ),
+            #deploy=True,
+            # deploy_options=apigateway_.StageOptions(
+            #     stage_name=app_environment.get_stage_name(), 
+            #     logging_level=apigateway_.MethodLoggingLevel.INFO,
+            #     data_trace_enabled=True,
+            #     metrics_enabled=True,
+            #     tracing_enabled=True,
+            # ),
             endpoint_configuration=apigateway_.EndpointConfiguration(
                 types=[apigateway_.EndpointType.REGIONAL],
             ),
         )
+
+        # --------------------------------------------------------------------
+        # Set the API Gateway Stage
+        if(app_environment == AppEnvironment.DEV or app_environment == AppEnvironment.QA):
+            # Dev stage
+            dev_stage = apigateway_.Stage(
+                self, "dev-integrations-stage",
+                stage_name="dev",
+                deployment=self.api.latest_deployment,
+                logging_level=apigateway_.MethodLoggingLevel.INFO,
+                data_trace_enabled=True,
+                metrics_enabled=True,
+                tracing_enabled=True,
+            )
+
+            # QA stage
+            qa_stage = apigateway_.Stage(
+                self, "qa-integrations-stage",
+                stage_name="qa",
+                deployment=self.api.latest_deployment,
+                logging_level=apigateway_.MethodLoggingLevel.INFO,
+                data_trace_enabled=True,
+                metrics_enabled=True,
+                tracing_enabled=True,
+            )
+        elif(app_environment == AppEnvironment.STAGE):
+            # Stage 
+            stage = apigateway_.Stage(
+                self, "stage-integrations-stage",
+                stage_name="stage",
+                deployment=self.api.latest_deployment,
+                logging_level=apigateway_.MethodLoggingLevel.INFO,
+                data_trace_enabled=True,
+                metrics_enabled=True,
+                tracing_enabled=True,
+            )
+        elif(app_environment == AppEnvironment.RC):
+            # RC 
+            rc_stage = apigateway_.Stage(
+                self, "rc-integrations-stage",
+                stage_name="rc",
+                deployment=self.api.latest_deployment,
+                logging_level=apigateway_.MethodLoggingLevel.INFO,
+                data_trace_enabled=True,
+                metrics_enabled=True,
+                tracing_enabled=True,
+            )
+        elif(app_environment == AppEnvironment.PROD):
+            # RC 
+            prod_stage = apigateway_.Stage(
+                self, "prod-integrations-stage",
+                stage_name="prod",
+                deployment=self.api.latest_deployment,
+                logging_level=apigateway_.MethodLoggingLevel.INFO,
+                data_trace_enabled=True,
+                metrics_enabled=True,
+                tracing_enabled=True,
+            )
+
 
         # --------------------------------------------------------------------
         # Set Custom Domain depending on the stage
