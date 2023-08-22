@@ -79,7 +79,7 @@ class PayladHandler:
                                     }
                                 },
                                 "FirstContact": "true",
-                                "Comments": data.get(GuestcardsConstants.GUEST_COMMENT, ""),
+                                "Comments": data.get("Comments", ""),
                                 "TransactionSource": data.get("TransactionSourceid")
                             }
                     } 

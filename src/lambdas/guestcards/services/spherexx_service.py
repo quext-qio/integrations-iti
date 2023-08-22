@@ -17,6 +17,7 @@ class SpherexxService:
         tour_scheduled_id = None
         tour_error = ""
         first_contact =  True
+        tour_information = None
         property_id = ips_response["platformData"]["foreign_community_id"]
 
         event = {
@@ -25,6 +26,7 @@ class SpherexxService:
                     "FirstContact": first_contact,
                     "EventDate": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "TransactionSourceid": "Quext",
+                    "Comments": prospect_comments,
                     "UnitID": "",
                 }
      
@@ -33,6 +35,9 @@ class SpherexxService:
         if "tourScheduleData" in body:
             appointment_date = body["tourScheduleData"]["start"]
             if appointment_date != "":
+                converted_date = datetime.strptime(appointment_date.replace("T", " ")[0:appointment_date.index("Z")].strip(), '%Y-%m-%d %H:%M:%S')
+                format_date = converted_date.strftime("%B %d, %Y")
+                hour = converted_date.strftime("%I:%M:%S %p")
                 date_only = appointment_date[0:appointment_date.index("T")]
                 available_times = self.get_appointment_slots(property_id, date_only)
                 
@@ -43,17 +48,29 @@ class SpherexxService:
                                 "FirstContact": first_contact,
                                 "EventDate":  f'{appointment_date[0:appointment_date.index("Z")]}.000000-04:00',
                                 "TransactionSourceid": "Quext",
+                                "Comments": prospect_comments,
                                 "UnitID": "",
                             }
                 
                         events = PayladHandler().create_events(event, ips_response)
                         tour_scheduled_id = str(uuid.uuid4())
+                        tour_comment = f' --TOURS--Tour Scheduled for {format_date} at {hour}'
+                        prospect_comments = prospect_comments + tour_comment
+                        available_times = []
+
 
                 else:
                      tour_scheduled_id = ""
                      tour_error = "No time slots available for that start time"
+
+                tour_information = {
+                "availableTimes": available_times,
+                "tourScheduledID": tour_scheduled_id,
+                "tourRequested": appointment_date,
+                "tourSchedule": True if tour_scheduled_id else False,
+                "tourError": tour_error
+            }
                    
-                
         body_json = PayladHandler().builder_payload(body, events)
       
         body_json["LeadManagement"]["Prospects"]["Prospect"]["Customers"]["Customer"].update({
@@ -71,7 +88,6 @@ class SpherexxService:
 
         xml = Converter(body_json).json_to_xml()
         cleaned_xml = re.sub(r'^<\?xml [^>]+>\s*', '', xml)
-        print(cleaned_xml)
         url = f"{URL}{INSERT_LEAD_PATH}.asmx"
         username = spherexx_config["spherexx_username"]
         password = spherexx_config["spherexx_password"]
@@ -92,21 +108,16 @@ class SpherexxService:
         'SOAPAction': f'https://www.iloveleasing.com/InsertLead'
         }
         res = requests.request("POST", url, headers=headers, data=payload)
-        tour_information = {
-                "availableTimes": available_times,
-                "tourScheduledID": tour_scheduled_id,
-                "tourRequested": appointment_date,
-                "tourSchedule": True if tour_scheduled_id else False,
-                "tourError": tour_error
-            }
+        
         # Format response of RealPage ILM
+        print(res.text)
         is_success = True if "true" in res.text else False
         serviceResponse = ServiceResponse(
             guest_card_id=str(uuid.uuid4()) if is_success else "",
             first_name=body["guest"]["first_name"],
             last_name=body["guest"]["last_name"],
             message= "" if is_success else "The Data sent is invalid" ,
-            result= "SUCCESS" if is_success else "FAILED",
+            result= "SUCCESS" if is_success else "FAILURE",
             tour_information=tour_information,
         ).format_response()
 
