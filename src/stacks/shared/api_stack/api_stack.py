@@ -41,6 +41,7 @@ class APIStack(NestedStack):
             self, f"Integrations_Api", 
             rest_api_name="Integrations_Api", 
             description="Base API Gateway for Zato to AWS Migration",
+            deploy=False,
             #deploy=True,
             # deploy_options=apigateway_.StageOptions(
             #     stage_name=app_environment.get_stage_name(), 
@@ -49,6 +50,7 @@ class APIStack(NestedStack):
             #     metrics_enabled=True,
             #     tracing_enabled=True,
             # ),
+            
             endpoint_configuration=apigateway_.EndpointConfiguration(
                 types=[apigateway_.EndpointType.REGIONAL],
             ),
@@ -78,7 +80,19 @@ class APIStack(NestedStack):
                 metrics_enabled=True,
                 tracing_enabled=True,
             )
-        elif(app_environment == AppEnvironment.STAGE):
+            dev_stage.deployment = apigateway_.Deployment(
+                self, "dev-integrations-deployment",
+                api=self.api,
+                description="dev-integrations-deployment",
+            )
+            qa_stage.deployment = apigateway_.Deployment(
+                self, "qa-integrations-deployment",
+                api=self.api,
+                description="qa-integrations-deployment",
+            )
+
+
+        elif(app_environment == AppEnvironment.STAGE or app_environment == AppEnvironment.RC):
             # Stage 
             stage = apigateway_.Stage(
                 self, "stage-integrations-stage",
@@ -89,7 +103,6 @@ class APIStack(NestedStack):
                 metrics_enabled=True,
                 tracing_enabled=True,
             )
-        elif(app_environment == AppEnvironment.RC):
             # RC 
             rc_stage = apigateway_.Stage(
                 self, "rc-integrations-stage",
@@ -100,8 +113,9 @@ class APIStack(NestedStack):
                 metrics_enabled=True,
                 tracing_enabled=True,
             )
+
         elif(app_environment == AppEnvironment.PROD):
-            # RC 
+            # PROD 
             prod_stage = apigateway_.Stage(
                 self, "prod-integrations-stage",
                 stage_name="prod",
