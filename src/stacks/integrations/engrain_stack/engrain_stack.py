@@ -7,10 +7,10 @@ from aws_cdk import (
     Duration,
 )
 from constructs import Construct
-import boto3
+from src.utils.enums.app_environment import AppEnvironment
 
 class EngrainStack(NestedStack):
-    def __init__(self, scope: Construct, construct_id: str, environment: dict[str, str], api: apigateway_.RestApi, layers:list, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, environment: dict[str, str], api: apigateway_.RestApi, layers:list, app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Set maximun timeout for lambda functions
@@ -23,13 +23,13 @@ class EngrainStack(NestedStack):
         # Create a Lambda function for Job Purposes
         lambda_fn = lambda_.Function(
             self,
-            "Engrain_Job_Function",
+            f"{app_environment.get_stage_name()}-engrain-job-lambda-function",
             description="Engrain Job Lambda Function", 
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
             code=lambda_.Code.from_asset("./src/lambdas/engrain"),
             handler="job_lambda_function.lambda_handler",
-            function_name="Engrain_Job_Function",
+            function_name=f"{app_environment.get_stage_name()}-engrain-job-lambda-function",
             layers=layers,
             timeout=timeout,
         )
@@ -37,7 +37,7 @@ class EngrainStack(NestedStack):
         # Create a CloudWatch Event Rule
         event_rule = events_.Rule(
             self,
-            f"FiveMinutesScheduledEvent",
+            f"{app_environment.get_stage_name()}-five-minutes-scheduled-event-rule",
             schedule=events_.Schedule.cron(minute="*/5"),
             description="CloudWatch Event Rule for execute Engrain Job every 5 minutes",
         )
@@ -55,7 +55,7 @@ class EngrainStack(NestedStack):
         # Create lambda function instance for (# GET /engrain/status)
         get_lambda_function = lambda_.Function(
             self, 
-            "Engrain_Status_Lambda_Function",
+            f"{app_environment.get_stage_name()}-engrain-status-lambda-function",
             description="This endpoint is responsible for providing information on the execution permissions of the job, the date and time of the last execution, and if it is currently running.",
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
@@ -63,13 +63,13 @@ class EngrainStack(NestedStack):
             code=lambda_.Code.from_asset("./src/lambdas/engrain"),
             handler="get_lambda_function.lambda_handler",
             layers=layers,
-            function_name="Engrain_Status_Lambda_Function",
+            function_name=f"{app_environment.get_stage_name()}-engrain-status-lambda-function",
         )
         
         # Create lambda function instance for (# PATCH /engrain/status)
         patch_lambda_function = lambda_.Function(
             self, 
-            "Engrain_Update_Status_Lambda_Function",
+            f"{app_environment.get_stage_name()}-engrain-update-status-lambda-function",
             description="This endpoint is responsible to update the execution permissions of the job.",
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
@@ -77,7 +77,7 @@ class EngrainStack(NestedStack):
             code=lambda_.Code.from_asset("./src/lambdas/engrain"),
             handler="patch_lambda_function.lambda_handler",
             layers=layers,
-            function_name="Engrain_Update_Status_Lambda_Function",
+            function_name=f"{app_environment.get_stage_name()}-engrain-update-status-lambda-function",
         )
 
         # --------------------------------------------------------------------

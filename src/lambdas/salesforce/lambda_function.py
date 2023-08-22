@@ -2,28 +2,24 @@ import json
 from schemas.schema_request_post import SchemaRequestPost
 from global_config.config import salesforce_config
 from simple_salesforce import Salesforce
-from AccessControl import AccessUtils as AccessControl
+from acl import ACL
 
 def lambda_handler(event, context):
+    print(f"Event: {event}, context: {context}")
+    
+    # ---------------------------------------------------------------------------------------------
+    # AccessControl
+    # ---------------------------------------------------------------------------------------------
+    # TODO: Uncomment when ACL is ready for stage and prod
+    # is_acl_valid, response_acl = ACL.check_permitions(event)
+    # if not is_acl_valid:
+    #     return response_acl
 
-    try:
-        # ACL Validation
-        headers = event['headers']
-        wsgi_input = {
-            'PATH_INFO': event['resource'],
-            'REQUEST_METHOD': "POST"
-        }
-        if 'x-api-key' in headers:
-            wsgi_input['HTTP_X_API_KEY'] = headers['x-api-key']
+    # ---------------------------------------------------------------------------------------------
+    # Body validation
+    # ---------------------------------------------------------------------------------------------
 
-        res, res_code= AccessControl.check_access_control(wsgi_input)
-        if res_code != 200:
-            return res_code, res
-    except Exception as e:
-        print(f"ACL Validation Error: {str(e)}")
-        pass
-
-    # Validate input
+    # Validate body of request
     input = json.loads(event['body'])
     is_valid, input_errors = SchemaRequestPost(input).is_valid()
     if not is_valid:
@@ -32,7 +28,7 @@ def lambda_handler(event, context):
         return {
             'statusCode': "400",
             'body': json.dumps({
-                'data': [],
+                'data': {},
                 'errors': errors,
             }),
             'headers': {
@@ -42,23 +38,25 @@ def lambda_handler(event, context):
             'isBase64Encoded': False  
         }
 
+    # ---------------------------------------------------------------------------------------------
     # Salesforce flow
+    # ---------------------------------------------------------------------------------------------
     try:
-        # Get config from parameter store
+        # Get config from parameter store to connect to Salesforce
         username = salesforce_config['username']
         password = salesforce_config['password']
         security_token = salesforce_config['security_token']
         current_env = salesforce_config['current_env']
         
-        # Salesforce connection
-        sf = None
-        if current_env == 'prod':
-            sf = Salesforce(username=username, password=password, security_token=security_token)
+        # Salesforce authentication ([stage], [rc] and [prod] will be connected to the real Salesforce)
+        salesforce = None
+        if current_env == 'stage' or current_env == 'rc' or current_env == 'prod':
+            salesforce = Salesforce(username=username, password=password, security_token=security_token)
         else:    
-            sf = Salesforce(username=username, password=password, security_token=security_token, domain='test')
+            salesforce = Salesforce(username=username, password=password, security_token=security_token, domain='test')
 
         # Execute query
-        query_result = sf.query_all(input['query'])
+        query_result = salesforce.query_all(input['query'])
 
         # Case: Success
         return {
@@ -73,11 +71,14 @@ def lambda_handler(event, context):
             },
             'isBase64Encoded': False  
         }
+    
     except Exception as e:
+        # Case: Internal Server Error
+        print(f"Unhandled exception in [Salesforce flow]: {e}")
         return {
-            'statusCode': "400",
+            'statusCode': "500",
             'body': json.dumps({
-                'data': None,
+                'data': {},
                 'errors': [str(e)],
             }),
             'headers': {

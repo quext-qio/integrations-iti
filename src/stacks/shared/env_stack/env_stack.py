@@ -2,31 +2,19 @@ import os
 import boto3
 from aws_cdk import NestedStack
 from constructs import Construct
-from src.utils.enums.stage_name import StageName
+from src.utils.enums.app_environment import AppEnvironment
 
 class EnvStack(NestedStack):
     @property
     def get_env(self):
         return self.env
 
-    def __init__(self, scope: Construct, construct_id: str, stage_name: StageName, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # --------------------------------------------------------------------
-        # Create the environment based on the stage name
-        parameter_name = ""
-        if stage_name == StageName.DEV:
-            parameter_name = "/dev/integrations/hub" 
-        elif stage_name == StageName.STAGE:
-            parameter_name = "/stage/integrations/hub"
-        elif stage_name == StageName.PROD:
-            parameter_name = "/prod/integrations/hub"
-        elif stage_name == StageName.RC:
-            parameter_name = "/stage/integrations/hub"
-        elif stage_name == StageName.QA:
-            parameter_name = "/dev/integrations/hub"
-        else:
-            raise Exception("Invalid stage name")
+        # Get name of the parameter store associated with the stage
+        parameter_name = app_environment.get_parameter_store_name()
 
         # Load session using default AWS credentials
         aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID')
@@ -47,7 +35,7 @@ class EnvStack(NestedStack):
         # Assume the IAM role
         response = sts_client.assume_role(
             RoleArn=role_arn,
-            RoleSessionName=f"{stage_name.value}-assumed-session"
+            RoleSessionName=f"{app_environment.get_stage_name()}-assumed-session"
         )
 
         # Extract the temporary credentials from the response

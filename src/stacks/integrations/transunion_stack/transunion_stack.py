@@ -6,11 +6,11 @@ from aws_cdk import (
     
 )
 from constructs import Construct
-
+from src.utils.enums.app_environment import AppEnvironment
 
 class TransUnionStack(NestedStack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers: list, environment: dict, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers: list, environment: dict, app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         timeout=Duration.seconds(900)
@@ -20,7 +20,7 @@ class TransUnionStack(NestedStack):
         # Creates lambda function instance for (# POST /transunion/identity)
         identity_lambda_function = lambda_.Function(
             self, 
-            "TransUnion_Identity_Lambda_Function",
+            f"{app_environment.get_stage_name()}-transunion-identity-lambda-function",
             description="Handles the verification and evaluation processes with TransUnion", 
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
@@ -28,7 +28,7 @@ class TransUnionStack(NestedStack):
             code=lambda_.Code.from_asset("./src/lambdas/transunion"),
             handler="identity_lambda_function.lambda_handler",
             layers=layers,
-            function_name="TransUnion_Identity_Lambda_Function",
+            function_name=f"{app_environment.get_stage_name()}-transunion-identity-lambda-function",
         )
 
         # Identity
@@ -75,7 +75,7 @@ class TransUnionStack(NestedStack):
         # Creates lambda function instance for (# POST /transunion/screening)
         screening_lambda_function = lambda_.Function(
             self, 
-            "TransUnion_Screening_Lambda_Function",
+            f"{app_environment.get_stage_name()}-transunion-screening-lambda-function",
             description="Handles the resident screening processes with TransUnion", 
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
@@ -83,7 +83,7 @@ class TransUnionStack(NestedStack):
             code=lambda_.Code.from_asset("./src/lambdas/transunion"),
             handler="screening_lambda_function.lambda_handler",
             layers=layers,
-            function_name="TransUnion_Screening_Lambda_Function",
+            function_name=f"{app_environment.get_stage_name()}-transunion-screening-lambda-function",
         )
 
         # Resident screening
@@ -129,7 +129,7 @@ class TransUnionStack(NestedStack):
         # Creates lambda function instance for (# POST /transunion/postback)
         postback_lambda_function = lambda_.Function(
             self, 
-            "TransUnion_Postback_Lambda_Function",
+            f"{app_environment.get_stage_name()}-transunion-postback-lambda-function",
             description="Handles the Postback webhook for TransUnion", 
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
@@ -137,7 +137,7 @@ class TransUnionStack(NestedStack):
             code=lambda_.Code.from_asset("./src/lambdas/transunion"),
             handler="postback_lambda_function.lambda_handler",
             layers=layers,
-            function_name="TransUnion_Postback_Lambda_Function",
+            function_name=f"{app_environment.get_stage_name()}-transunion-postback-lambda-function",
         )
 
         # Postback webhook

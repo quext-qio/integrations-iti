@@ -5,10 +5,11 @@ from aws_cdk import (
     aws_apigateway as apigateway_,
 )
 from constructs import Construct
+from src.utils.enums.app_environment import AppEnvironment
 
 class SalesforceStack(NestedStack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], **kwargs):
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
@@ -20,7 +21,7 @@ class SalesforceStack(NestedStack):
         # Create lambda function instance for (# POST /salesforce/query)
         post_lambda_function = lambda_.Function(
             self, 
-            "Salesforce_Dynamic_Lambda_Function",
+            f"{app_environment.get_stage_name()}-salesforce-dynamic-lambda-function",
             description="Salesforce Lambda is responsible retrieving data from Salesforce using simple_salesforce library.", 
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_8,
@@ -28,8 +29,9 @@ class SalesforceStack(NestedStack):
             code=lambda_.Code.from_asset("./src/lambdas/salesforce"),
             handler="lambda_function.lambda_handler",
             layers=layers,
-            function_name="Salesforce_Dynamic_Lambda_Function",
+            function_name=f"{app_environment.get_stage_name()}-salesforce-dynamic-lambda-function",
         )
+        
 
         # --------------------------------------------------------------------
         # Resource to execute query (POST)
@@ -38,8 +40,9 @@ class SalesforceStack(NestedStack):
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
                 allow_origins=apigateway_.Cors.ALL_ORIGINS
-            ),    
+            ),  
         )
+        
 
         # --------------------------------------------------------------------
         # Create a Lambda integration instance
@@ -70,7 +73,7 @@ class SalesforceStack(NestedStack):
                     response_parameters={
                         'method.response.header.Access-Control-Allow-Origin': True
                     }
-                )
+                ),
             ],
+            #api_key_required=True,
         )
-
