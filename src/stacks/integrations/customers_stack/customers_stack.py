@@ -5,10 +5,11 @@ from aws_cdk import (
     aws_apigateway as apigateway_,
 )
 from constructs import Construct
+from src.utils.enums.app_environment import AppEnvironment
 
 class CustomersStack(NestedStack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
@@ -20,7 +21,7 @@ class CustomersStack(NestedStack):
         # Create lambda function instance for (# POST /placepay/new-account)
         lambda_function = lambda_.Function(
             self, 
-            "Auth_Get_Customers",
+            f"{app_environment.get_stage_name()}-auth-get-customers",
             description="This Lambda is responsible customers list, with or without specify custommerUUID", 
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
@@ -28,7 +29,7 @@ class CustomersStack(NestedStack):
             code=lambda_.Code.from_asset("./src/lambdas/customers"),
             handler="lambda_function.lambda_handler",
             layers=layers,
-            function_name="Auth_Get_Customers",
+            function_name=f"{app_environment.get_stage_name()}-auth-get-customers",
         )
 
         # -------------------------------------------------------------------- 

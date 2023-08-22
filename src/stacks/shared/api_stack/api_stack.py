@@ -38,7 +38,7 @@ class APIStack(NestedStack):
         # --------------------------------------------------------------------
         # Create a Rest API instance
         self.api = apigateway_.RestApi(
-            self, "Integrations_Api", 
+            self, f"Integrations_Api", 
             rest_api_name="Integrations_Api", 
             description="Base API Gateway for Zato to AWS Migration",
             deploy=True,

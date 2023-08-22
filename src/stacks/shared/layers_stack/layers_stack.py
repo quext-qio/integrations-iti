@@ -1,11 +1,10 @@
-import shutil
-import zipfile
-import os
+import os, zipfile, shutil
 from constructs import Construct
 from aws_cdk import (
     NestedStack,
     aws_lambda as lambda_,
 )
+from src.utils.enums.app_environment import AppEnvironment
 
 class LayersStack(NestedStack):
     @property
@@ -40,7 +39,7 @@ class LayersStack(NestedStack):
     def get_salesforce_layer(self):
         return self.salesforce_layer
     
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         
         # --------------------------------------------------------------------
@@ -58,8 +57,8 @@ class LayersStack(NestedStack):
         # --------------------------------------------------------------------
         # Create place-api layer
         place_api_layer = lambda_.LayerVersion(
-            self, "PlaceApiLayer",
-            layer_version_name="PlaceApiLayer",
+            self, f"{app_environment.get_stage_name()}-place-api-layer",
+            layer_version_name=f"{app_environment.get_stage_name()}-place-api-layer",
             description="Package documentation: https://pypi.org/project/place-api/",
             code=lambda_.Code.from_asset("./src/utils/layers/place_layer.zip"),
             compatible_runtimes=[
@@ -79,8 +78,8 @@ class LayersStack(NestedStack):
         # --------------------------------------------------------------------
         # Create mysql_layer layer
         mysql_layer = lambda_.LayerVersion(
-            self, "MySQLLayer",
-            layer_version_name="MySQLLayer",
+            self, f"{app_environment.get_stage_name()}-mysql-layer",
+            layer_version_name=f"{app_environment.get_stage_name()}-mysql-layer",
             description="Package documentation: https://pypi.org/project/",
             code=lambda_.Code.from_asset("./src/utils/layers/mysql_layer.zip"),
             compatible_runtimes=[
@@ -100,8 +99,8 @@ class LayersStack(NestedStack):
         # --------------------------------------------------------------------
         # Create zeep_layer layer
         zeep_layer = lambda_.LayerVersion(
-            self, "ZeepLayer",
-            layer_version_name="ZeepLayer",
+            self, f"{app_environment.get_stage_name()}-zeep-layer",
+            layer_version_name=f"{app_environment.get_stage_name()}-zeep-layer",
             description="Package documentation: https://pypi.org/project/",
             code=lambda_.Code.from_asset("./src/utils/layers/zeep_layer.zip"),
             compatible_runtimes=[
@@ -121,8 +120,8 @@ class LayersStack(NestedStack):
         # --------------------------------------------------------------------
         # Create suds_layer layer
         suds_layer = lambda_.LayerVersion(
-            self, "SudsPy3Layer",
-            layer_version_name="SudsPy3Layer",
+            self, f"{app_environment.get_stage_name()}-sudspy3-layer",
+            layer_version_name=f"{app_environment.get_stage_name()}-sudspy3-layer",
             description="Package documentation: https://pypi.org/project/",
             code=lambda_.Code.from_asset("./src/utils/layers/suds_layer.zip"),
             compatible_runtimes=[
@@ -142,8 +141,8 @@ class LayersStack(NestedStack):
         # --------------------------------------------------------------------
         # Create suds_layer layer
         crypto_layer = lambda_.LayerVersion(
-            self, "CryptodomeLayer",
-            layer_version_name="CryptodomeLayer",
+            self, f"{app_environment.get_stage_name()}-cryptodome-layer",
+            layer_version_name=f"{app_environment.get_stage_name()}-cryptodome-layer",
             description="Package documentation: https://pypi.org/project/",
             code=lambda_.Code.from_asset("./src/utils/layers/crypto_layer.zip"),
             compatible_runtimes=[
@@ -163,8 +162,8 @@ class LayersStack(NestedStack):
         # --------------------------------------------------------------------
         # Salesforce Layer 
         salesforce_layer = lambda_.LayerVersion(
-            self, "SalesforceLayer",
-            layer_version_name="SalesforceLayer",
+            self, f"{app_environment.get_stage_name()}-salesforce-layer",
+            layer_version_name=f"{app_environment.get_stage_name()}-salesforce-layer",
             description="Package documentation: hhttps://pypi.org/project/simple-salesforce/",
             code=lambda_.Code.from_asset("./src/utils/layers/salesforce_layer.zip"),
             compatible_runtimes=[
@@ -182,8 +181,8 @@ class LayersStack(NestedStack):
         # --------------------------------------------------------------------
         # Create Custom Shared Layer 
         shared_layer = lambda_.LayerVersion(
-            self, "CustomSharedLayer",
-            layer_version_name="CustomSharedLayer",
+            self, f"{app_environment.get_stage_name()}-custom-shared-layer",
+            layer_version_name=f"{app_environment.get_stage_name()}-custom-shared-layer",
             description="Shared layer generated by code in [Integrations-iti] repository in next folder (src/utils/shared), this layer is generated in complilation time",
             code=lambda_.Code.from_asset("./src/utils/layers/shared_layer.zip"),
             compatible_runtimes=[
@@ -203,8 +202,8 @@ class LayersStack(NestedStack):
         # --------------------------------------------------------------------
         # Pip Packages Layer 
         pip_packages_layer = lambda_.LayerVersion(
-            self, "IntegrationPipPackagesLayer",
-            layer_version_name="IntegrationPipPackagesLayer",
+            self, f"{app_environment.get_stage_name()}-integration-pip-packages-layer",
+            layer_version_name=f"{app_environment.get_stage_name()}-integration-pip-packages-layer",
             description="Custom layer generated by code in [Integrations-iti] repository to share pip packages in all lambda functions, this layer is generated in complilation time", 
             code=lambda_.Code.from_asset("./src/utils/layers/pip_packages_layer.zip"),
             compatible_runtimes=[
