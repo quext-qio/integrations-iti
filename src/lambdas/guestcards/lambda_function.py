@@ -2,9 +2,13 @@ import json
 from factory.service_factory import ServiceFactory
 from schemas.schema_request_post import SchemaRequestPost
 from IPSController import IPSController
+from acl import ACL
 
 def lambda_handler(event, context):
     input = json.loads(event['body'])
+    is_acl_valid, response_acl = ACL.check_permitions(event)
+    if not is_acl_valid:
+        return response_acl
     is_valid, input_errors = SchemaRequestPost(input).is_valid()
     if not is_valid:
         # Case: Bad Request

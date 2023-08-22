@@ -63,7 +63,7 @@ def lambda_handler(event, context):
         return {
             'statusCode': "200",
             'body': json.dumps({
-                'data': map_body(query_result),
+                'data': query_result,
                 'errors': [],
             }),
             'headers': {
@@ -89,59 +89,3 @@ def lambda_handler(event, context):
             'isBase64Encoded': False  
         }
         
-# ---------------------------------------------------------------------------------------------
-# Map Query Result to Response Body
-def map_body(query_result: dict) -> dict:
-    sales_pending = []
-    sales_won = []
-    implementation_completed = []
-    implementation_scheduled = []
-
-    for record in query_result["records"]:
-        # All the fields for the query are in the record
-        stage = record["StageName"]
-        close_date = record["CloseDate"]
-        units = record["expr0"]
-        contract_signed_date = record["Contract_Signed_Date__c"]
-        estimated_launch_date = record["Estimated_Launch_Date__c"]
-        effective_date = record["Effective_Date__c"]
-
-        # Array #1a is for Sales_Pending
-        if stage.lower() in ["negotiation", "contract out"]:
-            sales_pending_item = {
-                "date": close_date,
-                "units": units
-            }
-            sales_pending.append(sales_pending_item)
-
-        elif stage == "Closed Won":
-            # Array #1b is for Sales_Won
-            sales_won_item = {
-                "date": contract_signed_date if contract_signed_date != None else close_date,
-                "units": units
-            }
-            sales_won.append(sales_won_item)
-
-            # Array #2a is for Implementation_Completed
-            if effective_date != None:
-                implementation_completed_item = {
-                    "date": effective_date,
-                    "units": units
-                }
-                implementation_completed.append(implementation_completed_item)  
-            # Array #2b is for Implementation_Scheduled
-            else: 
-                implementation_scheduled_item = {
-                    "date": effective_date,
-                    "units": units
-                }
-                implementation_scheduled.append(implementation_scheduled_item)
-            
-
-
-    return {
-        "sales_pending" : sales_pending,
-        "sales_won" : sales_won,
-        "implementation_completed" : implementation_completed,
-        "implementation_scheduled" : implementation_scheduled
-    }
