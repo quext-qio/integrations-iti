@@ -2,7 +2,7 @@
 
 git_repo_creds = [$class: 'UsernamePasswordMultiBinding', credentialsId: 'quext-github', usernameVariable: 'GITHUB_USERNAME', passwordVariable: 'GITHUB_PASSWORD']
 List stop_branches_list = ['stage']
-List envsToBuildAndDeploy = ['dev', 'stage', 'rc', 'qa']
+List envsToBuildAndDeploy = ['dev', 'qa', 'rc', 'stage']
 List envs = envsToBuildAndDeploy + stop_branches_list
 ecr_repository_uri = '273056594042.dkr.ecr.us-east-1.amazonaws.com/integration/api'
 defaultRegion = "us-east-1"
@@ -14,7 +14,6 @@ branch_env = [
         "stage" : 'stage',
         "rc"    : 'rc',
         "qa"    : 'qa',
-        //"master"  : 'prod'
     ]
 
 accounts = [
@@ -22,8 +21,12 @@ accounts = [
             "stage": "323546893515",
             "qa"   : "633546161654",
             "rc"   : "323546893515",
-            //"prod" : "283107020475"
     ]
+
+shared_stack = [
+            "dev"  : "qa",
+            "rc"   : "stage",
+    ]    
 
 pipeline {
     agent { label 'jenkins-spot-fleet'}
@@ -62,10 +65,20 @@ pipeline {
             steps {
                 script {
                     if (params.ENVIRONMENT.equals('none')){
-                        DEPLOY_ENVIRONMENT = branch_env.get(env.BRANCH_NAME, 'NONE')
-                    }
+                        if (branch_env.containsKey('qa') || branch_env.containsKey('rc')){
+                            DEPLOY_ENVIRONMENT = branch_env.get(env.BRANCH_NAME, 'NONE')
+                            STACK = shared_stack.get(env.BRANCH_NAME, 'NONE')
+                        }
+                    }                
                     else {
-                        DEPLOY_ENVIRONMENT = params.ENVIRONMENT
+                        if (params.ENVIRONMENT.equals('qa') || params.ENVIRONMENT.equals('rc')){
+                            DEPLOY_ENVIRONMENT = params.ENVIRONMENT
+                            STACK = shared_stack.get(params.ENVIRONMENT, 'NONE')
+                        }
+                        else {
+                            DEPLOY_ENVIRONMENT = params.ENVIRONMENT
+                            STACK = params.ENVIRONMENT
+                        }                   
                     }
                     currentBuild.displayName = "#${BUILD_NUMBER} Environment: ${DEPLOY_ENVIRONMENT}"
                     env.ACCOUNT_ID = accounts.get(DEPLOY_ENVIRONMENT)
@@ -108,7 +121,7 @@ pipeline {
                         env.AWS_ACCESS_KEY_ID=AWS_KEYS[0]
                         env.AWS_SECRET_ACCESS_KEY=AWS_KEYS[1]
                         env.AWS_SESSION_TOKEN=AWS_KEYS[2]
-                        sh "cdk destroy --all --force --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
+                        sh "cdk destroy --all --force --toolkit-stack-name quext-${STACK}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
                     }
                 }
             }  
@@ -147,7 +160,7 @@ pipeline {
                                         env.AWS_SECRET_ACCESS_KEY=AWS_KEYS[1]
                                         env.AWS_SESSION_TOKEN=AWS_KEYS[2]
                                     }
-                                    sh "cdk deploy --all --require-approval never --toolkit-stack-name quext-${DEPLOY_ENVIRONMENT}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
+                                    sh "cdk deploy --all --require-approval never --toolkit-stack-name quext-${STACK}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
                                 }
                             }
                         }
