@@ -1,5 +1,5 @@
 from constructs import Construct
-from src.utils.enums.stage_name import StageName
+from src.utils.enums.app_environment import AppEnvironment
 from aws_cdk import (
     NestedStack,
     aws_apigateway as apigateway_,
@@ -9,16 +9,16 @@ from aws_cdk import (
 )
 
 # Lambda function to store the API URL after deployment
-def print_api_url_lambda(scope: Construct, api_url: str, stage: StageName):
+def print_api_url_lambda(scope: Construct, api_url: str, app_environment: AppEnvironment):
     return lambda_.Function(
         scope,
-        f"{stage.name}-ApiUrlFunction",
+        f"{app_environment.get_stage_name()}-api-url-function",
         runtime=lambda_.Runtime.PYTHON_3_8,
         handler="index.handler",
         code=lambda_.Code.from_inline(
             "import os\n"
             "def handler(event, context):\n"
-            f"    print('API URL for Aws Integration Engine in stage ({stage.name}):', '{api_url}')"
+            f"    print('API URL for Aws Integration Engine in stage ({app_environment.name}):', '{api_url}')"
         ),
     )
 
@@ -33,22 +33,22 @@ class APIStack(NestedStack):
         return self.resources
 
 
-    def __init__(self, scope: Construct, construct_id: str, stage: StageName, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         # --------------------------------------------------------------------
         # Create a Rest API instance
         self.api = apigateway_.RestApi(
-            self, "Integrations_Api", 
+            self, f"Integrations_Api", 
             rest_api_name="Integrations_Api", 
             description="Base API Gateway for Zato to AWS Migration",
             deploy=True,
             deploy_options=apigateway_.StageOptions(
-                stage_name=stage.value, 
+                stage_name=app_environment.get_stage_name(), 
                 logging_level=apigateway_.MethodLoggingLevel.INFO,
                 data_trace_enabled=True,
                 metrics_enabled=True,
                 tracing_enabled=True,
-            ),
+            ),  
             endpoint_configuration=apigateway_.EndpointConfiguration(
                 types=[apigateway_.EndpointType.REGIONAL],
             ),
@@ -56,14 +56,14 @@ class APIStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Set Custom Domain depending on the stage
-        domain_config = stage.get_api_domain_config()
+        domain_config = app_environment.get_api_domain_config()
         hosted_zone_id = domain_config["hosted_zone_id"]
         domain_name_alias_target = domain_config["domain_name_alias_target"]
         custom_domain_name = domain_config["custom_domain_name"]
         
         # Get the domain name from the attributes
         api_domain = apigateway_.DomainName.from_domain_name_attributes(
-            self, f"{stage.value}-DomainName",
+            self, f"{app_environment.get_stage_name()}-domain-name",
             domain_name=custom_domain_name,
             domain_name_alias_hosted_zone_id=hosted_zone_id,
             domain_name_alias_target=domain_name_alias_target,
@@ -72,7 +72,7 @@ class APIStack(NestedStack):
         try:
             # Attempt to create the base mapping
             apigateway_.BasePathMapping(
-                self, f"{stage.value}-BasePathMapping",
+                self, f"{app_environment.get_stage_name()}-base-path-mapping",
                 domain_name=api_domain,
                 rest_api=self.api,
                 stage=self.api.deployment_stage,
@@ -81,20 +81,7 @@ class APIStack(NestedStack):
             # If the base mapping already exists, catch the exception
             # and proceed without creating a new one.
             print("Base path mapping already exists.")
-            pass
-
-        # --------------------------------------------------------------------
-        # Asocaite API Key for the API Gateway
-        # api_key = apigateway_.ApiKey(
-        #     self, f"{stage.value}-ApiKey",
-        #     api_key_name=f"{stage.value}-ApiKey",
-        #     description=f"API Key for {stage.value} stage",
-        #     enabled=True,
-        #     value=stage.get_api_key(),
-        # )
-
-        #api_key = self.api.add_api_key(stage.get_api_key())
-        
+            pass     
         
         # --------------------------------------------------------------------
         # Standard root resource
@@ -154,6 +141,6 @@ class APIStack(NestedStack):
         # TODO: Remove logic when custom domain is ready
         # Create a Lambda function for Store API URL after deployment
         api_url = self.api.url
-        print_url_lambda = print_api_url_lambda(self, api_url, stage)
-        rule = events_.Rule(self, f"{stage.name}-PrintApiUrlRule", schedule=events_.Schedule.expression('rate(365 days)'))
+        print_url_lambda = print_api_url_lambda(self, api_url, app_environment)
+        rule = events_.Rule(self, f"{app_environment.name}-print-api-url-rule", schedule=events_.Schedule.expression('rate(365 days)'))
         rule.add_target(targets_.LambdaFunction(print_url_lambda, event=events_.RuleTargetInput.from_object({})))

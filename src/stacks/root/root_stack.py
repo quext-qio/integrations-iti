@@ -1,6 +1,6 @@
 from aws_cdk import Stack
 from constructs import Construct
-from src.utils.enums.stage_name import StageName
+from src.utils.enums.app_environment import AppEnvironment
 from src.stacks.shared.env_stack.env_stack import EnvStack
 from src.stacks.shared.layers_stack.layers_stack import LayersStack
 from src.stacks.shared.api_stack.api_stack import APIStack
@@ -19,7 +19,7 @@ from src.stacks.integrations.salesforce_stack.salesforce_stack import Salesforce
 # [RootStack] is the main [Stack] for the project
 # It is responsible for load all [NestedStack] and share resources between them
 class RootStack(Stack):
-    def __init__(self, scope: Construct, construct_id: str, stage: StageName, server_name:str, **kwargs):
+    def __init__(self, scope: Construct, construct_id: str, app_env: AppEnvironment, server_name:str, **kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
         # --------------------------------------------------------------------
@@ -29,8 +29,8 @@ class RootStack(Stack):
         # It assume a role to read the secrets from AWS Secrets Manager's shared account
         env_stack = EnvStack(
             self, 
-            f"{stage.value}-{server_name}-envStack", 
-            stage_name=stage,
+            f"{app_env.get_stage_name()}-{server_name}-env-stack", 
+            app_environment=app_env,
             description="Stack load environment variables for all lambda's functions",
         )
         environment=env_stack.get_env
@@ -50,7 +50,8 @@ class RootStack(Stack):
         # and also commit the new file [src/utils/layers/pip_packages_layer.zip] to the repository
         layer_stack =  LayersStack(
             self, 
-            f"{stage.value}-{server_name}-layerStack",
+            f"{app_env.get_stage_name()}-{server_name}-layer-stack",
+            app_environment=app_env,
             description="Stack load all layers to share between lambda's functions", 
         )
         place_api_layer = layer_stack.get_place_api_layer
@@ -71,8 +72,8 @@ class RootStack(Stack):
         # the value of [get_resources] will return a dictionary with all resources of API Gateway
         api_stack = APIStack(
             self, 
-            f"{stage.value}-{server_name}-apiStack", 
-            stage=stage,
+            f"{app_env.get_stage_name()}-{server_name}-api-stack", 
+            app_environment=app_env,
             description="Stack load API Gateway for all lambda's functions",
         )
         resources = api_stack.get_resources
@@ -108,7 +109,8 @@ class RootStack(Stack):
         # --------------------------------------------------------------------
         PlacepayStack(
             self,
-            f"{stage.value}-{server_name}-placepayStack",
+            f"{app_env.get_stage_name()}-{server_name}-placepay-stack",
+            app_environment=app_env,
             description="Stack for placepay endpoints",
             api=placepay_resource_v1,
             environment=environment,
@@ -125,7 +127,8 @@ class RootStack(Stack):
         # --------------------------------------------------------------------
         GuestcardsStack(
             self, 
-            f"{stage.value}-{server_name}-guestcardsStack", 
+            f"{app_env.get_stage_name()}-{server_name}-guestcards-stack", 
+            app_environment=app_env,
             description="Stack for guestcards endpoints",
             api=general_resource_v2,
             environment=environment,
@@ -140,8 +143,9 @@ class RootStack(Stack):
         # --------------------------------------------------------------------
         TransUnionStack(
             self, 
-            f"{stage.value}-{server_name}-transUnionStack", 
+            f"{app_env.get_stage_name()}-{server_name}-trans-union-stack", 
             api=transunion_resource_v1, 
+            app_environment=app_env,
             environment=environment,
             description="Stack for transunion endpoints",
             layers=[
@@ -155,9 +159,10 @@ class RootStack(Stack):
         # --------------------------------------------------------------------
         UnitsStack(
             self, 
-            f"{stage.value}-{server_name}-unitsStack", 
+            f"{app_env.get_stage_name()}-{server_name}-units-stack", 
             api=general_resource_v2, 
             environment=environment,
+            app_environment=app_env,
             description="Stack for units endpoints",
             layers=[
                 pip_packages_layer, 
@@ -173,8 +178,9 @@ class RootStack(Stack):
         # --------------------------------------------------------------------
         CommunitiesStack(
             self, 
-            f"{stage.value}-{server_name}-communitiesStack", 
+            f"{app_env.get_stage_name()}-{server_name}-communities-stack", 
             api=general_resource_v1, 
+            app_environment=app_env,
             description="Stack for communities endpoints",
             layers=[
                 pip_packages_layer,
@@ -188,8 +194,9 @@ class RootStack(Stack):
         # --------------------------------------------------------------------
         CustomersStack(
             self, 
-            f"{stage.value}-{server_name}-customersStack", 
+            f"{app_env.get_stage_name()}-{server_name}-customers-stack", 
             api=general_resource_v1, 
+            app_environment=app_env,
             description="Stack for customers endpoints",
             layers=[
                 pip_packages_layer,
@@ -203,8 +210,9 @@ class RootStack(Stack):
         # --------------------------------------------------------------------
         ResidentsStack(
             self, 
-            f"{stage.value}-{server_name}-residentsStack", 
+            f"{app_env.get_stage_name()}-{server_name}-residents-stack", 
             api=general_resource_v1, 
+            app_environment=app_env,
             description="Stack for residents endpoints",
             layers=[
                 pip_packages_layer,
@@ -220,8 +228,9 @@ class RootStack(Stack):
         # --------------------------------------------------------------------
         EngrainStack(
             self, 
-            f"{stage.value}-{server_name}-engrainStack",
+            f"{app_env.get_stage_name()}-{server_name}-engrain-stack",
             environment=environment,
+            app_environment=app_env,
             description="Stack for Engrain Job",
             api=engrain_resource_v1,
             layers=[
@@ -236,8 +245,9 @@ class RootStack(Stack):
         # --------------------------------------------------------------------
         TourAvailabilityStack(
             self, 
-            f"{stage.value}-{server_name}-tourAvailabilityStack",
+            f"{app_env.get_stage_name()}-{server_name}-tour-availability-stack",
             api=tour_resource_v2, 
+            app_environment=app_env,
             layers=[
                 pip_packages_layer,
                 suds_layer,
@@ -252,8 +262,9 @@ class RootStack(Stack):
         # --------------------------------------------------------------------
         ConserviceStack(
             self, 
-            f"{stage.value}-{server_name}-conserviceStack", 
+            f"{app_env.get_stage_name()}-{server_name}-conservice-stack", 
             api=general_resource_v1, 
+            app_environment=app_env,
             environment=environment,
             description="Stack for conservice endpoints",
             layers=[
@@ -267,9 +278,10 @@ class RootStack(Stack):
         # --------------------------------------------------------------------
         SalesforceStack(
             self,
-            f"{stage.value}-{server_name}-salesforceStack",
+            f"{app_env.get_stage_name()}-{server_name}-salesforce-stack",
             description="Stack for salesforce endpoints",
             api=salesforce_resource_v1,
+            app_environment=app_env,
             environment=environment,
             layers=[
                 salesforce_layer,

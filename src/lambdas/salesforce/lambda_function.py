@@ -10,9 +10,10 @@ def lambda_handler(event, context):
     # ---------------------------------------------------------------------------------------------
     # AccessControl
     # ---------------------------------------------------------------------------------------------
-    is_acl_valid, response_acl = ACL.check_permitions(event)
-    if not is_acl_valid:
-        return response_acl
+    # TODO: Uncomment when ACL is ready for stage and prod
+    # is_acl_valid, response_acl = ACL.check_permitions(event)
+    # if not is_acl_valid:
+    #     return response_acl
 
     # ---------------------------------------------------------------------------------------------
     # Body validation
@@ -47,15 +48,16 @@ def lambda_handler(event, context):
         security_token = salesforce_config['security_token']
         current_env = salesforce_config['current_env']
         
-        # Salesforce authentication
+        # Salesforce authentication ([stage], [rc] and [prod] will be connected to the real Salesforce)
         salesforce = None
-        if current_env == 'prod':
+        if current_env == 'stage' or current_env == 'rc' or current_env == 'prod':
             salesforce = Salesforce(username=username, password=password, security_token=security_token)
         else:    
             salesforce = Salesforce(username=username, password=password, security_token=security_token, domain='test')
 
         # Execute query
         query_result = salesforce.query_all(input['query'])
+
 
         # Case: Success
         return {
@@ -87,5 +89,3 @@ def lambda_handler(event, context):
             'isBase64Encoded': False  
         }
         
-
-    
