@@ -60,69 +60,46 @@ class APIStack(NestedStack):
         # Set the API Gateway Stage
         if(app_environment == AppEnvironment.DEV or app_environment == AppEnvironment.QA):
             # Dev stage
+            dev_deployment = apigateway_.Deployment(
+                self, "dev-integrations-deployment",
+                api=self.api,
+                description="dev-integrations-deployment",
+            )
             dev_stage = apigateway_.Stage(
                 self, "dev-integrations-stage",
                 stage_name="dev",
-                deployment=apigateway_.Deployment(
-                    self, "dev-integrations-deployment",
-                    api=self.api,
-                    description="dev-integrations-deployment",
-                ),
+                deployment=dev_deployment,
                 logging_level=apigateway_.MethodLoggingLevel.INFO,
                 data_trace_enabled=True,
                 metrics_enabled=True,
                 tracing_enabled=True,
             )
+            dev_deployment.deploy()
 
             # QA stage
+            qa_deployment = apigateway_.Deployment(
+                self, "qa-integrations-deployment",
+                api=self.api,
+                description="qa-integrations-deployment",
+            )
             qa_stage = apigateway_.Stage(
                 self, "qa-integrations-stage",
                 stage_name="qa",
-                deployment=apigateway_.Deployment(
-                    self, "qa-integrations-deployment",
-                    api=self.api,
-                    description="qa-integrations-deployment",
-                ),
+                deployment=qa_deployment,
                 logging_level=apigateway_.MethodLoggingLevel.INFO,
                 data_trace_enabled=True,
                 metrics_enabled=True,
                 tracing_enabled=True,
             )
+            qa_deployment.deploy()
+
+
 
 
         elif(app_environment == AppEnvironment.STAGE or app_environment == AppEnvironment.RC):
-            # Stage 
-            stage = apigateway_.Stage(
-                self, "stage-integrations-stage",
-                stage_name="stage",
-                deployment=self.api.latest_deployment,
-                logging_level=apigateway_.MethodLoggingLevel.INFO,
-                data_trace_enabled=True,
-                metrics_enabled=True,
-                tracing_enabled=True,
-            )
-            # RC 
-            rc_stage = apigateway_.Stage(
-                self, "rc-integrations-stage",
-                stage_name="rc",
-                deployment=self.api.latest_deployment,
-                logging_level=apigateway_.MethodLoggingLevel.INFO,
-                data_trace_enabled=True,
-                metrics_enabled=True,
-                tracing_enabled=True,
-            )
-
+            pass
         elif(app_environment == AppEnvironment.PROD):
-            # PROD 
-            prod_stage = apigateway_.Stage(
-                self, "prod-integrations-stage",
-                stage_name="prod",
-                deployment=self.api.latest_deployment,
-                logging_level=apigateway_.MethodLoggingLevel.INFO,
-                data_trace_enabled=True,
-                metrics_enabled=True,
-                tracing_enabled=True,
-            )
+            pass
 
 
         # --------------------------------------------------------------------
