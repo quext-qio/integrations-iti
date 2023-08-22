@@ -64,56 +64,7 @@ class SchemaRequestPost(IValidator):
             },
             "guestPreference": {
                 "type": "dict",
-                "required": True,
-                "schema": {
-                    "desiredBeds": {
-                        'required': True,
-                        'type': 'list',
-                        'allowed': ['ONE_BEDROOM', 'TWO_BEDROOM', 'THREE_BEDROOM'],
-                        'empty': True
-                    },
-                    "desiredRent": {
-                        'required': False,
-                        'type': 'integer'
-                    },
-                    "desiredBaths": {
-                        'required': False,
-                        'type': 'list',
-                        'schema': {
-                            'type': 'integer',
-                            'min': 1
-                        }
-                    },
-                    "moveInDate": {
-                        'required': False,
-                        'type': 'string'
-                    },
-                    "contactPreference": {
-                        'required': False,
-                        'type': 'list',
-                        'allowed': ['sms', 'email', 'phone']
-                    },
-                    "leaseTermMonths": {
-                        'required': False,
-                        'type': 'integer',
-                        'min': 1
-                    },
-                    "noOfOccupants": {
-                        'required': False,
-                        'type': 'integer',
-                        'min': 1
-                    },
-                    "moveInReason": {
-                        'required': False,
-                        'type': 'string',
-                        'empty': False
-                    },
-                    "preferredAmenities": {
-                        'required': False,
-                        'type': 'string',
-                        'empty': False
-                    }
-                }
+                "required": True
             },
             "qContactID": {
                 'required': False,

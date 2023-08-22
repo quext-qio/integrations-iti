@@ -6,6 +6,7 @@ from services.realpage_service import RealPageService
 from services.resman_service import ResManService
 from services.yardi_service import YardiService
 from services.realpage_ilm_service import RealPageILMService
+from services.spherexx_service import SpherexxService
 
 class ServiceFactory:
     @staticmethod
@@ -29,3 +30,7 @@ class ServiceFactory:
             return YardiService()
         elif service_type == ServiceType.REALPAGEILM or service_type == ServiceType.REALPAGEL2L:
             return RealPageILMService()
+        elif service_type == ServiceType.SPHEREXX:
+            return SpherexxService()
+
+        
