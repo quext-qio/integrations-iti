@@ -56,32 +56,32 @@ class APIStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Set Custom Domain depending on the stage
-        domain_config = stage.get_api_domain_config()
-        hosted_zone_id = domain_config["hosted_zone_id"]
-        domain_name_alias_target = domain_config["domain_name_alias_target"]
-        custom_domain_name = domain_config["custom_domain_name"]
+        # domain_config = stage.get_api_domain_config()
+        # hosted_zone_id = domain_config["hosted_zone_id"]
+        # domain_name_alias_target = domain_config["domain_name_alias_target"]
+        # custom_domain_name = domain_config["custom_domain_name"]
         
-        # Get the domain name from the attributes
-        api_domain = apigateway_.DomainName.from_domain_name_attributes(
-            self, f"{stage.value}-DomainName",
-            domain_name=custom_domain_name,
-            domain_name_alias_hosted_zone_id=hosted_zone_id,
-            domain_name_alias_target=domain_name_alias_target,
-        )
+        # # Get the domain name from the attributes
+        # api_domain = apigateway_.DomainName.from_domain_name_attributes(
+        #     self, f"{stage.value}-DomainName",
+        #     domain_name=custom_domain_name,
+        #     domain_name_alias_hosted_zone_id=hosted_zone_id,
+        #     domain_name_alias_target=domain_name_alias_target,
+        # )
 
-        try:
-            # Attempt to create the base mapping
-            apigateway_.BasePathMapping(
-                self, f"{stage.value}-BasePathMapping",
-                domain_name=api_domain,
-                rest_api=self.api,
-                stage=self.api.deployment_stage,
-            )
-        except apigateway_.CfnBasePathMappingAlreadyExistsException:
-            # If the base mapping already exists, catch the exception
-            # and proceed without creating a new one.
-            print("Base path mapping already exists.")
-            pass
+        # try:
+        #     # Attempt to create the base mapping
+        #     apigateway_.BasePathMapping(
+        #         self, f"{stage.value}-BasePathMapping",
+        #         domain_name=api_domain,
+        #         rest_api=self.api,
+        #         stage=self.api.deployment_stage,
+        #     )
+        # except apigateway_.CfnBasePathMappingAlreadyExistsException:
+        #     # If the base mapping already exists, catch the exception
+        #     # and proceed without creating a new one.
+        #     print("Base path mapping already exists.")
+        #     pass
 
         # --------------------------------------------------------------------
         # Asocaite API Key for the API Gateway

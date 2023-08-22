@@ -2,6 +2,7 @@ import requests, json
 from utils.shared.constants.guestcard_constants import GuestcardsConstants
 from utils.mapper.bedroom_mapping import bedroom_mapping
 from utils.shared.config import config
+from urllib.parse import urlencode
 
 class PayladHandler:
 
@@ -40,17 +41,17 @@ class PayladHandler:
                                     "@Exact": str(guest_preference.get(GuestcardsConstants.DESIRED_RENT, ""))
                                 },
                                 "DesiredNumBedrooms": {
-                                        "Min": min(bedroooms_data) if len(bedroooms_data) > 0 else 0,
-                                        "Max": max(bedroooms_data) if len(bedroooms_data) > 0 else 0
+                                        "@Min": min(bedroooms_data) if len(bedroooms_data) > 0 else 0,
+                                        "@Max": max(bedroooms_data) if len(bedroooms_data) > 0 else 0
                                 },
                                 "DesiredLeaseTerm": guest_preference.get(GuestcardsConstants.LEASE_TERM, 0),
                                 "NumberOfOccupants": guest_preference.get(GuestcardsConstants.OCCUPANTS, 0),
 
                                 "Comment": guest_preference.get(GuestcardsConstants.MOVE_IN_REASON, ""),
 
-                            }
-                        },
-                    "Events": events
+                            },
+                            "Events": events
+                        }
 
                     }
                 }
@@ -59,7 +60,7 @@ class PayladHandler:
 
 
     def create_events(self, data, ips):
-            agent_id, last_name = self.get_agent_info(data["Source"], ips)
+            agent_id, first_name, last_name = self.get_agent_info(data["Source"], ips)
             events = {
                             "Event": {
                                 "@EventType": data[GuestcardsConstants.EVENT_TYPE],
@@ -73,19 +74,21 @@ class PayladHandler:
                                         "@IDValue": agent_id
                                     },
                                     "AgentName": {
-                                        "FirstName": GuestcardsConstants.SOURCE,
+                                        "FirstName": first_name,
                                         "LastName": last_name
                                     }
                                 },
                                 "FirstContact": "true",
-                                "Comments": data.get(GuestcardsConstants.GUEST_COMMENT, ""),
+                                "Comments": data.get("Comments", ""),
                                 "TransactionSource": data.get("TransactionSourceid")
                             }
                     } 
             
             return events
-            
+ 
     def get_agent_info(self, source, ips):
+        if ips["platformData"]["platform"] == "Spherexx":
+            agent_id, first_name, last_name = "", "Leasing","Lori"
         agent_id, last_name = "", ""
         if source == "ws":
             last_name = GuestcardsConstants.WEBSITES
@@ -97,7 +100,7 @@ class PayladHandler:
             "IntegrationPartnerID": config['Integration_partner_id'],
             "ApiKey": config['ApiKey']
             }
-          
+        first_name = GuestcardsConstants.SOURCE
         url = f'https://api.myresman.com/Leasing/GetEmployees'
         _body = urlencode(body, {"Content-type": "application/x-www-form-urlencoded"})
     
@@ -115,4 +118,4 @@ class PayladHandler:
         for agent in employees["Employees"]:
             if last_name in agent["Name"]:
                 agent_id = agent["ID"] 
-        return agent_id, last_name
+        return agent_id, first_name, last_name
