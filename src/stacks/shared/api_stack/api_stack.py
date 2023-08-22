@@ -64,6 +64,7 @@ class APIStack(NestedStack):
                 self, "dev-integrations-deployment",
                 api=self.api,
                 description="dev-integrations-deployment",
+                retain_deployments=True,
             )
             dev_stage = apigateway_.Stage(
                 self, "dev-integrations-stage",
@@ -74,13 +75,13 @@ class APIStack(NestedStack):
                 metrics_enabled=True,
                 tracing_enabled=True,
             )
-            dev_deployment.deploy()
 
             # QA stage
             qa_deployment = apigateway_.Deployment(
                 self, "qa-integrations-deployment",
                 api=self.api,
                 description="qa-integrations-deployment",
+                retain_deployments=True,
             )
             qa_stage = apigateway_.Stage(
                 self, "qa-integrations-stage",
@@ -91,7 +92,6 @@ class APIStack(NestedStack):
                 metrics_enabled=True,
                 tracing_enabled=True,
             )
-            qa_deployment.deploy()
 
 
 
