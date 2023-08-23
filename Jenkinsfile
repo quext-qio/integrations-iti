@@ -121,6 +121,8 @@ pipeline {
                         env.AWS_ACCESS_KEY_ID=AWS_KEYS[0]
                         env.AWS_SECRET_ACCESS_KEY=AWS_KEYS[1]
                         env.AWS_SESSION_TOKEN=AWS_KEYS[2]
+                        sh "echo $DEPLOY_ENVIRONMENT"
+                        sh "echo $STACK"
                         sh "cdk destroy --all --force --toolkit-stack-name quext-${STACK}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
                     }
                 }
@@ -160,6 +162,8 @@ pipeline {
                                         env.AWS_SECRET_ACCESS_KEY=AWS_KEYS[1]
                                         env.AWS_SESSION_TOKEN=AWS_KEYS[2]
                                     }
+                                    sh "echo $DEPLOY_ENVIRONMENT"
+                                    sh "echo $STACK"
                                     sh "cdk deploy --all --require-approval never --toolkit-stack-name quext-${STACK}-integrationApi-cdk-toolkit --progress bar --trace true -vv"
                                 }
                             }
