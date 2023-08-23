@@ -111,7 +111,7 @@ pipeline {
             steps {
                 script {
                     docker.image("${ecr_repository_uri}:${imageTag}").inside() {
-                        jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/quext-${DEPLOY_ENVIRONMENT}-integrationApi-assume-role"
+                        jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/quext-${STACK}-integrationApi-assume-role"
                         def AWS_KEYS = sh(returnStdout: true, script: """
                             aws sts assume-role --role-arn $jenkinsRole \
                             --role-session-name cdk \
@@ -151,7 +151,7 @@ pipeline {
                             withEnv(["STAGE=${DEPLOY_ENVIRONMENT}"]) {
                                 docker.image("${ecr_repository_uri}:${imageTag}").inside() {
                                     if (params."CDK destroy" != true) {
-                                        jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/quext-${DEPLOY_ENVIRONMENT}-integrationApi-assume-role"
+                                        jenkinsRole = "arn:aws:iam::${ACCOUNT_ID}:role/quext-${STACK}-integrationApi-assume-role"
                                         def AWS_KEYS = sh(returnStdout: true, script: """
                                             aws sts assume-role --role-arn $jenkinsRole \
                                             --role-session-name cdk \
