@@ -9,3 +9,4 @@ class ServiceType(Enum):
     YARDI = "yardi"
     REALPAGEILM = "realpage_ilm"
     REALPAGEL2L = "realpage_l2l"
+    SPHEREXX = "spherexx"

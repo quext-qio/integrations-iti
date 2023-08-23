@@ -48,15 +48,16 @@ def lambda_handler(event, context):
         security_token = salesforce_config['security_token']
         current_env = salesforce_config['current_env']
         
-        # Salesforce authentication
+        # Salesforce authentication ([stage], [rc] and [prod] will be connected to the real Salesforce)
         salesforce = None
-        if current_env == 'prod' or current_env == 'stage':
+        if current_env == 'stage' or current_env == 'rc' or current_env == 'prod':
             salesforce = Salesforce(username=username, password=password, security_token=security_token)
         else:    
             salesforce = Salesforce(username=username, password=password, security_token=security_token, domain='test')
 
         # Execute query
         query_result = salesforce.query_all(input['query'])
+
 
         # Case: Success
         return {
@@ -88,5 +89,3 @@ def lambda_handler(event, context):
             'isBase64Encoded': False  
         }
         
-
-    

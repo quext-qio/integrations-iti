@@ -5,10 +5,11 @@ from aws_cdk import (
     aws_apigateway as apigateway_,
 )
 from constructs import Construct
+from src.utils.enums.app_environment import AppEnvironment
 
 class TourAvailabilityStack(NestedStack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str],**kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
@@ -20,7 +21,7 @@ class TourAvailabilityStack(NestedStack):
         # Create lambda function instance
         lambda_function = lambda_.Function(
             self, 
-            "TourAvailability_Lambda_Function",
+            f"{app_environment.get_stage_name()}-tour-availability-lambda-function",
             description="TourAvailability Lambda is responsible for times slots per community",
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
@@ -28,7 +29,7 @@ class TourAvailabilityStack(NestedStack):
             code=lambda_.Code.from_asset("./src/lambdas/tour_availability"),
             handler="lambda_function.lambda_handler",
             layers=layers,
-            function_name="TourAvailability_Lambda_Function",
+            function_name=f"{app_environment.get_stage_name()}-tour-availability-lambda-function",
         )
 
         # -------------------------------------------------------------------- 
