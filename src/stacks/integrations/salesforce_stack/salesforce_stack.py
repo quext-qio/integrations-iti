@@ -15,11 +15,11 @@ class SalesforceStack(NestedStack):
         # -----------------------------------------------------------------------
         # Constants
         timeout=Duration.seconds(900)
-        allow_methods=['OPTIONS', 'POST']
+        allow_methods=['OPTIONS', 'GET']
         
         # --------------------------------------------------------------------
         # Create lambda function instance for (# POST /salesforce/query)
-        post_lambda_function = lambda_.Function(
+        lambda_function = lambda_.Function(
             self, 
             f"{app_environment.get_stage_name()}-salesforce-dynamic-lambda-function",
             description="Salesforce Lambda is responsible retrieving data from Salesforce using simple_salesforce library.", 
@@ -35,8 +35,8 @@ class SalesforceStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Resource to execute query (POST)
-        post_endpoint = api.add_resource(
-            "query",
+        get_endpoint = api.add_resource(
+            "liftoff",
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
                 allow_origins=apigateway_.Cors.ALL_ORIGINS
@@ -47,8 +47,8 @@ class SalesforceStack(NestedStack):
         # --------------------------------------------------------------------
         # Create a Lambda integration instance
         # POST
-        post_endpoint_lambda_integration = apigateway_.LambdaIntegration(
-            post_lambda_function,
+        get_endpoint_lambda_integration = apigateway_.LambdaIntegration(
+            lambda_function,
             proxy=True,
             integration_responses=[
                 apigateway_.IntegrationResponse(
@@ -62,10 +62,10 @@ class SalesforceStack(NestedStack):
         )
 
         # --------------------------------------------------------------------
-        # Add a POST method to endpoint
-        post_endpoint.add_method(
-            'POST', 
-            post_endpoint_lambda_integration,
+        # Add a GET method to endpoint
+        get_endpoint.add_method(
+            'GET', 
+            get_endpoint_lambda_integration,
             request_parameters={},
             method_responses=[
                 apigateway_.MethodResponse(
