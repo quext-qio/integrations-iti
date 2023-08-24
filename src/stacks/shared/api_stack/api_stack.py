@@ -99,6 +99,7 @@ class APIStack(NestedStack):
         engrain_resource_v1 = api_v1.add_resource("engrain")
         tour_resource_v1 = api_v1.add_resource("tour")
         salesforce_resource_v1 = api_v1.add_resource("salesforce")
+        jira_resource_v1 = api_v1.add_resource("jira")
 
         # Create a dictionary of all the resources of v1
         dict_v1 = {
@@ -109,6 +110,7 @@ class APIStack(NestedStack):
             "engrain": engrain_resource_v1,
             "tour": tour_resource_v1,
             "salesforce": salesforce_resource_v1,
+            "jira": jira_resource_v1,
         }
 
         # Suported third party services v2
@@ -119,6 +121,7 @@ class APIStack(NestedStack):
         engrain_resource_v2 = api_v2.add_resource("engrain")
         tour_resource_v2 = api_v2.add_resource("tour")
         salesforce_resource_v2 = api_v2.add_resource("salesforce")
+        jira_resource_v2 = api_v2.add_resource("jira")
 
         # Create a dictionary of all the resources of v2
         dict_v2 = {
@@ -129,6 +132,7 @@ class APIStack(NestedStack):
             "engrain": engrain_resource_v2,
             "tour": tour_resource_v2,
             "salesforce": salesforce_resource_v2,
+            "jira": jira_resource_v2,
         }
 
         # Create a dictionary of all the resources and versions
