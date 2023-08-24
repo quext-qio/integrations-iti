@@ -1,5 +1,4 @@
 import json
-from schemas.schema_request_post import SchemaRequestPost
 from global_config.config import salesforce_config
 from simple_salesforce import Salesforce
 from acl import ACL
@@ -15,28 +14,6 @@ def lambda_handler(event, context):
     # if not is_acl_valid:
     #     return response_acl
 
-    # ---------------------------------------------------------------------------------------------
-    # Body validation
-    # ---------------------------------------------------------------------------------------------
-
-    # Validate body of request
-    input = json.loads(event['body'])
-    is_valid, input_errors = SchemaRequestPost(input).is_valid()
-    if not is_valid:
-        # Case: Bad Request
-        errors = [{"message": f"{k}, {v[0]}" } for k,v in input_errors.items()]
-        return {
-            'statusCode': "400",
-            'body': json.dumps({
-                'data': {},
-                'errors': errors,
-            }),
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',  
-            },
-            'isBase64Encoded': False  
-        }
 
     # ---------------------------------------------------------------------------------------------
     # Salesforce flow
@@ -56,7 +33,8 @@ def lambda_handler(event, context):
             salesforce = Salesforce(username=username, password=password, security_token=security_token, domain='test')
 
         # Execute query
-        query_result = salesforce.query_all(input['query'])
+        query = "SELECT StageName , CloseDate , Contract_Signed_Date__c , Estimated_Launch_Date__c , Effective_Date__C , sum(Total_Units__c) FROM Opportunity where Product_Family__c = 'IoT' and StageName <> 'Closed Lost' and (not Name like '%test%') and StageName In ('Closed Won', 'Negotiation', 'Contract Out') GROUP BY closedate,  Effective_Date__C, Contract_Signed_Date__c, Estimated_Launch_Date__c , StageName Having sum(Total_Units__c) > 0 order by closedate, Estimated_Launch_Date__c , StageName"
+        query_result = salesforce.query_all(query)
 
 
         # Case: Success
