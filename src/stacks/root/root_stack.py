@@ -15,6 +15,7 @@ from src.stacks.integrations.engrain_stack.engrain_stack import EngrainStack
 from src.stacks.integrations.tour_availability_stack.tour_availability_stack import TourAvailabilityStack
 from src.stacks.integrations.conservice_stack.conservice_stack import ConserviceStack
 from src.stacks.integrations.salesforce_stack.salesforce_stack import SalesforceStack
+#from src.stacks.integrations.qoops.qoops_stack import QoopsStack
 
 # [RootStack] is the main [Stack] for the project
 # It is responsible for load all [NestedStack] and share resources between them
@@ -62,6 +63,7 @@ class RootStack(Stack):
         pip_packages_layer = layer_stack.get_pip_packages_layer
         crypto_layer = layer_stack.get_crypto_layer
         salesforce_layer = layer_stack.get_salesforce_layer
+        jira_layer = layer_stack.get_jira_layer
 
 
         # --------------------------------------------------------------------
@@ -95,6 +97,7 @@ class RootStack(Stack):
         # API Gateway [V2] resources necessary for NestedStacks
         general_resource_v2 = api_v2["general"]
         tour_resource_v2 = api_v2["tour"]
+        jira_resource_v2 = api_v2["jira"]
 
 
         # --------------------------------------------------------------------
@@ -289,4 +292,21 @@ class RootStack(Stack):
                 pip_packages_layer,
             ],
         )
+        
+        # # --------------------------------------------------------------------
+        # # Qoops for Jira automation endpoints
+        # # --------------------------------------------------------------------
+        # QoopsStack(
+        #     self,
+        #     f"{app_env.get_stage_name()}-{server_name}-jira-stack",
+        #     description="Stack for submitting tickets to Quext's Jira system.",
+        #     api=jira_resource_v2,
+        #     app_environment=app_env,
+        #     environment=environment,
+        #     layers=[
+        #         jira_layer,
+        #         shared_layer,
+        #         pip_packages_layer,
+        #     ],
+        # )
 

@@ -39,6 +39,10 @@ class LayersStack(NestedStack):
     def get_salesforce_layer(self):
         return self.salesforce_layer
     
+    @property
+    def get_jira_layer(self):
+        return self.jira_layer
+    
     def __init__(self, scope: Construct, construct_id: str, app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
         
@@ -164,7 +168,7 @@ class LayersStack(NestedStack):
         salesforce_layer = lambda_.LayerVersion(
             self, f"{app_environment.get_stage_name()}-salesforce-layer",
             layer_version_name=f"{app_environment.get_stage_name()}-salesforce-layer",
-            description="Package documentation: hhttps://pypi.org/project/simple-salesforce/",
+            description="Package documentation: https://pypi.org/project/simple-salesforce/",
             code=lambda_.Code.from_asset("./src/utils/layers/salesforce_layer.zip"),
             compatible_runtimes=[
                 lambda_.Runtime.PYTHON_3_8,
@@ -177,6 +181,27 @@ class LayersStack(NestedStack):
             ],
         )
         self.salesforce_layer = salesforce_layer  
+
+        # --------------------------------------------------------------------
+        # Jira Layer 
+        jira_layer = lambda_.LayerVersion(
+            self, f"{app_environment.get_stage_name()}-jira-layer",
+            layer_version_name=f"{app_environment.get_stage_name()}-jira-layer",
+            description="Package documentation: https://pypi.org/project/jira/",
+            code=lambda_.Code.from_asset("./src/utils/layers/jira_layer.zip"),
+            compatible_runtimes=[
+                lambda_.Runtime.PYTHON_3_10, 
+                lambda_.Runtime.PYTHON_3_9, 
+                lambda_.Runtime.PYTHON_3_8, 
+                lambda_.Runtime.PYTHON_3_7, 
+                lambda_.Runtime.PYTHON_3_6,
+            ],
+            compatible_architectures=[
+                lambda_.Architecture.ARM_64,
+                lambda_.Architecture.X86_64,
+            ],
+        )
+        self.jira_layer = jira_layer  
 
         # --------------------------------------------------------------------
         # Create Custom Shared Layer 
