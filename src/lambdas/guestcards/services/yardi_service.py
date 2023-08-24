@@ -54,6 +54,7 @@ class YardiService(ServiceInterface):
                     "TransactionSourceid": YardiConstants.SOURCE,
                     "UnitID": "",
                 }
+            
             event_object = PayladHandler().create_events(event, ips_response)
          
             if "tourScheduleData" in body:
