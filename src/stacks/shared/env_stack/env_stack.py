@@ -8,10 +8,6 @@ class EnvStack(NestedStack):
     @property
     def get_env(self):
         return self.env
-    
-    @property
-    def get_assume_role(self):
-        return self.assume_role
 
     def __init__(self, scope: Construct, construct_id: str, app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -41,7 +37,6 @@ class EnvStack(NestedStack):
             RoleArn=role_arn,
             RoleSessionName=f"{app_environment.get_stage_name()}-assumed-session"
         )
-        self.assume_role = assume_role
 
         # Extract the temporary credentials from the assume_role
         credentials = assume_role['Credentials']

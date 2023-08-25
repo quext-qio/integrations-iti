@@ -35,8 +35,6 @@ class RootStack(Stack):
             description="Stack load environment variables for all lambda's functions",
         )
         environment=env_stack.get_env
-        assume_role=env_stack.get_assume_role
-
 
         # --------------------------------------------------------------------
         # [Shared] Layers Stack
@@ -309,6 +307,5 @@ class RootStack(Stack):
                 shared_layer,
                 pip_packages_layer,
             ],
-            assume_role=assume_role,
         )
 

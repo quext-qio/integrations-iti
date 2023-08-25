@@ -1,3 +1,4 @@
+import os, boto3
 from aws_cdk import (
     NestedStack,
     Duration,
@@ -13,7 +14,7 @@ from src.utils.enums.app_environment import AppEnvironment
 
 class QoopsStack(NestedStack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, assumed_role: iam_.Role, **kwargs):
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
@@ -38,7 +39,17 @@ class QoopsStack(NestedStack):
         #     assumed_by=iam_.ServicePrincipal("apigateway.amazonaws.com"),
         #     managed_policies=[iam_.ManagedPolicy.from_aws_managed_policy_name("AmazonSQSFullAccess")]
         # )
-        rest_api_role = assumed_role
+
+        role_arn = os.getenv('ROLE_ARN', 'arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters')
+        
+        assumed_role = iam_.Role.from_role_arn(
+            self,
+            f"{app_environment.get_stage_name()}-assumed-role",
+            role_arn=role_arn
+        )
+        
+
+        print(f"TYPE: {type(assumed_role)}")
 
 
         # --------------------------------------------------------------------
@@ -53,7 +64,7 @@ class QoopsStack(NestedStack):
         # Create API Integration Options object: 
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_apigateway/IntegrationOptions.html
         api_integration_options = apigateway_.IntegrationOptions(
-            credentials_role=rest_api_role,
+            credentials_role=assumed_role,
             integration_responses=[integration_response],
             request_templates={"application/json": "Action=SendMessage&MessageBody=$input.body"},
             passthrough_behavior=apigateway_.PassthroughBehavior.NEVER,
