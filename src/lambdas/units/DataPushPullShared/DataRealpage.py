@@ -7,13 +7,12 @@ class DataRealpage:
         
     def get_unit_availability(self, ips):
         errors = []
-        parameter_store = json.loads(os.environ.get("parameter_store"))
         wsdl = RealpageConstants.WSDL_URL
         client = suds.client.Client(wsdl)
         _auth = client.factory.create(RealpageConstants.AUTHDTO)
-        _auth.pmcid = parameter_store[RealpageConstants.PMCID]
-        _auth.siteid = parameter_store[RealpageConstants.SITEID]
-        _auth.licensekey = parameter_store[RealpageConstants.LICENSE_KEY]
+        _auth.pmcid = os.environ[RealpageConstants.PMCID]
+        _auth.siteid = os.environ[RealpageConstants.SITEID]
+        _auth.licensekey = os.environ[RealpageConstants.LICENSE_KEY]
 
   
         date_needed = datetime.date.today() + datetime.timedelta(days=30)
