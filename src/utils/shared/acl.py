@@ -3,8 +3,7 @@ import json, os, requests
 class ACL:
     @staticmethod
     def _loadSecurity() -> tuple:
-        parameter_store = json.loads(os.environ.get("parameter_store"))
-        host = parameter_store['ACL_HOST']
+        host = os.environ['ACL_HOST']
         url = f'{host}/api/partners/security?redacted=off'
         response = requests.get(url)
         if response.status_code == 200:

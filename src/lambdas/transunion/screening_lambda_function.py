@@ -9,13 +9,12 @@ from Utils.Converter import Converter
 from schemas.ScreeningSchema import ScreeningSchema
 
 def lambda_handler(event, context):
-    parameter_store = json.loads(os.environ.get("parameter_store"))
     payload = json.loads(event["body"])
 
     valid_schema, input_error = ScreeningSchema(payload).is_valid()
 
     if valid_schema:
-        payload = structure_object_resident_screening_transunion(payload, parameter_store["TRANSUNION_MEMBER_NAME"], parameter_store["TRANSUNION_REPORT_PASSWORD"], parameter_store["TRANSUNION_PROPERTY_ID"], parameter_store["TRANSUNION_SOURCE_ID"], parameter_store["TRANSUNION_POST_BACK_URL"])
+        payload = structure_object_resident_screening_transunion(payload, os.environ["TRANSUNION_MEMBER_NAME"], os.environ["TRANSUNION_REPORT_PASSWORD"], os.environ["TRANSUNION_PROPERTY_ID"], os.environ["TRANSUNION_SOURCE_ID"], os.environ["TRANSUNION_POST_BACK_URL"])
         converter = Converter(payload)
         payload = converter.json_to_xml()
 
@@ -28,7 +27,7 @@ def lambda_handler(event, context):
             "Accept":"application/xml",
         }
 
-        response = requests.post(parameter_store["TRANSUNION_REPORT_HOST"], data=payload, headers=headers)
+        response = requests.post(os.environ["TRANSUNION_REPORT_HOST"], data=payload, headers=headers)
         response = clean_xml_transunion_screening_response(response)
         response = converter.xml_to_dict(response)
 

@@ -18,8 +18,7 @@ class AccessControl():
 
     def load_acls(self, partner=""):
         
-        parameter_store = json.loads(os.environ.get("parameter_store"))
-        host = parameter_store['ACL_HOST']
+        host = os.environ['ACL_HOST']
         url = f'{host}/api/partners/security/{partner}?redacted=off'
         response = requests.get(url)
         # If outgoing return an error

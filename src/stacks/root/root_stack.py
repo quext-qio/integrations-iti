@@ -1,3 +1,4 @@
+import json
 from aws_cdk import Stack
 from constructs import Construct
 from src.utils.enums.app_environment import AppEnvironment
@@ -20,6 +21,7 @@ from src.stacks.integrations.salesforce_stack.salesforce_stack import Salesforce
 # [RootStack] is the main [Stack] for the project
 # It is responsible for load all [NestedStack] and share resources between them
 class RootStack(Stack):
+
     def __init__(self, scope: Construct, construct_id: str, app_env: AppEnvironment, server_name:str, **kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
@@ -35,8 +37,6 @@ class RootStack(Stack):
             description="Stack load environment variables for all lambda's functions",
         )
         environment=env_stack.get_env
-
-
         # --------------------------------------------------------------------
         # [Shared] Layers Stack
         # --------------------------------------------------------------------
@@ -106,7 +106,7 @@ class RootStack(Stack):
         # the resources necessary for each endpoint to reduce the size of 
         # resorces loaded in each lambda's function
         # --------------------------------------------------------------------
-
+        
         # --------------------------------------------------------------------
         # Placepay endpoints
         # --------------------------------------------------------------------
@@ -116,7 +116,7 @@ class RootStack(Stack):
             app_environment=app_env,
             description="Stack for placepay endpoints",
             api=placepay_resource_v1,
-            environment=environment,
+            environment=environment["placepay"],
             layers=[
                 place_api_layer,
                 shared_layer,
@@ -134,7 +134,7 @@ class RootStack(Stack):
             app_environment=app_env,
             description="Stack for guestcards endpoints",
             api=general_resource_v2,
-            environment=environment,
+            environment=environment["guestcards"],
             layers=[
                 pip_packages_layer,
                 shared_layer,
@@ -149,7 +149,7 @@ class RootStack(Stack):
             f"{app_env.get_stage_name()}-{server_name}-trans-union-stack", 
             api=transunion_resource_v1, 
             app_environment=app_env,
-            environment=environment,
+            environment=environment["transunion"],
             description="Stack for transunion endpoints",
             layers=[
                 pip_packages_layer,
@@ -164,9 +164,9 @@ class RootStack(Stack):
             self, 
             f"{app_env.get_stage_name()}-{server_name}-units-stack", 
             api=general_resource_v2, 
-            environment=environment,
             app_environment=app_env,
             description="Stack for units endpoints",
+            environment=environment["units"],
             layers=[
                 pip_packages_layer, 
                 mysql_layer, 
@@ -185,11 +185,11 @@ class RootStack(Stack):
             api=general_resource_v1, 
             app_environment=app_env,
             description="Stack for communities endpoints",
+            environment=environment["communities"],
             layers=[
                 pip_packages_layer,
                 shared_layer,
             ],
-            environment=environment,
         )
 
         # --------------------------------------------------------------------
@@ -201,11 +201,11 @@ class RootStack(Stack):
             api=general_resource_v1, 
             app_environment=app_env,
             description="Stack for customers endpoints",
+            environment=environment["customers"],
             layers=[
                 pip_packages_layer,
                 shared_layer,
             ],
-            environment=environment,
         )
 
         # --------------------------------------------------------------------
@@ -217,13 +217,13 @@ class RootStack(Stack):
             api=general_resource_v1, 
             app_environment=app_env,
             description="Stack for residents endpoints",
+            environment=environment["residents"],
             layers=[
                 pip_packages_layer,
                 shared_layer,
                 crypto_layer,
                 mysql_layer,
             ],
-            environment=environment,
         )
 
         # --------------------------------------------------------------------
@@ -232,10 +232,10 @@ class RootStack(Stack):
         EngrainStack(
             self, 
             f"{app_env.get_stage_name()}-{server_name}-engrain-stack",
-            environment=environment,
             app_environment=app_env,
             description="Stack for Engrain Job",
             api=engrain_resource_v1,
+            environment=environment["engrain"],
             layers=[
                 mysql_layer,
                 pip_packages_layer,
@@ -251,13 +251,13 @@ class RootStack(Stack):
             f"{app_env.get_stage_name()}-{server_name}-tour-availability-stack",
             api=tour_resource_v2, 
             app_environment=app_env,
+            description="Stack for Tour availability endpoints",
+            environment=environment["touravailability"],
             layers=[
                 pip_packages_layer,
                 suds_layer,
                 shared_layer
             ],
-            environment=environment,
-            description="Stack for Tour availability endpoints",
         )
 
         # --------------------------------------------------------------------
@@ -268,8 +268,8 @@ class RootStack(Stack):
             f"{app_env.get_stage_name()}-{server_name}-conservice-stack", 
             api=general_resource_v1, 
             app_environment=app_env,
-            environment=environment,
             description="Stack for conservice endpoints",
+            environment=environment["conservice"],
             layers=[
                 pip_packages_layer,
                 shared_layer,
@@ -285,7 +285,7 @@ class RootStack(Stack):
             description="Stack for salesforce endpoints",
             api=salesforce_resource_v1,
             app_environment=app_env,
-            environment=environment,
+            environment=environment["salesforce"],
             layers=[
                 salesforce_layer,
                 shared_layer,
@@ -293,9 +293,9 @@ class RootStack(Stack):
             ],
         )
         
-        # # --------------------------------------------------------------------
-        # # Qoops for Jira automation endpoints
-        # # --------------------------------------------------------------------
+        # --------------------------------------------------------------------
+        # Qoops for Jira automation endpoints
+        # --------------------------------------------------------------------
         # QoopsStack(
         #     self,
         #     f"{app_env.get_stage_name()}-{server_name}-jira-stack",
