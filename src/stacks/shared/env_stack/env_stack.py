@@ -8,6 +8,10 @@ class EnvStack(NestedStack):
     @property
     def get_env(self):
         return self.env
+    
+    @property
+    def get_assume_role(self):
+        return self.assume_role
 
     def __init__(self, scope: Construct, construct_id: str, app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -33,13 +37,14 @@ class EnvStack(NestedStack):
         role_arn = os.getenv('ROLE_ARN', 'arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters')
         
         # Assume the IAM role
-        response = sts_client.assume_role(
+        assume_role = sts_client.assume_role(
             RoleArn=role_arn,
             RoleSessionName=f"{app_environment.get_stage_name()}-assumed-session"
         )
+        self.assume_role = assume_role
 
-        # Extract the temporary credentials from the response
-        credentials = response['Credentials']
+        # Extract the temporary credentials from the assume_role
+        credentials = assume_role['Credentials']
 
         # Create a new session using the temporary credentials
         new_session = boto3.Session(

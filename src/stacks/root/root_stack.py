@@ -15,7 +15,7 @@ from src.stacks.integrations.engrain_stack.engrain_stack import EngrainStack
 from src.stacks.integrations.tour_availability_stack.tour_availability_stack import TourAvailabilityStack
 from src.stacks.integrations.conservice_stack.conservice_stack import ConserviceStack
 from src.stacks.integrations.salesforce_stack.salesforce_stack import SalesforceStack
-#from src.stacks.integrations.qoops.qoops_stack import QoopsStack
+from src.stacks.integrations.qoops.qoops_stack import QoopsStack
 
 # [RootStack] is the main [Stack] for the project
 # It is responsible for load all [NestedStack] and share resources between them
@@ -35,6 +35,7 @@ class RootStack(Stack):
             description="Stack load environment variables for all lambda's functions",
         )
         environment=env_stack.get_env
+        assume_role=env_stack.get_assume_role
 
 
         # --------------------------------------------------------------------
@@ -293,20 +294,21 @@ class RootStack(Stack):
             ],
         )
         
-        # # --------------------------------------------------------------------
-        # # Qoops for Jira automation endpoints
-        # # --------------------------------------------------------------------
-        # QoopsStack(
-        #     self,
-        #     f"{app_env.get_stage_name()}-{server_name}-jira-stack",
-        #     description="Stack for submitting tickets to Quext's Jira system.",
-        #     api=jira_resource_v2,
-        #     app_environment=app_env,
-        #     environment=environment,
-        #     layers=[
-        #         jira_layer,
-        #         shared_layer,
-        #         pip_packages_layer,
-        #     ],
-        # )
+        # --------------------------------------------------------------------
+        # Qoops for Jira automation endpoints
+        # --------------------------------------------------------------------
+        QoopsStack(
+            self,
+            f"{app_env.get_stage_name()}-{server_name}-jira-stack",
+            description="Stack for submitting tickets to Quext's Jira system.",
+            api=jira_resource_v2,
+            app_environment=app_env,
+            environment=environment,
+            layers=[
+                jira_layer,
+                shared_layer,
+                pip_packages_layer,
+            ],
+            assume_role=assume_role,
+        )
 
