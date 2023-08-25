@@ -1,14 +1,11 @@
 import os
 import json
 
-# Read environment variables
-parameter_store = json.loads(os.environ.get("parameter_store"))
-
 # Jira configuration
 jira_config = {
     'server_url': 'https://quext.atlassian.net/',
     'reporter_email':'cs.noreply@onequext.com',
-    'token': parameter_store["JIRA_REPORTER_TOKEN"],
+    'token': os.environ["JIRA_REPORTER_TOKEN"],
 }
 
 priorities = {

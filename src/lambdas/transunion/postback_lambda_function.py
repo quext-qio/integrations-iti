@@ -7,11 +7,9 @@ from Utils.Converter import Converter
 from Utils.Constants import constants
 
 def lambda_handler(event, context):
-    parameter_store = json.loads(os.environ.get("parameter_store"))
-
     payload = event["body"]
-    leasing_host = parameter_store["LEASING_HOST"]
-    leasing_background_screening_endpoint = parameter_store["LEASING_BACKGROUND_SCREENING_ENDPOINT"]
+    leasing_host = os.environ["LEASING_HOST"]
+    leasing_background_screening_endpoint = os.environ["LEASING_BACKGROUND_SCREENING_ENDPOINT"]
 
     # convert xml to dict
     convert = Converter(payload)
@@ -50,7 +48,7 @@ def lambda_handler(event, context):
         iterations = 0
 
         while success == False:
-            response = requests.get(f"{leasing_host}{parameter_store['LEASING_FIND_BY_NUMBER']}/{application_number}")
+            response = requests.get(f"{leasing_host}{os.environ['LEASING_FIND_BY_NUMBER']}/{application_number}")
             household_id = response.text
             iterations += 1
             
