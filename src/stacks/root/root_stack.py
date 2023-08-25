@@ -302,7 +302,7 @@ class RootStack(Stack):
             description="Stack for submitting tickets to Quext's Jira system.",
             api=jira_resource_v2,
             app_environment=app_env,
-            environment=environment,
+            environment=environment["qoops"],
             layers=[
                 jira_layer,
                 shared_layer,
