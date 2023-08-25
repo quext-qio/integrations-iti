@@ -1,5 +1,4 @@
-import os
-import boto3
+import os, json, boto3
 from aws_cdk import NestedStack
 from constructs import Construct
 from src.utils.enums.app_environment import AppEnvironment
@@ -54,11 +53,12 @@ class EnvStack(NestedStack):
             region_name="us-east-1", 
         )
         response = ssm_client.get_parameter(Name=parameter_name, WithDecryption=True)
-        all_params = response["Parameter"]["Value"]
-       
+        all_params = json.loads(response["Parameter"]["Value"])
+
+
         # --------------------------------------------------------------------
         # Create a dict with the environment variables depending of integration
-        self.env = {
+        environment_dict = {
             "placepay": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "PLACE_PAY_API_KEY": all_params["PLACE_PAY_API_KEY"],
@@ -79,15 +79,9 @@ class EnvStack(NestedStack):
                 "YARDI_SERVER_NAME": all_params["YARDI_SERVER_NAME"],
                 "YARDI_DATABASE": all_params["YARDI_DATABASE"],
                 "YARDI_INTERFACE_LICENSE": all_params["YARDI_INTERFACE_LICENSE"],
-                "YARDI_USER_NAME_DEMO": all_params["YARDI_USER_NAME_DEMO"],
-                "YARDI_PASSWORD_DEMO": all_params["YARDI_PASSWORD_DEMO"],
-                "YARDI_SERVER_NAME_DEMO": all_params["YARDI_SERVER_NAME_DEMO"],
-                "YARDI_DATABASE_DEMO": all_params["YARDI_DATABASE_DEMO"],
-                "YARDI_INTERFACE_LICENSE_DEMO": all_params["YARDI_INTERFACE_LICENSE_DEMO"],
                 "LEASING_HOST": all_params["LEASING_HOST"],
                 "IPS_HOST": all_params["IPS_HOST"],
                 "YARDI_URL": all_params["YARDI_URL"],
-                "YARDI_URL_DEMO": all_params["YARDI_URL_DEMO"],
             },
             "transunion": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
@@ -164,3 +158,5 @@ class EnvStack(NestedStack):
             },
             
         }
+
+        self.env = environment_dict
