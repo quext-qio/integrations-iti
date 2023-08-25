@@ -62,9 +62,11 @@ class EnvStack(NestedStack):
             "placepay": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "PLACE_PAY_API_KEY": all_params["PLACE_PAY_API_KEY"],
+                "ACL_HOST": all_params["ACL_HOST"],
             },
             "guestcards": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "ACL_HOST": all_params["ACL_HOST"],
                 # Realpage
                 "WS_REALPAGE_ILM_APIKEY": all_params["WS_REALPAGE_ILM_APIKEY"],
                 "DH_REALPAGE_ILM_APIKEY": all_params["DH_REALPAGE_ILM_APIKEY"],
@@ -91,6 +93,7 @@ class EnvStack(NestedStack):
             },
             "transunion": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "ACL_HOST": all_params["ACL_HOST"],
                 # Identity
                 "TRANSUNION_IDENTITY_HOST": all_params["TRANSUNION_IDENTITY_HOST"],
                 "TRANSUNION_AUTHENTICATION": all_params["TRANSUNION_AUTHENTICATION"],
@@ -110,6 +113,7 @@ class EnvStack(NestedStack):
             },
             "units": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "ACL_HOST": all_params["ACL_HOST"],
                 "RESMAN_INTEGRATION_PARTNER_ID": all_params["RESMAN_INTEGRATION_PARTNER_ID"],
                 "RESMAN_API_KEY": all_params["RESMAN_API_KEY"],
                 "NEWCO_DB_HOST": all_params["NEWCO_DB_HOST"],
@@ -121,14 +125,17 @@ class EnvStack(NestedStack):
             },
             "communities": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "ACL_HOST": all_params["ACL_HOST"],
                 "AUTH_HOST": all_params["AUTH_HOST"],
             },
             "customers": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "ACL_HOST": all_params["ACL_HOST"],
                 "AUTH_HOST": all_params["AUTH_HOST"],
             },
             "residents": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "ACL_HOST": all_params["ACL_HOST"],
                 "NEWCO_DB_HOST": all_params["NEWCO_DB_HOST"],
                 "NEWCO_DB_PASSWORD": all_params["NEWCO_DB_PASSWORD"],
                 "NEWCO_DB_NAME": all_params["NEWCO_DB_NAME"],
@@ -136,6 +143,7 @@ class EnvStack(NestedStack):
             },
             "engrain": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "ACL_HOST": all_params["ACL_HOST"],
                 "ENGRAIN_API_KEY": all_params["ENGRAIN_API_KEY"],
                 "ENGRAIN_QUEXT_API_KEY": all_params["ENGRAIN_QUEXT_API_KEY"],
                 "ENGRAIN_MADERA_UUID": all_params["ENGRAIN_MADERA_UUID"],
@@ -146,20 +154,24 @@ class EnvStack(NestedStack):
             },
             "touravailability": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "ACL_HOST": all_params["ACL_HOST"],
                 "FUNNEL_API_KEY": all_params["FUNNEL_API_KEY"],
                 "QXT_CALENDAR_TOUR_HOST": all_params["QXT_CALENDAR_TOUR_HOST"],
             },
             "conservice": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "ACL_HOST": all_params["ACL_HOST"],
             },
             "salesforce": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "ACL_HOST": all_params["ACL_HOST"],
                 "SALESFORCE_USERNAME": all_params["SALESFORCE_USERNAME"],
                 "SALESFORCE_PASSWORD": all_params["SALESFORCE_PASSWORD"],
                 "SALESFORCE_SECURITY_TOKEN": all_params["SALESFORCE_SECURITY_TOKEN"],
             },
             "qoops": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "ACL_HOST": all_params["ACL_HOST"],
                 "JIRA_REPORTER_TOKEN": all_params["JIRA_REPORTER_TOKEN"],
             },
             
