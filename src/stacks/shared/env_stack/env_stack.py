@@ -82,6 +82,12 @@ class EnvStack(NestedStack):
                 "LEASING_HOST": all_params["LEASING_HOST"],
                 "IPS_HOST": all_params["IPS_HOST"],
                 "YARDI_URL": all_params["YARDI_URL"],
+                # Resman
+                "RESMAN_INTEGRATION_PARTNER_ID": all_params["RESMAN_INTEGRATION_PARTNER_ID"],
+                "RESMAN_ACCOUNT_ID": all_params["RESMAN_ACCOUNT_ID"],
+                "RESMAN_PROPERTY_ID": all_params["RESMAN_PROPERTY_ID"],
+                "RESMAN_API_KEY": all_params["RESMAN_API_KEY"],
+                "QXT_CALENDAR_TOUR_HOST": all_params["QXT_CALENDAR_TOUR_HOST"],
             },
             "transunion": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
