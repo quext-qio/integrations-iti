@@ -54,7 +54,113 @@ class EnvStack(NestedStack):
             region_name="us-east-1", 
         )
         response = ssm_client.get_parameter(Name=parameter_name, WithDecryption=True)
-
+        all_params = response["Parameter"]["Value"]
+       
+        # --------------------------------------------------------------------
+        # Create a dict with the environment variables depending of integration
         self.env = {
-            "parameter_store": response["Parameter"]["Value"]
+            "placepay": {
+                "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "PLACE_PAY_API_KEY": all_params["PLACE_PAY_API_KEY"],
+            },
+            "guestcards": {
+                "CURRENT_ENV": all_params["CURRENT_ENV"],
+                # Realpage
+                "WS_REALPAGE_ILM_APIKEY": all_params["WS_REALPAGE_ILM_APIKEY"],
+                "DH_REALPAGE_ILM_APIKEY": all_params["DH_REALPAGE_ILM_APIKEY"],
+                "WS_REALPAGE_L2L_APIKEY": all_params["WS_REALPAGE_L2L_APIKEY"],
+                "DH_REALPAGE_L2L_APIKEY": all_params["DH_REALPAGE_L2L_APIKEY"],
+                # Spherexx
+                "SPHEREXX_USERNAME": all_params["SPHEREXX_USERNAME"],
+                "SPHEREXX_PASSWORD": all_params["SPHEREXX_PASSWORD"],
+                # Yardi
+                "YARDI_USER_NAME": all_params["YARDI_USER_NAME"],
+                "YARDI_PASSWORD": all_params["YARDI_PASSWORD"],
+                "YARDI_SERVER_NAME": all_params["YARDI_SERVER_NAME"],
+                "YARDI_DATABASE": all_params["YARDI_DATABASE"],
+                "YARDI_INTERFACE_LICENSE": all_params["YARDI_INTERFACE_LICENSE"],
+                "YARDI_USER_NAME_DEMO": all_params["YARDI_USER_NAME_DEMO"],
+                "YARDI_PASSWORD_DEMO": all_params["YARDI_PASSWORD_DEMO"],
+                "YARDI_SERVER_NAME_DEMO": all_params["YARDI_SERVER_NAME_DEMO"],
+                "YARDI_DATABASE_DEMO": all_params["YARDI_DATABASE_DEMO"],
+                "YARDI_INTERFACE_LICENSE_DEMO": all_params["YARDI_INTERFACE_LICENSE_DEMO"],
+                "LEASING_HOST": all_params["LEASING_HOST"],
+                "IPS_HOST": all_params["IPS_HOST"],
+                "YARDI_URL": all_params["YARDI_URL"],
+                "YARDI_URL_DEMO": all_params["YARDI_URL_DEMO"],
+            },
+            "transunion": {
+                "CURRENT_ENV": all_params["CURRENT_ENV"],
+                # Identity
+                "TRANSUNION_IDENTITY_HOST": all_params["TRANSUNION_IDENTITY_HOST"],
+                "TRANSUNION_AUTHENTICATION": all_params["TRANSUNION_AUTHENTICATION"],
+                "TRANSUNION_PROPERTY_ID_CODE": all_params["TRANSUNION_PROPERTY_ID_CODE"],
+                "TRANSUNION_SECRET_KEY": all_params["TRANSUNION_SECRET_KEY"],
+                # Screening
+                "TRANSUNION_MEMBER_NAME": all_params["TRANSUNION_MEMBER_NAME"],
+                "TRANSUNION_REPORT_PASSWORD": all_params["TRANSUNION_REPORT_PASSWORD"],
+                "TRANSUNION_PROPERTY_ID": all_params["TRANSUNION_PROPERTY_ID"],
+                "TRANSUNION_SOURCE_ID": all_params["TRANSUNION_SOURCE_ID"],
+                "TRANSUNION_POST_BACK_URL": all_params["TRANSUNION_POST_BACK_URL"],
+                "TRANSUNION_REPORT_HOST": all_params["TRANSUNION_REPORT_HOST"],
+                # Postback
+                "LEASING_HOST": all_params["LEASING_HOST"],
+                "LEASING_BACKGROUND_SCREENING_ENDPOINT": all_params["LEASING_BACKGROUND_SCREENING_ENDPOINT"],
+                "LEASING_FIND_BY_NUMBER": all_params["LEASING_FIND_BY_NUMBER"],
+            },
+            "units": {
+                "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "RESMAN_INTEGRATION_PARTNER_ID": all_params["RESMAN_INTEGRATION_PARTNER_ID"],
+                "RESMAN_API_KEY": all_params["RESMAN_API_KEY"],
+                "NEWCO_DB_HOST": all_params["NEWCO_DB_HOST"],
+                "NEWCO_DB_PASSWORD": all_params["NEWCO_DB_PASSWORD"],
+                "NEWCO_DB_NAME": all_params["NEWCO_DB_NAME"],
+                "NEWCO_DB_USER": all_params["NEWCO_DB_USER"],
+                "ENGRAIN_HOST": all_params["ENGRAIN_HOST"],
+                "ENGRAIN_API_KEY": all_params["ENGRAIN_API_KEY"],
+            },
+            "communities": {
+                "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "AUTH_HOST": all_params["AUTH_HOST"],
+            },
+            "customers": {
+                "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "AUTH_HOST": all_params["AUTH_HOST"],
+            },
+            "residents": {
+                "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "NEWCO_DB_HOST": all_params["NEWCO_DB_HOST"],
+                "NEWCO_DB_PASSWORD": all_params["NEWCO_DB_PASSWORD"],
+                "NEWCO_DB_NAME": all_params["NEWCO_DB_NAME"],
+                "NEWCO_DB_USER": all_params["NEWCO_DB_USER"],
+            },
+            "engrain": {
+                "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "ENGRAIN_API_KEY": all_params["ENGRAIN_API_KEY"],
+                "ENGRAIN_QUEXT_API_KEY": all_params["ENGRAIN_QUEXT_API_KEY"],
+                "ENGRAIN_MADERA_UUID": all_params["ENGRAIN_MADERA_UUID"],
+                "NEWCO_DB_HOST": all_params["NEWCO_DB_HOST"],
+                "NEWCO_DB_PASSWORD": all_params["NEWCO_DB_PASSWORD"],
+                "NEWCO_DB_NAME": all_params["NEWCO_DB_NAME"],
+                "NEWCO_DB_USER": all_params["NEWCO_DB_USER"],
+            },
+            "touravailability": {
+                "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "FUNNEL_API_KEY": all_params["FUNNEL_API_KEY"],
+                "QXT_CALENDAR_TOUR_HOST": all_params["QXT_CALENDAR_TOUR_HOST"],
+            },
+            "conservice": {
+                "CURRENT_ENV": all_params["CURRENT_ENV"],
+            },
+            "salesforce": {
+                "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "SALESFORCE_USERNAME": all_params["SALESFORCE_USERNAME"],
+                "SALESFORCE_PASSWORD": all_params["SALESFORCE_PASSWORD"],
+                "SALESFORCE_SECURITY_TOKEN": all_params["SALESFORCE_SECURITY_TOKEN"],
+            },
+            "qoops": {
+                "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "JIRA_REPORTER_TOKEN": all_params["JIRA_REPORTER_TOKEN"],
+            },
+            
         }

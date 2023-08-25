@@ -35,7 +35,6 @@ class RootStack(Stack):
             description="Stack load environment variables for all lambda's functions",
         )
         environment=env_stack.get_env
-
         # --------------------------------------------------------------------
         # [Shared] Layers Stack
         # --------------------------------------------------------------------
@@ -115,7 +114,9 @@ class RootStack(Stack):
             app_environment=app_env,
             description="Stack for placepay endpoints",
             api=placepay_resource_v1,
-            environment=environment,
+            environment={
+                "parameter_store": environment["placepay"]
+            },
             layers=[
                 place_api_layer,
                 shared_layer,
@@ -133,7 +134,9 @@ class RootStack(Stack):
             app_environment=app_env,
             description="Stack for guestcards endpoints",
             api=general_resource_v2,
-            environment=environment,
+            environment={
+                "parameter_store": environment["guestcards"]
+            },
             layers=[
                 pip_packages_layer,
                 shared_layer,
@@ -148,7 +151,9 @@ class RootStack(Stack):
             f"{app_env.get_stage_name()}-{server_name}-trans-union-stack", 
             api=transunion_resource_v1, 
             app_environment=app_env,
-            environment=environment,
+            environment={
+                "parameter_store": environment["transunion"]
+            },
             description="Stack for transunion endpoints",
             layers=[
                 pip_packages_layer,
@@ -163,9 +168,11 @@ class RootStack(Stack):
             self, 
             f"{app_env.get_stage_name()}-{server_name}-units-stack", 
             api=general_resource_v2, 
-            environment=environment,
             app_environment=app_env,
             description="Stack for units endpoints",
+            environment={
+                "parameter_store": environment["units"]
+            },
             layers=[
                 pip_packages_layer, 
                 mysql_layer, 
@@ -184,11 +191,13 @@ class RootStack(Stack):
             api=general_resource_v1, 
             app_environment=app_env,
             description="Stack for communities endpoints",
+            environment={
+                "parameter_store": environment["communities"]
+            },
             layers=[
                 pip_packages_layer,
                 shared_layer,
             ],
-            environment=environment,
         )
 
         # --------------------------------------------------------------------
@@ -200,11 +209,13 @@ class RootStack(Stack):
             api=general_resource_v1, 
             app_environment=app_env,
             description="Stack for customers endpoints",
+            environment={
+                "parameter_store": environment["customers"]
+            },
             layers=[
                 pip_packages_layer,
                 shared_layer,
             ],
-            environment=environment,
         )
 
         # --------------------------------------------------------------------
@@ -216,13 +227,15 @@ class RootStack(Stack):
             api=general_resource_v1, 
             app_environment=app_env,
             description="Stack for residents endpoints",
+            environment={
+                "parameter_store": environment["residents"]
+            },
             layers=[
                 pip_packages_layer,
                 shared_layer,
                 crypto_layer,
                 mysql_layer,
             ],
-            environment=environment,
         )
 
         # --------------------------------------------------------------------
@@ -231,10 +244,12 @@ class RootStack(Stack):
         EngrainStack(
             self, 
             f"{app_env.get_stage_name()}-{server_name}-engrain-stack",
-            environment=environment,
             app_environment=app_env,
             description="Stack for Engrain Job",
             api=engrain_resource_v1,
+            environment={
+                "parameter_store": environment["engrain"]
+            },
             layers=[
                 mysql_layer,
                 pip_packages_layer,
@@ -250,13 +265,15 @@ class RootStack(Stack):
             f"{app_env.get_stage_name()}-{server_name}-tour-availability-stack",
             api=tour_resource_v2, 
             app_environment=app_env,
+            description="Stack for Tour availability endpoints",
+            environment={
+                "parameter_store": environment["touravailability"]
+            },
             layers=[
                 pip_packages_layer,
                 suds_layer,
                 shared_layer
             ],
-            environment=environment,
-            description="Stack for Tour availability endpoints",
         )
 
         # --------------------------------------------------------------------
@@ -267,8 +284,10 @@ class RootStack(Stack):
             f"{app_env.get_stage_name()}-{server_name}-conservice-stack", 
             api=general_resource_v1, 
             app_environment=app_env,
-            environment=environment,
             description="Stack for conservice endpoints",
+            environment={
+                "parameter_store": environment["conservice"]
+            },
             layers=[
                 pip_packages_layer,
                 shared_layer,
@@ -284,7 +303,9 @@ class RootStack(Stack):
             description="Stack for salesforce endpoints",
             api=salesforce_resource_v1,
             app_environment=app_env,
-            environment=environment,
+            environment={
+                "parameter_store": environment["salesforce"]
+            },
             layers=[
                 salesforce_layer,
                 shared_layer,
