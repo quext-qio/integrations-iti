@@ -23,25 +23,31 @@ class QoopsStack(NestedStack):
         #allow_methods=['OPTIONS', 'POST']
 
         # --------------------------------------------------------------------
-        # Create the QoopsQueue
-        queue = sqs_.Queue(
-            self, 
-            f"{app_environment.get_stage_name()}-queue", 
-            visibility_timeout=timeout,
-            queue_name=f"{app_environment.get_stage_name()}-queue",
-        )
+        try: 
+            # Create the QoopsQueue
+            queue = sqs_.Queue(
+                self, 
+                f"{app_environment.get_stage_name()}-queue", 
+                visibility_timeout=timeout,
+                queue_name=f"{app_environment.get_stage_name()}-queue",
+            )
+        except Exception as e:
+            print(f"Error creating queue: {e}")
 
         # --------------------------------------------------------------------
         # Create the API GW service role with permissions to call SQS
-        rest_api_role = iam_.Role(
-            self,
-            f"{app_environment.get_stage_name()}-role",
-            role_name=f"{app_environment.get_stage_name()}-role",
-            description="Qoops Role for API Gateway to call SQS",
-            assumed_by=iam_.ServicePrincipal("apigateway.amazonaws.com"),
-            managed_policies=[iam_.ManagedPolicy.from_aws_managed_policy_name("AmazonSQSFullAccess")]
-        )
-        print(type(rest_api_role))
+        try:
+            rest_api_role = iam_.Role(
+                self,
+                f"{app_environment.get_stage_name()}-role",
+                role_name=f"{app_environment.get_stage_name()}-role",
+                description="Qoops Role for API Gateway to call SQS",
+                assumed_by=iam_.ServicePrincipal("apigateway.amazonaws.com"),
+                managed_policies=[iam_.ManagedPolicy.from_aws_managed_policy_name("AmazonSQSFullAccess")]
+            )
+        except Exception as e:
+            print(f"Error creating role for SQS: {e}")
+            raise PermissionError(f"Error creating role for SQS: {e}")
 
         # --------------------------------------------------------------------
         # Create API Integration Response object: 
@@ -54,13 +60,17 @@ class QoopsStack(NestedStack):
         # --------------------------------------------------------------------
         # Create API Integration Options object: 
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_apigateway/IntegrationOptions.html
-        api_integration_options = apigateway_.IntegrationOptions(
-            credentials_role=rest_api_role,
-            integration_responses=[integration_response],
-            request_templates={"application/json": "Action=SendMessage&MessageBody=$input.body"},
-            passthrough_behavior=apigateway_.PassthroughBehavior.NEVER,
-            request_parameters={"integration.request.header.Content-Type": "'application/x-www-form-urlencoded'"},
-        )
+        try:
+            api_integration_options = apigateway_.IntegrationOptions(
+                credentials_role=rest_api_role,
+                integration_responses=[integration_response],
+                request_templates={"application/json": "Action=SendMessage&MessageBody=$input.body"},
+                passthrough_behavior=apigateway_.PassthroughBehavior.NEVER,
+                request_parameters={"integration.request.header.Content-Type": "'application/x-www-form-urlencoded'"},
+            )
+        except Exception as e:
+            print(f"Error creating API Integration Options: {e}")
+            raise PermissionError(f"Error creating API Integration Options: {e}")
 
         # --------------------------------------------------------------------
         # Create AWS Integration Object for SQS: 
@@ -101,8 +111,16 @@ class QoopsStack(NestedStack):
         )
 
         # --------------------------------------------------------------------
-        # Create an SQS event source for Lambda
-        sqs_event_source = lambda_event_sources_.SqsEventSource(queue)
-
-        # Add SQS event source to the Lambda function
-        sqs_lambda.add_event_source(sqs_event_source)
+        try: 
+            # Create an SQS event source for Lambda
+            sqs_event_source = lambda_event_sources_.SqsEventSource(queue)
+        except Exception as e:
+            print(f"Error creating SQS event source: {e}")
+            raise PermissionError(f"Error creating SQS event source: {e}")
+        
+        try:
+            # Add SQS event source to the Lambda function
+            sqs_lambda.add_event_source(sqs_event_source)
+        except Exception as e:
+            print(f"Error adding SQS event source: {e}")
+            raise PermissionError(f"Error adding SQS event source: {e}")
