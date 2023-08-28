@@ -20,7 +20,7 @@ class QoopsStack(NestedStack):
         # -----------------------------------------------------------------------
         # Constants
         timeout=Duration.seconds(900)
-        allow_methods=['OPTIONS', 'POST']
+        #allow_methods=['OPTIONS', 'POST']
 
         # --------------------------------------------------------------------
         # Create the QoopsQueue
@@ -33,22 +33,25 @@ class QoopsStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Load session using default AWS credentials
-        # aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID')
-        # aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
-        # aws_session_token=os.getenv('AWS_SESSION_TOKEN')
+        aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID')
+        aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
+        aws_session_token=os.getenv('AWS_SESSION_TOKEN')
 
-        # session = boto3.Session(
-        #     aws_access_key_id=aws_access_key_id,
-        #     aws_secret_access_key=aws_secret_access_key,
-        #     aws_session_token=aws_session_token,
-        # )
+        session = boto3.Session(
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
+        )
 
-        # # Create a client to interact with the STS (Security Token Service)
-        # sts_client = session.client("sts")
+        # Create a client to interact with the STS (Security Token Service)
+        sts_client = session.client("sts")
 
-        # role_arn = os.getenv('ROLE_ARN', 'arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters')
+        #role_arn = os.getenv('ROLE_ARN', 'arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters')
         
-        # # Assume the IAM role
+        aws_role_arn=os.getenv("AWS_ROLE")
+
+
+        # Assume the IAM role
         # assume_role = sts_client.assume_role(
         #     RoleArn=role_arn,
         #     RoleSessionName=f"{app_environment.get_stage_name()}-sqs-assumed-session"
@@ -56,8 +59,6 @@ class QoopsStack(NestedStack):
 
         # # Extract the temporary credentials from the assume_role
         # credentials = assume_role['Credentials']
-
-        # print(type(credentials))
 
         # # Create a new session using the temporary credentials
         # new_session = boto3.Session(
@@ -75,15 +76,16 @@ class QoopsStack(NestedStack):
         
     
 
-        # # Create the API GW service role with permissions to call SQS
-        rest_api_role = iam_.Role(
-            self,
-            f"{app_environment.get_stage_name()}-qoops-api-role",
-            role_name=f"{app_environment.get_stage_name()}-rest-api-role",
-            description="Qoops Role for API Gateway to call SQS",
-            assumed_by=iam_.ServicePrincipal("apigateway.amazonaws.com"),
-            managed_policies=[iam_.ManagedPolicy.from_aws_managed_policy_name("AmazonSQSFullAccess")]
-        )
+        # Create the API GW service role with permissions to call SQS
+        # rest_api_role = iam_.Role(
+        #     self,
+        #     f"{app_environment.get_stage_name()}-qoops-api-role",
+        #     role_name=f"{app_environment.get_stage_name()}-rest-api-role",
+        #     description="Qoops Role for API Gateway to call SQS",
+        #     assumed_by=iam_.ServicePrincipal("apigateway.amazonaws.com"),
+        #     managed_policies=[iam_.ManagedPolicy.from_aws_managed_policy_name("AmazonSQSFullAccess")]
+        # )
+        #print(type(rest_api_role))
 
         # --------------------------------------------------------------------
         # Create API Integration Response object: 
@@ -97,7 +99,7 @@ class QoopsStack(NestedStack):
         # Create API Integration Options object: 
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_apigateway/IntegrationOptions.html
         api_integration_options = apigateway_.IntegrationOptions(
-            credentials_role=rest_api_role,
+            credentials_role=aws_role_arn,
             integration_responses=[integration_response],
             request_templates={"application/json": "Action=SendMessage&MessageBody=$input.body"},
             passthrough_behavior=apigateway_.PassthroughBehavior.NEVER,
