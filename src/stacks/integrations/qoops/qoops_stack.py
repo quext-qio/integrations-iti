@@ -32,23 +32,23 @@ class QoopsStack(NestedStack):
         )
 
         # --------------------------------------------------------------------
-        # Load session using default AWS credentials
-        aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID')
-        aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
-        aws_session_token=os.getenv('AWS_SESSION_TOKEN')
+        # # Load session using default AWS credentials
+        # aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID')
+        # aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
+        # aws_session_token=os.getenv('AWS_SESSION_TOKEN')
 
-        session = boto3.Session(
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key,
-            aws_session_token=aws_session_token,
-        )
+        # session = boto3.Session(
+        #     aws_access_key_id=aws_access_key_id,
+        #     aws_secret_access_key=aws_secret_access_key,
+        #     aws_session_token=aws_session_token,
+        # )
 
         # Create a client to interact with the STS (Security Token Service)
-        sts_client = session.client("sts")
+        #sts_client = session.client("sts")
 
         #role_arn = os.getenv('ROLE_ARN', 'arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters')
         
-        aws_role_arn=os.getenv("AWS_ROLE")
+        #aws_role_arn=os.getenv("AWS_ROLE")
 
 
         # Assume the IAM role
@@ -77,14 +77,14 @@ class QoopsStack(NestedStack):
     
 
         # Create the API GW service role with permissions to call SQS
-        # rest_api_role = iam_.Role(
-        #     self,
-        #     f"{app_environment.get_stage_name()}-qoops-api-role",
-        #     role_name=f"{app_environment.get_stage_name()}-rest-api-role",
-        #     description="Qoops Role for API Gateway to call SQS",
-        #     assumed_by=iam_.ServicePrincipal("apigateway.amazonaws.com"),
-        #     managed_policies=[iam_.ManagedPolicy.from_aws_managed_policy_name("AmazonSQSFullAccess")]
-        # )
+        rest_api_role = iam_.Role(
+            self,
+            f"{app_environment.get_stage_name()}-qoops-api-role",
+            role_name=f"{app_environment.get_stage_name()}-rest-api-role",
+            description="Qoops Role for API Gateway to call SQS",
+            assumed_by=iam_.ServicePrincipal("apigateway.amazonaws.com"),
+            managed_policies=[iam_.ManagedPolicy.from_aws_managed_policy_name("AmazonSQSFullAccess")]
+        )
         #print(type(rest_api_role))
 
         # --------------------------------------------------------------------
@@ -99,7 +99,7 @@ class QoopsStack(NestedStack):
         # Create API Integration Options object: 
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_apigateway/IntegrationOptions.html
         api_integration_options = apigateway_.IntegrationOptions(
-            credentials_role=aws_role_arn,
+            credentials_role=rest_api_role,
             integration_responses=[integration_response],
             request_templates={"application/json": "Action=SendMessage&MessageBody=$input.body"},
             passthrough_behavior=apigateway_.PassthroughBehavior.NEVER,
@@ -150,74 +150,3 @@ class QoopsStack(NestedStack):
 
         # Add SQS event source to the Lambda function
         sqs_lambda.add_event_source(sqs_event_source)
-
-
-
-
-
-        # # --------------------------------------------------------------------
-        # # Create lambda function instance for (# POST /jira/report)
-        # post_lambda_function = lambda_.Function(
-        #     self, 
-        #     f"{app_environment.get_stage_name()}-jira-report-lambda-function",
-        #     description=f"This lambda is used to report Jira issues using the {app_environment.get_stage_name()}-qoops-queue", 
-        #     environment=environment,
-        #     runtime=lambda_.Runtime.PYTHON_3_10,
-        #     timeout=timeout,
-        #     code=lambda_.Code.from_asset("./src/lambdas/qoops"),
-        #     handler="lambda_function.lambda_handler",
-        #     layers=layers,
-        #     function_name=f"{app_environment.get_stage_name()}-jira-report-lambda-function",
-        # )
-        
-    
-
-        # # --------------------------------------------------------------------
-        # # Resource to report issues (POST)
-        # post_endpoint = api.add_resource(
-        #     "report",
-        #     default_cors_preflight_options=apigateway_.CorsOptions(
-        #         allow_methods=allow_methods,
-        #         allow_origins=apigateway_.Cors.ALL_ORIGINS
-        #     ),    
-        # )
-
-        
-
-        # # --------------------------------------------------------------------
-        # # Create a Lambda integration instance
-        # # POST
-        # post_endpoint_lambda_integration = apigateway_.LambdaIntegration(
-        #     post_lambda_function,
-        #     proxy=True,
-        #     integration_responses=[
-        #         apigateway_.IntegrationResponse(
-        #             status_code="200",
-        #             response_templates={"application/json": ""},
-        #             response_parameters={
-        #                 'method.response.header.Access-Control-Allow-Origin': "'*'"
-        #             }
-        #         ),
-        #     ],
-        # )
-
-        
-
-        # # --------------------------------------------------------------------
-        # # Add a POST method to endpoint
-        # post_endpoint.add_method(
-        #     'POST', 
-        #     post_endpoint_lambda_integration,
-        #     request_parameters={},
-        #     method_responses=[
-        #         apigateway_.MethodResponse(
-        #             status_code="200",
-        #             response_parameters={
-        #                 'method.response.header.Access-Control-Allow-Origin': True
-        #             }
-        #         )
-        #     ],
-        # )
-
-        
-
