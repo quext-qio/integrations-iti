@@ -1,5 +1,5 @@
-import json, requests, logging
-from datetime import datetime, timedelta
+import json, requests, logging, re
+from datetime import datetime
 from abstract.service_interface import ServiceInterface
 from constants.yardi_constants import YardiConstants
 from Converter import Converter
@@ -23,23 +23,15 @@ class YardiService(ServiceInterface):
             guest_preference = body["guestPreference"]
             community_uuid = body["platformData"].get(YardiConstants.COMMUNITYUUID)
             customer_uuid =  body["platformData"].get(YardiConstants.CUSTOMERUUID)
+            tour_scheduled_id = ""
+            tour_error = ""
+            available_times = []
+            event_list = []
             
             first_contact, generated_id = self.generate_unique_id(body.get(YardiConstants.QCONTACTID), community_uuid, customer_uuid)
-            customer_info["Identification"] = [
-                {
-                    "@IDValue": generated_id,
-                    "@IDType": YardiConstants.PROSPECT_ID,
-                    "@OrganizationName": YardiConstants.ORGANIZATION_NAME
-                },
-                {
-                    "@IDValue": property_id,
-                    "@IDType": YardiConstants.PROPERTY_ID,
-                    "@OrganizationName": YardiConstants.YARDI
-                }
-            ]
             
-            phone = self.clean_and_validate_phone_number("+"+customer_info[phone])
-            customer_info["guest"]["phone"] = phone
+            phone = self.clean_and_validate_phone_number("+"+customer_info["phone"])
+            body["guest"]["phone"] = phone
             bedroooms_data = []
             if "desiredBeds" in guest_preference:
                 # Map string to int using [bedroom_mapping]
@@ -68,10 +60,13 @@ class YardiService(ServiceInterface):
                     if code != 200:
                         tour_requested = appointment_date
                         tour_error = quext_response["error"]["message"]
+                        headers = {
+                                'Access-Control-Allow-Origin': '*',
+                                'Content-Type': 'application/json',
+                            }
                         available_times =  QuextTourService.get_available_times(body["platformData"], body["tourScheduleData"]["start"], "Quext", headers)
                         
                     else:
-                        tour_schedule = True
                         tour_requested = appointment_date
                         tour_scheduled_id = quext_response.get("data", {}).get("id", "")
                         actual_customer_comment = body.get("guestComment", "")
@@ -87,7 +82,6 @@ class YardiService(ServiceInterface):
                             input_time = datetime.strptime(tour_requested[tour_requested.index("T") + 1: tour_requested.index("Z")], "%H:%M:%S")
                             formatted_time = input_time.strftime("%H:%M:%S")
                             unit_id = self.get_unit_id(desired_rent, max(bedroooms_data) if len(bedroooms_data) > 0 else 0, tour_requested, property_id, is_qa)
-                            event_list = []
                             if unit_id is None:
                                 event_list = self.get_events(event_object=event_object, date_tour=tour_requested[0: tour_requested.index("T")] + "T" + formatted_time, tour_comment=tour_comment, unit_id=None)
                             else:
@@ -102,7 +96,22 @@ class YardiService(ServiceInterface):
                         "tourError": tour_error
                     }
           
-            xml = Converter(PayladHandler().builder_payload(body, event_list)).json_to_xml()
+            xml = PayladHandler().builder_payload(body,event_list)
+            xml["LeadManagement"]["Prospects"]["Prospect"]["Customers"]["Customer"]["Identification"] = [
+                        {
+                            "@IDValue": generated_id,
+                            "@IDType": YardiConstants.PROSPECT_ID,
+                            "@OrganizationName": YardiConstants.ORGANIZATION_NAME
+                        },
+                        {
+                            "@IDValue": property_id,
+                            "@IDType": YardiConstants.PROPERTY_ID,
+                            "@OrganizationName": YardiConstants.YARDI
+                        }
+                    ]
+            xml =Converter(xml).json_to_xml()
+            cleaned_xml = re.sub(r'^<\?xml [^>]+>\s*', '', xml)
+    
           
             # Create body for Yardi
             import_yardi_guest_login = {
@@ -114,7 +123,7 @@ class YardiService(ServiceInterface):
                 "Platform": YardiConstants.YARDI_PLATFORM,
                 "InterfaceEntity": YardiConstants.YARDI_INTERFACE_ENTITY,
                 "InterfaceLicense": yardiConfig[YardiConstants.INTERFACE_LICENSE_DEMO] if is_qa else yardiConfig[YardiConstants.INTERFACE_LICENSE],
-                "XmlDoc": xml
+                "XmlDoc": cleaned_xml
             }
             new_body = {
                 "soap:Envelope": {
@@ -124,6 +133,8 @@ class YardiService(ServiceInterface):
                     }
                 }
             }
+            xml = Converter(json.dumps(new_body)).json_to_xml()
+            
                 # Call the outgoing
             try:
                     url = yardiConfig["yardi_url_demo"] if is_qa else yardiConfig["yardi_url"]
@@ -366,4 +377,18 @@ class YardiService(ServiceInterface):
                             "Comments":  tour_comment
                             }) 
         return events_list 
+    
+    #Search for a purpose in IPS
+    def search_purpose(self, purpose, communityUUID):
+        response = requests.get(f'{yardiConfig["ips_host"]}/api/community/{communityUUID}/purposes')
+        partners_info = response.json()
+
+        # Search if the  porpuse exists for this community
+        purpose_names = [item["purpose"]["name"] for item in partners_info]
+        if purpose in purpose_names:
+                return True
+       
+        return False
+    
+
             
