@@ -33,22 +33,22 @@ class QoopsStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Load session using default AWS credentials
-        # aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID')
-        # aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
-        # aws_session_token=os.getenv('AWS_SESSION_TOKEN')
+        aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID')
+        aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
+        aws_session_token=os.getenv('AWS_SESSION_TOKEN')
 
-        # session = boto3.Session(
-        #     aws_access_key_id=aws_access_key_id,
-        #     aws_secret_access_key=aws_secret_access_key,
-        #     aws_session_token=aws_session_token,
-        # )
+        session = boto3.Session(
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
+        )
 
         # Create a client to interact with the STS (Security Token Service)
-        # sts_client = session.client("sts")
+        sts_client = session.client("sts")
 
         #role_arn = os.getenv('ROLE_ARN', 'arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters')
         
-        # aws_role_arn=os.getenv("AWS_ROLE")
+        aws_role_arn=os.getenv("AWS_ROLE")
 
 
         # Assume the IAM role
@@ -90,66 +90,66 @@ class QoopsStack(NestedStack):
         # --------------------------------------------------------------------
         # Create API Integration Response object: 
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_apigateway/IntegrationResponse.html
-        # integration_response = apigateway_.IntegrationResponse(
-        #     status_code="200",
-        #     response_templates={"application/json": ""},
-        # )
+        integration_response = apigateway_.IntegrationResponse(
+            status_code="200",
+            response_templates={"application/json": ""},
+        )
 
         # --------------------------------------------------------------------
         # Create API Integration Options object: 
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_apigateway/IntegrationOptions.html
-        # api_integration_options = apigateway_.IntegrationOptions(
-        #     credentials_role=aws_role_arn,
-        #     integration_responses=[integration_response],
-        #     request_templates={"application/json": "Action=SendMessage&MessageBody=$input.body"},
-        #     passthrough_behavior=apigateway_.PassthroughBehavior.NEVER,
-        #     request_parameters={"integration.request.header.Content-Type": "'application/x-www-form-urlencoded'"},
-        # )
+        api_integration_options = apigateway_.IntegrationOptions(
+            credentials_role=aws_role_arn,
+            integration_responses=[integration_response],
+            request_templates={"application/json": "Action=SendMessage&MessageBody=$input.body"},
+            passthrough_behavior=apigateway_.PassthroughBehavior.NEVER,
+            request_parameters={"integration.request.header.Content-Type": "'application/x-www-form-urlencoded'"},
+        )
 
         # --------------------------------------------------------------------
         # Create AWS Integration Object for SQS: 
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_apigateway/AwsIntegration.html
-        # api_resource_sqs_integration = apigateway_.AwsIntegration(
-        #     service="sqs",
-        #     integration_http_method="POST",
-        #     options=api_integration_options,
-        #     path="{}/{}".format(Aws.ACCOUNT_ID, queue.queue_name),
-        # )
+        api_resource_sqs_integration = apigateway_.AwsIntegration(
+            service="sqs",
+            integration_http_method="POST",
+            options=api_integration_options,
+            path="{}/{}".format(Aws.ACCOUNT_ID, queue.queue_name),
+        )
 
         # --------------------------------------------------------------------
         # Create a Method Response Object: 
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_apigateway/MethodResponse.html
-        # method_response = apigateway_.MethodResponse(status_code="200")
+        method_response = apigateway_.MethodResponse(status_code="200")
 
         # --------------------------------------------------------------------
         # Add the API GW Integration to the API GW Resource
-        # api.add_method(
-        #     "POST",
-        #     api_resource_sqs_integration,
-        #     method_responses=[method_response]
-        # )
+        api.add_method(
+            "POST",
+            api_resource_sqs_integration,
+            method_responses=[method_response]
+        )
 
 
         # --------------------------------------------------------------------
         # Creating Lambda function that will be triggered by the SQS Queue
-        # sqs_lambda = lambda_.Function(
-        #     self, f"{app_environment.get_stage_name()}-jira-report-lambda-function",
-        #     description=f"This lambda is used to report Jira issues using the {app_environment.get_stage_name()}-qoops-queue", 
-        #     environment=environment,
-        #     runtime=lambda_.Runtime.PYTHON_3_10,
-        #     timeout=timeout,
-        #     code=lambda_.Code.from_asset("./src/lambdas/qoops"),
-        #     handler="lambda_function.lambda_handler",
-        #     layers=layers,
-        #     function_name=f"{app_environment.get_stage_name()}-jira-report-lambda-function",
-        # )
+        sqs_lambda = lambda_.Function(
+            self, f"{app_environment.get_stage_name()}-jira-report-lambda-function",
+            description=f"This lambda is used to report Jira issues using the {app_environment.get_stage_name()}-qoops-queue", 
+            environment=environment,
+            runtime=lambda_.Runtime.PYTHON_3_10,
+            timeout=timeout,
+            code=lambda_.Code.from_asset("./src/lambdas/qoops"),
+            handler="lambda_function.lambda_handler",
+            layers=layers,
+            function_name=f"{app_environment.get_stage_name()}-jira-report-lambda-function",
+        )
 
         # --------------------------------------------------------------------
         # Create an SQS event source for Lambda
-        # sqs_event_source = lambda_event_sources_.SqsEventSource(queue)
+        sqs_event_source = lambda_event_sources_.SqsEventSource(queue)
 
         # Add SQS event source to the Lambda function
-        # sqs_lambda.add_event_source(sqs_event_source)
+        sqs_lambda.add_event_source(sqs_event_source)
 
 
 
