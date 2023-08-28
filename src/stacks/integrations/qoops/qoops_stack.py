@@ -26,66 +26,22 @@ class QoopsStack(NestedStack):
         # Create the QoopsQueue
         queue = sqs_.Queue(
             self, 
-            f"{app_environment.get_stage_name()}-qoops-queue", 
+            f"{app_environment.get_stage_name()}-queue", 
             visibility_timeout=timeout,
-            queue_name=f"{app_environment.get_stage_name()}-qoops-queue",
+            queue_name=f"{app_environment.get_stage_name()}-queue",
         )
 
         # --------------------------------------------------------------------
-        # # Load session using default AWS credentials
-        # aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID')
-        # aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
-        # aws_session_token=os.getenv('AWS_SESSION_TOKEN')
-
-        # session = boto3.Session(
-        #     aws_access_key_id=aws_access_key_id,
-        #     aws_secret_access_key=aws_secret_access_key,
-        #     aws_session_token=aws_session_token,
-        # )
-
-        # Create a client to interact with the STS (Security Token Service)
-        #sts_client = session.client("sts")
-
-        #role_arn = os.getenv('ROLE_ARN', 'arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters')
-        
-        #aws_role_arn=os.getenv("AWS_ROLE")
-
-
-        # Assume the IAM role
-        # assume_role = sts_client.assume_role(
-        #     RoleArn=role_arn,
-        #     RoleSessionName=f"{app_environment.get_stage_name()}-sqs-assumed-session"
-        # )
-
-        # # Extract the temporary credentials from the assume_role
-        # credentials = assume_role['Credentials']
-
-        # # Create a new session using the temporary credentials
-        # new_session = boto3.Session(
-        #     aws_access_key_id=credentials['AccessKeyId'],
-        #     aws_secret_access_key=credentials['SecretAccessKey'],
-        #     aws_session_token=credentials['SessionToken'],
-        # )
-
-        # # Create a client to interact with SQS (Simple Queue Service)
-        # sqs_client = new_session.client(
-        #     "sqs",
-        #     region_name="us-east-1",
-        # )
-
-        
-    
-
         # Create the API GW service role with permissions to call SQS
         rest_api_role = iam_.Role(
             self,
-            f"{app_environment.get_stage_name()}-qoops-api-role",
-            role_name=f"{app_environment.get_stage_name()}-rest-api-role",
+            f"{app_environment.get_stage_name()}-role",
+            role_name=f"{app_environment.get_stage_name()}-role",
             description="Qoops Role for API Gateway to call SQS",
             assumed_by=iam_.ServicePrincipal("apigateway.amazonaws.com"),
             managed_policies=[iam_.ManagedPolicy.from_aws_managed_policy_name("AmazonSQSFullAccess")]
         )
-        #print(type(rest_api_role))
+        print(type(rest_api_role))
 
         # --------------------------------------------------------------------
         # Create API Integration Response object: 
@@ -133,15 +89,15 @@ class QoopsStack(NestedStack):
         # --------------------------------------------------------------------
         # Creating Lambda function that will be triggered by the SQS Queue
         sqs_lambda = lambda_.Function(
-            self, f"{app_environment.get_stage_name()}-jira-report-lambda-function",
-            description=f"This lambda is used to report Jira issues using the {app_environment.get_stage_name()}-qoops-queue", 
+            self, f"{app_environment.get_stage_name()}-qoops-lambda",
+            description=f"This lambda is used to report Jira issues using the qoops-queue", 
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
             timeout=timeout,
             code=lambda_.Code.from_asset("./src/lambdas/qoops"),
             handler="lambda_function.lambda_handler",
             layers=layers,
-            function_name=f"{app_environment.get_stage_name()}-jira-report-lambda-function",
+            function_name=f"{app_environment.get_stage_name()}-qoops-lambda",
         )
 
         # --------------------------------------------------------------------
