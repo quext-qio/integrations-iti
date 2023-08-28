@@ -32,21 +32,58 @@ class QoopsStack(NestedStack):
         )
 
         # --------------------------------------------------------------------
-        # Create the API GW service role with permissions to call SQS
-        rest_api_role = iam_.Role(
-            self,
-            f"{app_environment.get_stage_name()}-rest-api-role",
-            assumed_by=iam_.ServicePrincipal("apigateway.amazonaws.com"),
-            managed_policies=[iam_.ManagedPolicy.from_aws_managed_policy_name("AmazonSQSFullAccess")]
-        )
+        # Load session using default AWS credentials
+        # aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID')
+        # aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
+        # aws_session_token=os.getenv('AWS_SESSION_TOKEN')
+
+        # session = boto3.Session(
+        #     aws_access_key_id=aws_access_key_id,
+        #     aws_secret_access_key=aws_secret_access_key,
+        #     aws_session_token=aws_session_token,
+        # )
+
+        # # Create a client to interact with the STS (Security Token Service)
+        # sts_client = session.client("sts")
 
         # role_arn = os.getenv('ROLE_ARN', 'arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters')
         
-        # assumed_role = iam_.Role.from_role_arn(
-        #     self,
-        #     f"{app_environment.get_stage_name()}-assumed-role",
-        #     role_arn=role_arn
+        # # Assume the IAM role
+        # assume_role = sts_client.assume_role(
+        #     RoleArn=role_arn,
+        #     RoleSessionName=f"{app_environment.get_stage_name()}-sqs-assumed-session"
         # )
+
+        # # Extract the temporary credentials from the assume_role
+        # credentials = assume_role['Credentials']
+
+        # print(type(credentials))
+
+        # # Create a new session using the temporary credentials
+        # new_session = boto3.Session(
+        #     aws_access_key_id=credentials['AccessKeyId'],
+        #     aws_secret_access_key=credentials['SecretAccessKey'],
+        #     aws_session_token=credentials['SessionToken'],
+        # )
+
+        # # Create a client to interact with SQS (Simple Queue Service)
+        # sqs_client = new_session.client(
+        #     "sqs",
+        #     region_name="us-east-1",
+        # )
+
+        
+    
+
+        # # Create the API GW service role with permissions to call SQS
+        rest_api_role = iam_.Role(
+            self,
+            f"{app_environment.get_stage_name()}-qoops-api-role",
+            role_name=f"{app_environment.get_stage_name()}-rest-api-role",
+            description="Qoops Role for API Gateway to call SQS",
+            assumed_by=iam_.ServicePrincipal("apigateway.amazonaws.com"),
+            managed_policies=[iam_.ManagedPolicy.from_aws_managed_policy_name("AmazonSQSFullAccess")]
+        )
 
         # --------------------------------------------------------------------
         # Create API Integration Response object: 
