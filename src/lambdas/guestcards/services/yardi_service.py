@@ -166,7 +166,7 @@ class YardiService(ServiceInterface):
                                 customer_id = message['#text'].split(': ')[1]
 
                     serviceResponse = ServiceResponse(
-                        guest_card_id= response,
+                        guest_card_id= customer_id,
                         first_name=body["guest"]["first_name"],
                         last_name=body["guest"]["last_name"],
                         tour_information=tour_information,
