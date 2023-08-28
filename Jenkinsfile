@@ -24,8 +24,10 @@ accounts = [
     ]
 
 shared_stack = [
-            "qa"  : "dev",
-            "stage"   : "rc",
+            "dev"    : 'dev',
+            "qa"     : "dev",
+            "rc"     : "stage",
+            "stage"  : 'stage',
     ]    
 
 pipeline {
