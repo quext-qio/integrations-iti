@@ -9,8 +9,7 @@ class DataController:
 
     def get_customers(self, customer_uuid, wsgi_input):
         errors = []
-        parameter_store = json.loads(os.environ.get("parameter_store"))
-        auth_host = parameter_store['AUTH_HOST']
+        auth_host = os.environ['AUTH_HOST']
         url = f'{auth_host}/service/api/v1/customers/{customer_uuid}'  
         payload = {}
         headers = {

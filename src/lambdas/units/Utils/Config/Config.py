@@ -1,14 +1,12 @@
 import os
-import json
 
-parameter_store = json.loads(os.environ.get("parameter_store"))
 config = {
-    "Integration_partner_id": parameter_store['RESMAN_INTEGRATION_PARTNER_ID'],
-    "ApiKey": parameter_store['RESMAN_API_KEY'],
-    "Newco_host": parameter_store['NEWCO_DB_HOST'],
-    "Newco_password": parameter_store['NEWCO_DB_PASSWORD'],
-    "Newco_db_name": parameter_store['NEWCO_DB_NAME'],
-    "Newco_db_user": parameter_store['NEWCO_DB_USER'],
-    "Engrain_host": parameter_store['ENGRAIN_HOST'],
-    "Engrain_api_key": parameter_store['ENGRAIN_API_KEY'],  
+    "Integration_partner_id": os.environ['RESMAN_INTEGRATION_PARTNER_ID'],
+    "ApiKey": os.environ['RESMAN_API_KEY'],
+    "Newco_host": os.environ['NEWCO_DB_HOST'],
+    "Newco_password": os.environ['NEWCO_DB_PASSWORD'],
+    "Newco_db_name": os.environ['NEWCO_DB_NAME'],
+    "Newco_db_user": os.environ['NEWCO_DB_USER'],
+    "Engrain_host": os.environ['ENGRAIN_HOST'],
+    "Engrain_api_key": os.environ['ENGRAIN_API_KEY'],  
 } 

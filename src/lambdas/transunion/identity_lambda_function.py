@@ -11,14 +11,13 @@ from Utils.Constants import constants
 from schemas.IdentitySchema import IdentitySchema
 
 def lambda_handler(event, context):
-  parameter_store = json.loads(os.environ.get("parameter_store"))
-
+ 
   payload = json.loads(event["body"])
   valid_schema = True
   input_error = []
   
   # TransUnion identity base url
-  identity_url = parameter_store["TRANSUNION_IDENTITY_HOST"]
+  identity_url = os.environ["TRANSUNION_IDENTITY_HOST"]
 
   # verifies if the request is for verification or evaluation
   if is_verify(payload):
@@ -33,14 +32,14 @@ def lambda_handler(event, context):
   if valid_schema:
     try:
       # ------------- handles the authtentication creation ------------- #
-      auth_response = requests.get(parameter_store["TRANSUNION_AUTHENTICATION"])
+      auth_response = requests.get(os.environ["TRANSUNION_AUTHENTICATION"])
       auth_response = json.loads(auth_response.text)
-      transunion_property_id_code = parameter_store["TRANSUNION_PROPERTY_ID_CODE"]
+      transunion_property_id_code = os.environ["TRANSUNION_PROPERTY_ID_CODE"]
       
       payload["OrganizationId"] = transunion_property_id_code
       payload = json.dumps(payload)
 
-      auth_encryption = create_auth_encryption(payload, auth_response["Nonce"], auth_response["Timestamp"], transunion_property_id_code, parameter_store["TRANSUNION_SECRET_KEY"])
+      auth_encryption = create_auth_encryption(payload, auth_response["Nonce"], auth_response["Timestamp"], transunion_property_id_code, os.environ["TRANSUNION_SECRET_KEY"])
       headers_auth = f'{constants["RESIDENT_ID"]}{transunion_property_id_code}:{auth_encryption}:{auth_response["Timestamp"]}:{auth_response["Nonce"]}'
       # creates the required headers for the request
       headers = {

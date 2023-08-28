@@ -38,8 +38,7 @@ class DataRealpage:
         licensekey = ""
         client = None
         if partner_uuid:  
-                parameter_store = json.loads(os.environ.get("parameter_store"))
-                host = parameter_store['ACL_HOST']
+                host = os.environ['ACL_HOST']
                 outgoingIPSSecurityResponse = requests.get(f'{host}/api/partners/security/{partner_uuid}?redacted=off')
                 security_response = json.loads(outgoingIPSSecurityResponse.text)
 
