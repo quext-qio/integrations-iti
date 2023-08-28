@@ -109,9 +109,6 @@ class YardiService(ServiceInterface):
                             "@OrganizationName": YardiConstants.YARDI
                         }
                     ]
-            xml =Converter(xml).json_to_xml()
-            cleaned_xml = re.sub(r'^<\?xml [^>]+>\s*', '', xml)
-    
           
             # Create body for Yardi
             import_yardi_guest_login = {
@@ -123,7 +120,7 @@ class YardiService(ServiceInterface):
                 "Platform": YardiConstants.YARDI_PLATFORM,
                 "InterfaceEntity": YardiConstants.YARDI_INTERFACE_ENTITY,
                 "InterfaceLicense": yardiConfig[YardiConstants.INTERFACE_LICENSE_DEMO] if is_qa else yardiConfig[YardiConstants.INTERFACE_LICENSE],
-                "XmlDoc": cleaned_xml
+                "XmlDoc": xml
             }
             new_body = {
                 "soap:Envelope": {
