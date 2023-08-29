@@ -28,8 +28,8 @@ class QoopsStack(NestedStack):
             queue = sqs_.Queue(
                 self, 
                 f"{app_environment.get_stage_name()}-queue", 
-                visibility_timeout=timeout,
-                queue_name=f"{app_environment.get_stage_name()}-queue",
+                #visibility_timeout=timeout,
+                #queue_name=f"{app_environment.get_stage_name()}-queue",
             )
         except Exception as e:
             print(f"Error creating queue: {e}")
@@ -40,11 +40,25 @@ class QoopsStack(NestedStack):
             rest_api_role = iam_.Role(
                 self,
                 f"{app_environment.get_stage_name()}-role",
-                role_name=f"{app_environment.get_stage_name()}-role",
-                description="Qoops Role for API Gateway to call SQS",
+                #role_name=f"{app_environment.get_stage_name()}-role",
+                #description="Qoops Role for API Gateway to call SQS",
                 assumed_by=iam_.ServicePrincipal("apigateway.amazonaws.com"),
-                managed_policies=[iam_.ManagedPolicy.from_aws_managed_policy_name("AmazonSQSFullAccess")]
+                #managed_policies=[iam_.ManagedPolicy.from_aws_managed_policy_name("AmazonSQSFullAccess")]
             )
+
+            # Attach a policy granting permissions to send messages to the SQS queue
+            sqs_policy = iam_.Policy(
+                self,
+                f"{app_environment.get_stage_name()}-sqs-policy",
+                statements=[
+                    iam_.PolicyStatement(
+                        actions=["sqs:SendMessage"],
+                        resources=[queue.queue_arn],
+                    )
+                ],
+            )
+            rest_api_role.attach_inline_policy(sqs_policy)
+
         except Exception as e:
             print(f"Error creating role for SQS: {e}")
             raise PermissionError(f"Error creating role for SQS: {e}")
