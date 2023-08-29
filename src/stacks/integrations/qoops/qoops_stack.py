@@ -28,8 +28,8 @@ class QoopsStack(NestedStack):
             queue = sqs_.Queue(
                 self, 
                 f"{app_environment.get_stage_name()}-queue", 
-                #visibility_timeout=timeout,
-                #queue_name=f"{app_environment.get_stage_name()}-queue",
+                visibility_timeout=timeout,
+                queue_name=f"{app_environment.get_stage_name()}-queue",
             )
         except Exception as e:
             print(f"Error creating queue: {e}")
@@ -40,8 +40,8 @@ class QoopsStack(NestedStack):
             rest_api_role = iam_.Role(
                 self,
                 f"{app_environment.get_stage_name()}-role",
-                #role_name=f"{app_environment.get_stage_name()}-role",
-                #description="Qoops Role for API Gateway to call SQS",
+                role_name=f"{app_environment.get_stage_name()}-role",
+                description="Qoops Role for API Gateway to call SQS",
                 assumed_by=iam_.ServicePrincipal("apigateway.amazonaws.com"),
                 #managed_policies=[iam_.ManagedPolicy.from_aws_managed_policy_name("AmazonSQSFullAccess")]
             )
