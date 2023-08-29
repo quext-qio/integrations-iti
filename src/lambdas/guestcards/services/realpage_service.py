@@ -2,16 +2,13 @@ import json
 from abstract.service_interface import ServiceInterface
 from constants.realpage_constants import RealpageConstants
 from utils.service_response import ServiceResponse
-import suds
 import logging
 from datetime import datetime
 import dateutil.parser
-import calendar
 import os
+import suds
 import requests
-
-from zeep import Client
-from lxml import etree
+import xml.etree.ElementTree as ET
 import xmltodict
 
 class RealPageService(ServiceInterface):
@@ -38,22 +35,23 @@ class RealPageService(ServiceInterface):
                     #CREATING CLIENT CONNECTION WITH API CREDENTIALS RETURNED FROM SECURITY RESPONSE
                     if len(security_response['content']) > 0:
                         for i in security_response['content']:
-                            if i['partner_name'] ==  "RealPage":
-                                client = api_creds[RealpageConstants.WSDL] # creating client connection
+                            if i['partner_name'] == "RealPage":
+                                client = suds.client.Client(api_creds[RealpageConstants.WSDL])  # creating client connection
                                 pmcid = api_creds[RealpageConstants.PMCID]
                                 siteid = api_creds[RealpageConstants.SITEID]
                                 licensekey = api_creds[RealpageConstants.LICENSE_KEY]
                                 break
 
             if not client:
-                client = RealpageConstants.DHWSDL  # creating client connection
+                client = suds.client.Client(RealpageConstants.DHWSDL)  # creating client connection
 
-            client = Client(wsdl=client)
-            factory = client.type_factory('ns0')
-            # Preparing auth details from service request
-            _auth = factory.AuthDTO(pmcid=pmcid,
-                                    siteid=siteid,
-                                    licensekey=licensekey)
+            factory = client.factory
+        # Preparing auth details from service request
+            _auth = client.factory.create('AuthDTO')
+            _auth.pmcid = pmcid
+            _auth.siteid = siteid
+            _auth.licensekey = licensekey
+
                
             _phone_number = factory.PhoneNumber(type="Home",number=customer["phone"])            
             array_of_phone_number = factory.ArrayOfPhoneNumber(_phone_number)
@@ -98,7 +96,7 @@ class RealPageService(ServiceInterface):
             
             try:
                 res = client.service.insertprospect(auth=_auth, guestcard = _guestcard)
-                response = xmltodict.parse(etree.tostring(res))
+                response = xmltodict.parse(ET.tostring(res))
                 # Parse the JSON response
                 response_data = json.loads(json.dumps(response))
 

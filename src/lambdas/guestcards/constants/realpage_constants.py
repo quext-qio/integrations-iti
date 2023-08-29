@@ -1,7 +1,7 @@
 
 class RealpageConstants:
     FACTORY_DATA_STRUCTURE = "ns0"
-    DHWSDL = ""
+    DHWSDL = "https://gateway.rpx.realpage.com/rpxgateway/partner/DigitalHuman/DigitalHuman.svc/GetWSDL"
     REALPAGE = "RealPage"
     AUTHDTO = 'AuthDTO'
     PMCID = 'pmcid'

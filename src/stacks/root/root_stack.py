@@ -138,6 +138,7 @@ class RootStack(Stack):
             layers=[
                 pip_packages_layer,
                 shared_layer,
+                suds_layer
             ],
         )
 
