@@ -1,4 +1,4 @@
-import os, boto3
+import boto3
 from aws_cdk import (
     NestedStack,
     Duration,
@@ -125,16 +125,33 @@ class QoopsStack(NestedStack):
         )
 
         # --------------------------------------------------------------------
-        try: 
-            # Create an SQS event source for Lambda
-            sqs_event_source = lambda_event_sources_.SqsEventSource(queue)
-        except Exception as e:
-            print(f"Error creating SQS event source: {e}")
-            raise PermissionError(f"Error creating SQS event source: {e}")
-        
+        # Check if the event source mapping already exists
+        mapping_exists = False
         try:
-            # Add SQS event source to the Lambda function
-            sqs_lambda.add_event_source(sqs_event_source)
+            client = boto3.client('lambda')
+            response = client.list_event_source_mappings(
+                EventSourceArn=queue.queue_arn,
+                FunctionName=sqs_lambda.function_name
+            )
+            if 'EventSourceMappings' in response:
+                mapping_exists = True
+
         except Exception as e:
-            print(f"Error adding SQS event source: {e}")
-            raise PermissionError(f"Error adding SQS event source: {e}")
+            print(f"Error checking event source mapping: {e}")
+   
+        if not mapping_exists:
+            try: 
+                # Create an SQS event source for Lambda
+                sqs_event_source = lambda_event_sources_.SqsEventSource(queue)
+            except Exception as e:
+                print(f"Error creating SQS event source: {e}")
+                raise PermissionError(f"Error creating SQS event source: {e}")
+            
+            try:
+                # Add SQS event source to the Lambda function
+                sqs_lambda.add_event_source(sqs_event_source)
+            except Exception as e:
+                print(f"Error adding SQS event source: {e}")
+                raise PermissionError(f"Error adding SQS event source: {e}")
+        else:
+            print("Event source mapping already exists.")
