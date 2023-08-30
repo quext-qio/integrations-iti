@@ -1,8 +1,8 @@
 @Library('quext-shared-library') _
 
 git_repo_creds = [$class: 'UsernamePasswordMultiBinding', credentialsId: 'quext-github', usernameVariable: 'GITHUB_USERNAME', passwordVariable: 'GITHUB_PASSWORD']
-List stop_branches_list = ['stage', 'prod']
-List envsToBuildAndDeploy = ['dev', 'qa', 'rc', 'stage', 'prod']
+List stop_branches_list = ['stage', 'rc', 'prod']
+List envsToBuildAndDeploy = ['local','dev', 'qa', 'rc', 'stage', 'prod']
 List envs = envsToBuildAndDeploy + stop_branches_list
 ecr_repository_uri = '273056594042.dkr.ecr.us-east-1.amazonaws.com/integration/api'
 defaultRegion = "us-east-1"
@@ -10,6 +10,7 @@ DEPLOY_ENVIRONMENT = 'none'
 shared_services_account_id = '273056594042'
 
 branch_env = [
+        "local" : "local",
         "dev"   : 'dev',
         "stage" : 'stage',
         "rc"    : 'rc',
@@ -18,6 +19,7 @@ branch_env = [
     ]
 
 accounts = [
+            "local": "445841279194",
             "dev"  : "633546161654",
             "stage": "323546893515",
             "qa"   : "633546161654",
@@ -26,6 +28,7 @@ accounts = [
     ]
 
 shared_stack = [
+            "local"  : "local",
             "dev"    : 'dev',
             "qa"     : "dev",
             "rc"     : "stage",
