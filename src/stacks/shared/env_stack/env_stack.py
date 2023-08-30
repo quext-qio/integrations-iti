@@ -157,6 +157,7 @@ class EnvStack(NestedStack):
                 "ACL_HOST": all_params["ACL_HOST"],
                 "FUNNEL_API_KEY": all_params["FUNNEL_API_KEY"],
                 "QXT_CALENDAR_TOUR_HOST": all_params["QXT_CALENDAR_TOUR_HOST"],
+                "IPS_HOST": all_params["IPS_HOST"],
             },
             "conservice": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
