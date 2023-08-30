@@ -66,8 +66,11 @@ Enjoy!
 ## Deploy specific stage:
 
 Supoorted options:
+- local
 - dev
+- qa
 - stage
+- rc
 - prod
 
 Should set the variable `STAGE` with one of the last values before deploy the stack. By default, the stage will be `dev`.
