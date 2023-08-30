@@ -14,6 +14,7 @@ branch_env = [
         "stage" : 'stage',
         "rc"    : 'rc',
         "qa"    : 'qa',
+        "prod"  : 'prod',
     ]
 
 accounts = [
@@ -21,6 +22,7 @@ accounts = [
             "stage": "323546893515",
             "qa"   : "633546161654",
             "rc"   : "323546893515",
+            "prod" : "283107020475",
     ]
 
 shared_stack = [
@@ -28,6 +30,7 @@ shared_stack = [
             "qa"     : "dev",
             "rc"     : "stage",
             "stage"  : 'stage',
+            "prod"   : 'prod',
     ]    
 
 pipeline {
