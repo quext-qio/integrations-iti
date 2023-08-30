@@ -22,15 +22,10 @@ def lambda_handler(event, context):
         username = salesforce_config['username']
         password = salesforce_config['password']
         security_token = salesforce_config['security_token']
-        current_env = salesforce_config['current_env']
         
-        # Salesforce authentication ([stage], [rc] and [prod] will be connected to the real Salesforce)
-        salesforce = None
-        if current_env == 'stage' or current_env == 'rc' or current_env == 'prod':
-            salesforce = Salesforce(username=username, password=password, security_token=security_token)
-        else:    
-            salesforce = Salesforce(username=username, password=password, security_token=security_token, domain='test')
-
+        # Salesforce authentication 
+        salesforce = Salesforce(username=username, password=password, security_token=security_token)
+        
         # Query for Sales Completed
         sales_completed_query = "SELECT sum(Total_Units__c) FROM Opportunity where Product_Family__c = 'IoT'  and (not Name like '%test%') and StageName ='Closed Won' group by StageName Having sum(Total_Units__c) > 0"
         sales_completed_query_result = salesforce.query_all(sales_completed_query)
