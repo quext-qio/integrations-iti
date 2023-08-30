@@ -19,11 +19,7 @@ class DataControllerFactory:
         elif code != 200:
              return  code, { "errors": [ { "message": ips_response } ] }
              
-         # Get credentials
-        # credentials, status = AccessControl.externalCredentials(event, [] , partner)
-        # if status != "good":
-        #         response = { "data": { "provenance": [partner] }, "errors": status }
-        #         return response, 500
+      
         if partner == "Funnel":
             data, errors = DataFunnel().get_tour_availability(ips_response, input)
             return DataController(errors).built_response(data)    
