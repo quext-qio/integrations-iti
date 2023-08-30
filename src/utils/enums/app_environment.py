@@ -2,6 +2,7 @@ import os
 from enum import Enum
 
 class AppEnvironment(Enum):
+    LOCAL = "local"
     DEV = "dev"
     STAGE = "stage"
     PROD = "prod"
@@ -11,7 +12,13 @@ class AppEnvironment(Enum):
     # --------------------------------------------------------------------
     # Returns the custom domain config depend of the Stage
     def get_api_domain_config(self) -> dict:
-        if self == AppEnvironment.DEV:
+        if self == AppEnvironment.LOCAL:
+            return {
+                "hosted_zone_id" : "Z1UJRXOUMOOFQ8",
+                "domain_name_alias_target" : "dev.quext.io",
+                "custom_domain_name" : "api-sandbox.dev.quext.io",
+            }
+        elif self == AppEnvironment.DEV:
             return {
                 "hosted_zone_id" : "Z1UJRXOUMOOFQ8",
                 "domain_name_alias_target" : "dev.quext.io",
@@ -30,13 +37,11 @@ class AppEnvironment(Enum):
                 "custom_domain_name" : "integrations-api.stage.quext.io",
             }
         elif self == AppEnvironment.RC:
-            #TODO: Update this values to RC
-            # return {
-            #     "hosted_zone_id" : "Z1UJRXOUMOOFQ8",
-            #     "domain_name_alias_target" : "stage.quext.io",
-            #     "custom_domain_name" : "integrations-api-rc.stage.quext.io",
-            # }
-            raise NotImplementedError("RC is not implemented yet.")
+            return {
+                "hosted_zone_id" : "Z1UJRXOUMOOFQ8",
+                "domain_name_alias_target" : "stage.quext.io",
+                "custom_domain_name" : "integrations-api-rc.stage.quext.io",
+            }
         elif self == AppEnvironment.PROD:
             # return {
             #     "hosted_zone_id" : "Z1UJRXOUMOOFQ8",
@@ -51,7 +56,9 @@ class AppEnvironment(Enum):
     # --------------------------------------------------------------------
     # Returns the name of the parameter store associated with the stage
     def get_parameter_store_name(self) -> str:
-        if self == AppEnvironment.DEV:
+        if self == AppEnvironment.LOCAL:
+            return "/dev/integrations/hub"
+        elif self == AppEnvironment.DEV:
             return "/dev/integrations/hub"
         elif self == AppEnvironment.QA:
             return "/dev/integrations/hub"
@@ -67,7 +74,9 @@ class AppEnvironment(Enum):
     # --------------------------------------------------------------------
     # Returns name of the stage
     def get_stage_name(self) -> str:
-        if self == AppEnvironment.DEV:
+        if self == AppEnvironment.LOCAL:
+            return "local"
+        elif self == AppEnvironment.DEV:
             return "dev"
         elif self == AppEnvironment.QA:
             return "qa"
@@ -85,7 +94,9 @@ class AppEnvironment(Enum):
     @staticmethod
     def get_current_stage() -> "AppEnvironment":
         stage_name = os.getenv('STAGE', 'dev')
-        if stage_name == "dev":
+        if stage_name == "local":
+            return AppEnvironment.LOCAL
+        elif stage_name == "dev":
             return AppEnvironment.DEV
         elif stage_name == "qa":
             return AppEnvironment.QA
