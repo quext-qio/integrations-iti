@@ -139,6 +139,7 @@ class QoopsStack(NestedStack):
         except Exception as e:
             print(f"Error checking event source mapping: {e}")
    
+        # If the event source mapping does not exist, create it
         if not mapping_exists:
             try: 
                 # Create an SQS event source for Lambda
