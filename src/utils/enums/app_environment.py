@@ -43,12 +43,11 @@ class AppEnvironment(Enum):
                 "custom_domain_name" : "integrations-api-rc.stage.quext.io",
             }
         elif self == AppEnvironment.PROD:
-            # return {
-            #     "hosted_zone_id" : "Z1UJRXOUMOOFQ8",
-            #     "domain_name_alias_target" : "quext.io",
-            #     "custom_domain_name" : "integrations-api.quext.io",
-            # }
-            raise NotImplementedError("PROD is not implemented yet.")
+            return {
+                "hosted_zone_id" : "Z1UJRXOUMOOFQ8",
+                "domain_name_alias_target" : "quext.io",
+                "custom_domain_name" : "integrations-api.quext.io",
+            }
         else:
             raise ValueError(f"Unknown stage [get_api_domain_config()]: {self.value}")
 
