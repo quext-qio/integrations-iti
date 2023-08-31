@@ -2,7 +2,7 @@ import os
 import datetime, json, logging, requests
 from datetime import  datetime, timedelta
 from Utils.Constants.RealpageConstants import RealpageConstants
-from configuration.realpage_config import ilm_config
+from configuration.realpage.realpage_config import ilm_config
 import suds
 
 
@@ -30,7 +30,7 @@ class DataRealpage:
         outgoingIPSPartnerChannelResponse = partners
         partner = ips_response["platformData"]["platform"]  
         ips_partner_response = outgoingIPSPartnerChannelResponse
-        partner_uuid = ips_partner_response[RealpageConstants.CONTENT][0]['uuid'] and len(
+        partner_uuid = ips_partner_response[RealpageConstants.CONTENT][0]['uuid']  and len(
             ips_partner_response.get(RealpageConstants.CONTENT)) > 0 if "content" in ips_partner_response else ""
 
         api_creds = ""
