@@ -9,9 +9,9 @@ def lambda_handler(event, context):
     # ---------------------------------------------------------------------------------------------
     # AccessControl
     # ---------------------------------------------------------------------------------------------
-    is_acl_valid, response_acl = ACL.check_permitions(event)
-    if not is_acl_valid:
-        return response_acl
+    # is_acl_valid, response_acl = ACL.check_permitions(event)
+    # if not is_acl_valid:
+    #     return response_acl
 
 
     # ---------------------------------------------------------------------------------------------
