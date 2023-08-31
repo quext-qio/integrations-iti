@@ -26,10 +26,10 @@ class DataControllerFactory:
         elif partner == "Entrata":
             data, errors = DataEntrata().get_tour_availability()
             return DataController(errors).built_response(data)   
-        elif partner == "RealPage":
+        elif  "realpage" in partner.lower():
             code, partners =  IPSController().get_list_partners(input["platformData"]["communityUUID"])
             partners = json.loads(partners.text)
-            data, errors = DataRealpage().get_tour_availability(partners, input)
+            data, errors = DataRealpage().get_tour_availability(partners, input, ips_response)
             return DataController(errors).built_response(data)   
         else:
             data, errors = DataResman().get_tour_availability(ips_response, input)

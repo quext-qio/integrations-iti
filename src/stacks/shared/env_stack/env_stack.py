@@ -158,6 +158,10 @@ class EnvStack(NestedStack):
                 "FUNNEL_API_KEY": all_params["FUNNEL_API_KEY"],
                 "QXT_CALENDAR_TOUR_HOST": all_params["QXT_CALENDAR_TOUR_HOST"],
                 "IPS_HOST": all_params["IPS_HOST"],
+                "WS_REALPAGE_ILM_APIKEY": all_params["WS_REALPAGE_ILM_APIKEY"],
+                "DH_REALPAGE_ILM_APIKEY": all_params["DH_REALPAGE_ILM_APIKEY"],
+                "WS_REALPAGE_L2L_APIKEY": all_params["WS_REALPAGE_L2L_APIKEY"],
+                "DH_REALPAGE_L2L_APIKEY": all_params["DH_REALPAGE_L2L_APIKEY"],
             },
             "conservice": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
