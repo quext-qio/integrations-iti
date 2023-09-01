@@ -1,7 +1,7 @@
 import os
 import datetime, json, logging, requests
 from datetime import  datetime, timedelta
-from Utils.Constants.RealpageConstants import RealpageConstants
+from constants.realpage_constants import RealpageConstants
 from configuration.realpage.realpage_config import ilm_config
 import suds
 
