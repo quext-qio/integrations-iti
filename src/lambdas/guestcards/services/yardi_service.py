@@ -97,7 +97,7 @@ class YardiService(ServiceInterface):
                         "tourSchedule": True if tour_scheduled_id else False,
                         "tourError": tour_error
                     }
-            events = {"Event":event_list}
+            events = {"Event":event_list} if len(event_list) > 0 else []
             xml = PayladHandler().builder_payload(body,events)
             xml["LeadManagement"]["Prospects"]["Prospect"]["Customers"]["Customer"]["Identification"] = [
                         {
