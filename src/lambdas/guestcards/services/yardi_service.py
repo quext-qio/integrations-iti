@@ -25,11 +25,12 @@ class YardiService(ServiceInterface):
             customer_uuid =  body["platformData"].get(YardiConstants.CUSTOMERUUID)
             tour_scheduled_id = ""
             tour_error = ""
+            appointment_date = ""
             available_times = []
             event_list = []
             
             first_contact, generated_id = self.generate_unique_id(body.get(YardiConstants.QCONTACTID), community_uuid, customer_uuid)
-            
+    
             phone = self.clean_and_validate_phone_number("+"+customer_info["phone"])
             body["guest"]["phone"] = phone
             bedroooms_data = []
@@ -48,7 +49,6 @@ class YardiService(ServiceInterface):
                 }
             
             event_object = PayladHandler().create_events(event, ips_response)
-         
             if "tourScheduleData" in body:
                 appointment_date = body["tourScheduleData"]["start"]
                 comments = "Guest Card submitted online "
@@ -81,22 +81,24 @@ class YardiService(ServiceInterface):
                         if purpose_exists:
                             input_time = datetime.strptime(tour_requested[tour_requested.index("T") + 1: tour_requested.index("Z")], "%H:%M:%S")
                             formatted_time = input_time.strftime("%H:%M:%S")
-                            unit_id = self.get_unit_id(desired_rent, max(bedroooms_data) if len(bedroooms_data) > 0 else 0, tour_requested, property_id, is_qa)
+                            unit_id = self.get_unit_id(desired_rent, max(bedroooms_data) if len(bedroooms_data) > 0 else 0, property_id, is_qa)
+                            unit_id = "2310" if unit_id is None else unit_id
                             if unit_id is None:
                                 event_list = self.get_events(event_object=event_object, date_tour=tour_requested[0: tour_requested.index("T")] + "T" + formatted_time, tour_comment=tour_comment, unit_id=None)
                             else:
                                 event_list = self.get_events(event_object=event_object, date_tour=tour_requested[0: tour_requested.index("T")] + "T" + formatted_time, tour_comment=tour_comment, unit_id=unit_id)
-                            body["xml"]["LeadManagement"]["Prospects"]["Prospect"]["Events"]["Event"] = event_list
+            else:
+                event_list.append(event_object["Event"])
                 
-                tour_information = {
+            tour_information = {
                         "availableTimes": available_times,
                         "tourScheduledID": tour_scheduled_id,
                         "tourRequested": appointment_date,
                         "tourSchedule": True if tour_scheduled_id else False,
                         "tourError": tour_error
                     }
-          
-            xml = PayladHandler().builder_payload(body,event_list)
+            events = {"Event":event_list}
+            xml = PayladHandler().builder_payload(body,events)
             xml["LeadManagement"]["Prospects"]["Prospect"]["Customers"]["Customer"]["Identification"] = [
                         {
                             "@IDValue": generated_id,
@@ -131,7 +133,6 @@ class YardiService(ServiceInterface):
                 }
             }
             xml = Converter(json.dumps(new_body)).json_to_xml()
-            
                 # Call the outgoing
             try:
                     url = yardiConfig["yardi_url_demo"] if is_qa else yardiConfig["yardi_url"]
@@ -146,7 +147,7 @@ class YardiService(ServiceInterface):
                     customer_id = None
                     if "@messageType" in messages:
                         if messages["@messageType"] == "Error":
-                            logging.error(f"{self.handle_POST.__qualname__} Error trying to call Yardi outgoing{messages.get('#text', '')}")
+                            logging.error(f"Integrations-iti: Error trying to call Yardi outgoing{messages.get('#text', '')}")
                             return  {
                                 'statusCode': "500",
                                 'body': json.dumps({
@@ -187,7 +188,7 @@ class YardiService(ServiceInterface):
     
                     
             except Exception as e:
-                    logging.error(f"{self.handle_POST.__qualname__} Error trying to call Yardi outgoing{e}")
+                    logging.error(f"Integrations-iti: Error trying to call Yardi outgoing{e}")
                     return {
                         'statusCode': "500",
                         'body': json.dumps({
@@ -333,50 +334,60 @@ class YardiService(ServiceInterface):
             return unit_id
         
         except Exception as e:
-            logging.error(f"{self.handle_POST.__qualname__} Yardi {HTTP_SERVER_ERROR_MSJ}: {e}")
-            self.response.status_code = 504
-            self.response.payload = {
-                "data": [],
-                "errors": [{"message": f"{HTTP_SERVER_ERROR_MSJ}"}],
-            }
+            logging.error(f"Integrations-iti: Yardi UnitAvailability_Login : {e}")
+            return  {
+                        'statusCode': "500",
+                        'body': json.dumps({
+                            'data': [],
+                            'errors': [{"message": f"Unhandled error from Yardi guestcard: {e}"}]
+                        }),
+                        'headers': {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*',  
+                        },
+                        'isBase64Encoded': False  
+                    }
 
    #Add Guided  tour event
     def get_events(self, event_object, date_tour, tour_comment, unit_id: None):
+        event_object = event_object["Event"]
         new_date = event_object["@EventDate"][0: event_object["@EventDate"].index("T")+1]
         event_object.update({"@EventDate": new_date+ "07:00:00"})
         events_list = [event_object]
         if unit_id:
-             events_list.append({"@EventType": "Appointment",
-                            "@EventDate": date_tour,
-                            "EventID": {
-                                "@IDValue": "",
-                                "@IDType":  unit_id
-                            },
-                            "Agent": {
-                                "AgentName": {
-                                    "FirstName": event_object[YardiConstants.AGENT][YardiConstants.AGENT_NAME]["FirstName"],
-                                    "LastName": event_object[YardiConstants.AGENT][YardiConstants.AGENT_NAME]["LastName"]
-                                }
-                            },
-                            "FirstContact": "false",
-                            "Comments":  tour_comment
-                            }) 
+             events_list.append({
+                                    "@EventType": "Appointment",
+                                    "@EventDate": date_tour,
+                                    "EventID": {
+                                        "@IDValue": "",
+                                        "@IDType":  unit_id
+                                    },
+                                    "Agent": {
+                                        "AgentName": {
+                                            "FirstName": event_object[YardiConstants.AGENT][YardiConstants.AGENT_NAME]["FirstName"],
+                                            "LastName": event_object[YardiConstants.AGENT][YardiConstants.AGENT_NAME]["LastName"]
+                                        }
+                                    },
+                                    "FirstContact": "false",
+                                    "Comments":  tour_comment
+                                }) 
         else:
-             events_list.append({"@EventType": "GuidedTour",
-                            "@EventDate": date_tour,
-                            "EventID": {
-                                "@IDValue": "",
-                                "@IDType": YardiConstants.EVENT_ID
-                            },
-                            "Agent": {
-                                "AgentName": {
-                                    "FirstName": event_object[YardiConstants.AGENT][YardiConstants.AGENT_NAME]["FirstName"],
-                                    "LastName": event_object[YardiConstants.AGENT][YardiConstants.AGENT_NAME]["LastName"]
-                                }
-                            },
-                            "FirstContact": "false",
-                            "Comments":  tour_comment
-                            }) 
+             events_list.append({
+                                   "@EventType": "GuidedTour",
+                                    "@EventDate": date_tour,
+                                    "EventID": {
+                                        "@IDValue": "",
+                                        "@IDType": YardiConstants.EVENT_ID
+                                    },
+                                    "Agent": {
+                                        "AgentName": {
+                                            "FirstName": event_object[YardiConstants.AGENT][YardiConstants.AGENT_NAME]["FirstName"],
+                                            "LastName": event_object[YardiConstants.AGENT][YardiConstants.AGENT_NAME]["LastName"]
+                                        }
+                                    },
+                                    "FirstContact": "false",
+                                    "Comments":  tour_comment
+                                }) 
         return events_list 
     
     #Search for a purpose in IPS
