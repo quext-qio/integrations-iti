@@ -90,6 +90,8 @@ class EnvStack(NestedStack):
                 "RESMAN_PROPERTY_ID": all_params["RESMAN_PROPERTY_ID"],
                 "RESMAN_API_KEY": all_params["RESMAN_API_KEY"],
                 "QXT_CALENDAR_TOUR_HOST": all_params["QXT_CALENDAR_TOUR_HOST"],
+                #Funnel
+                "FUNNEL_API_KEY": all_params["FUNNEL_API_KEY"],
             },
             "transunion": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
