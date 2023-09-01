@@ -322,12 +322,16 @@ class YardiService(ServiceInterface):
                 # Find the value of UnitEconomicStatus within the ILS_Unit element
                 if(int(float(ils_unit.find('.//MarketRent').text)) <= int(desired_rent)) and  (int(float(ils_unit.find('.//UnitBedrooms').text)) >= int(num_bedrooms)):
                     unit_economic_status = ils_unit.find('.//UnitEconomicStatus').text
-                    if unit_economic_status == "model" or unit_economic_status == "residential":
-                        identification_element = root.find('.//ILS_Unit')
-                        # Retrieve the value of the IDValue attribute
-                        unit_id = identification_element.get('IDValue')
+                    unit_occupancy_status = ils_unit.find('.//UnitOccupancyStatus').text
+                    if unit_occupancy_status == "vacant":
+                        if unit_economic_status in ["model", "residential"]:
+                            identification_element = ils_unit.find('.//Identification')
+                            # Retrieve the value of the IDValue attribute
+                            unit_id = identification_element.get('IDValue')
+                            break
 
             return unit_id
+        
         except Exception as e:
             logging.error(f"{self.handle_POST.__qualname__} Yardi {HTTP_SERVER_ERROR_MSJ}: {e}")
             self.response.status_code = 504
@@ -386,6 +390,24 @@ class YardiService(ServiceInterface):
                 return True
        
         return False
+    
+    def register_partner_id(self, partner_id, customer_id, business_id, thing_type, partner_use_id):
+        payload = json.dumps({
+            "partner_id": partner_id,
+            "thing_type": thing_type,
+            "customer_id": customer_id,
+            "business_id": business_id,
+            "partner_use_id": partner_use_id,
+            "quext_id": None
+        })
+
+        headers = {
+            'accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+        response = requests.post(f'{yardiConfig["leasing_url"]}/api/v1/partner-id-translation/register-partner-id', headers=headers, data=payload )
+
+        return response.text
     
 
             
