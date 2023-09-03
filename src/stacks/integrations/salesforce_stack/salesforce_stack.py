@@ -9,7 +9,7 @@ from src.utils.enums.app_environment import AppEnvironment
 
 class SalesforceStack(NestedStack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs):
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, apiv2: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
@@ -18,10 +18,12 @@ class SalesforceStack(NestedStack):
         allow_methods=['OPTIONS', 'GET']
         
         # --------------------------------------------------------------------
-        # Create lambda function instance for (# POST /salesforce/query)
+        # Version #1
+        # --------------------------------------------------------------------
+        # Create lambda function instance for (# GET api/v1/salesforce/liftoff)
         lambda_function = lambda_.Function(
             self, 
-            f"{app_environment.get_stage_name()}-salesforce-dynamic-lambda-function",
+            f"{app_environment.get_stage_name()}-salesforce-v1-liftoff-lambda-function",
             description="Salesforce Lambda is responsible retrieving data from Salesforce using simple_salesforce library.", 
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_8,
@@ -34,7 +36,7 @@ class SalesforceStack(NestedStack):
         
 
         # --------------------------------------------------------------------
-        # Resource to execute query (POST)
+        # Resource to execute query (GET)
         get_endpoint = api.add_resource(
             "liftoff",
             default_cors_preflight_options=apigateway_.CorsOptions(
@@ -46,7 +48,7 @@ class SalesforceStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Create a Lambda integration instance
-        # POST
+        # GET
         get_endpoint_lambda_integration = apigateway_.LambdaIntegration(
             lambda_function,
             proxy=True,
@@ -76,4 +78,66 @@ class SalesforceStack(NestedStack):
                 ),
             ],
             #api_key_required=True,
+        )
+
+        # --------------------------------------------------------------------
+        # Version #2
+        # --------------------------------------------------------------------
+        # Create lambda function instance for (# GET api/v2/salesforce/liftoff)
+        lambda_function_v2 = lambda_.Function(
+            self, 
+            f"{app_environment.get_stage_name()}-salesforce-v2-liftoff-lambda-function",
+            description="Salesforce V2 Lambda is responsible retrieving data from Salesforce using simple_salesforce library.", 
+            environment=environment,
+            runtime=lambda_.Runtime.PYTHON_3_8,
+            timeout=timeout,
+            code=lambda_.Code.from_asset("./src/lambdas/v2/salesforce"),
+            handler="lambda_function.lambda_handler",
+            layers=layers,
+            function_name=f"{app_environment.get_stage_name()}-salesforce-v2-liftoff-lambda-function",
+        )
+        
+
+        # --------------------------------------------------------------------
+        # Resource to execute query (GET)
+        get_endpoint_v2 = apiv2.add_resource(
+            "liftoff",
+            default_cors_preflight_options=apigateway_.CorsOptions(
+                allow_methods=allow_methods,
+                allow_origins=apigateway_.Cors.ALL_ORIGINS
+            ),  
+        )
+        
+
+        # --------------------------------------------------------------------
+        # Create a Lambda integration instance
+        # GET
+        get_endpoint_lambda_integration_v2 = apigateway_.LambdaIntegration(
+            lambda_function_v2,
+            proxy=True,
+            integration_responses=[
+                apigateway_.IntegrationResponse(
+                    status_code="200",
+                    response_templates={"application/json": ""},
+                    response_parameters={
+                        'method.response.header.Access-Control-Allow-Origin': "'*'"
+                    }
+                ),
+            ],
+        )
+
+        # --------------------------------------------------------------------
+        # Add a GET method to endpoint
+        get_endpoint_v2.add_method(
+            'GET', 
+            get_endpoint_lambda_integration_v2,
+            request_parameters={},
+            method_responses=[
+                apigateway_.MethodResponse(
+                    status_code="200",
+                    response_parameters={
+                        'method.response.header.Access-Control-Allow-Origin': True
+                    }
+                ),
+            ],
         )

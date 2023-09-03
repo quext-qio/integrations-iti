@@ -81,8 +81,8 @@ class ResManService(ServiceInterface):
                     "UnitID": "",
                     "Comments": tour_comment
                 }
-
-                xml = Converter(PayladHandler().builder_payload(body, PayladHandler().create_events(event, ips))).json_to_xml()
+                event = PayladHandler().create_events(event, ips)
+                xml = Converter(PayladHandler().builder_payload(body, event )).json_to_xml()
                 resman_params.update({"Xml": xml})
                 
 
