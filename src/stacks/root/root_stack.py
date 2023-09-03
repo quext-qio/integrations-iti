@@ -98,6 +98,7 @@ class RootStack(Stack):
         general_resource_v2 = api_v2["general"]
         tour_resource_v2 = api_v2["tour"]
         jira_resource_v2 = api_v2["jira"]
+        salesforce_resource_v2 = api_v2["salesforce"]
 
 
         # --------------------------------------------------------------------
@@ -285,6 +286,7 @@ class RootStack(Stack):
             f"{app_env.get_stage_name()}-{server_name}-salesforce-stack",
             description="Stack for salesforce endpoints",
             api=salesforce_resource_v1,
+            apiv2=salesforce_resource_v2,
             app_environment=app_env,
             environment=environment["salesforce"],
             layers=[
