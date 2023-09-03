@@ -3,6 +3,7 @@ from global_config.config import salesforce_config
 from simple_salesforce import Salesforce
 from acl import ACL
 
+# version: V2
 def lambda_handler(event, context):
     print(f"Event: {event}, context: {context}")
     
@@ -29,20 +30,27 @@ def lambda_handler(event, context):
         # Query for Sales Completed
         sales_completed_query = "SELECT sum(Total_Units__c) FROM Opportunity where Product_Family__c = 'IoT'  and (not Name like '%test%') and StageName ='Closed Won' group by StageName Having sum(Total_Units__c) > 0"
         sales_completed_query_result = salesforce.query_all(sales_completed_query)
+        sc = sales_completed_query_result['records'][0]["expr0"]
 
         # Query for Installs Completed
         installs_completed_query = "select sum(Units__c) from Property__c where IoT__c = true and (not Name like '%test%') and (IoT_Project_Status__c = 'Completed')"
         installs_completed_query_result = salesforce.query_all(installs_completed_query)
+        ic = installs_completed_query_result['records'][0]["expr0"]
 
         # TODO: Query for Active Letters Of Intent
         active_letters_of_intent_query = ""
         active_letters_of_intent_query_result = 9500
+        ali = active_letters_of_intent_query_result
+
+        # IP Data
+        ip = sc-ic
 
         # Data to return
         query_result = {
-            "sc": sales_completed_query_result['records'][0]["expr0"],
-            'ic': installs_completed_query_result['records'][0]["expr0"],
-            "ali": active_letters_of_intent_query_result,
+            "sc": sc,
+            'ic': ic,
+            "ali": ali,
+            "ip": ip,
         }
 
 
