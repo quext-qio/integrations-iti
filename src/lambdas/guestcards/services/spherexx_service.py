@@ -19,6 +19,10 @@ class SpherexxService:
         first_contact =  True
         tour_information = None
         property_id = ips_response["platformData"]["foreign_community_id"]
+        move_in_date = body["guestPreference"]["moveInDate"]
+
+        if "T" in move_in_date:
+            body["guestPreference"]["moveInDate"] =  move_in_date[0:move_in_date.index("T")]
 
         event = {
                     "Source": body["source"],
@@ -109,8 +113,7 @@ class SpherexxService:
         }
         res = requests.request("POST", url, headers=headers, data=payload)
         
-        # Format response of RealPage ILM
-        print(res.text)
+        # Format response of Spherexx 
         is_success = True if "true" in res.text else False
         serviceResponse = ServiceResponse(
             guest_card_id=str(uuid.uuid4()) if is_success else "",
