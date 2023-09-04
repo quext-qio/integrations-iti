@@ -9,7 +9,7 @@ from src.utils.enums.app_environment import AppEnvironment
 
 class SalesforceStack(NestedStack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, apiv2: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs):
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, api_v2: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
