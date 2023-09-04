@@ -100,7 +100,7 @@ class SalesforceStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Resource to execute query (GET)
-        get_endpoint_v2 = apiv2.add_resource(
+        get_endpoint_v2 = api_v2.add_resource(
             "liftoff",
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
