@@ -39,8 +39,10 @@ def lambda_handler(event, context):
         installs_completed_query_result = salesforce.query_all(installs_completed_query)
         installs_completed_query_result2 = salesforce.query_all(installs_completed_query2)
         
-        ic = installs_completed_query_result['records'][0]["expr0"] + installs_completed_query_result2['records'][0]["expr0"]
 
+        aux = installs_completed_query_result2['records'][0]["expr0"] 
+        ic = installs_completed_query_result['records'][0]["expr0"] + (0 if aux is None else installs_completed_query_result['records'][0]["expr0"])
+        
         # TODO: Query for Active Letters Of Intent
         active_letters_of_intent_query = ""
         active_letters_of_intent_query_result = 5400
