@@ -39,7 +39,7 @@ def lambda_handler(event, context):
 
         # TODO: Query for Active Letters Of Intent
         active_letters_of_intent_query = ""
-        active_letters_of_intent_query_result = 9500
+        active_letters_of_intent_query_result = 5400
         ali = active_letters_of_intent_query_result
 
         # IP Data
