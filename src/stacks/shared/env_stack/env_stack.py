@@ -181,6 +181,9 @@ class EnvStack(NestedStack):
                 "ACL_HOST": all_params["ACL_HOST"],
                 "JIRA_REPORTER_TOKEN": all_params["JIRA_REPORTER_TOKEN"],
             },
+             "onetimelink": {
+                "CURRENT_ENV": all_params["CURRENT_ENV"],
+            },
             
         }
 
