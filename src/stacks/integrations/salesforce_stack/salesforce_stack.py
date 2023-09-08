@@ -9,7 +9,7 @@ from src.utils.enums.app_environment import AppEnvironment
 
 class SalesforceStack(NestedStack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, apiv2: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs):
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, api_v2: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
@@ -100,7 +100,7 @@ class SalesforceStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Resource to execute query (GET)
-        get_endpoint_v2 = apiv2.add_resource(
+        get_endpoint_v2 = api_v2.add_resource(
             "liftoff",
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
