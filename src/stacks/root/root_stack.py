@@ -16,6 +16,7 @@ from src.stacks.integrations.engrain_stack.engrain_stack import EngrainStack
 from src.stacks.integrations.tour_availability_stack.tour_availability_stack import TourAvailabilityStack
 from src.stacks.integrations.conservice_stack.conservice_stack import ConserviceStack
 from src.stacks.integrations.salesforce_stack.salesforce_stack import SalesforceStack
+from src.stacks.integrations.onetime_link_stack.onetime_link_stack import OneTimeLinkStack
 from src.stacks.integrations.qoops.qoops_stack import QoopsStack
 
 # [RootStack] is the main [Stack] for the project
@@ -99,6 +100,7 @@ class RootStack(Stack):
         tour_resource_v2 = api_v2["tour"]
         jira_resource_v2 = api_v2["jira"]
         salesforce_resource_v2 = api_v2["salesforce"]
+        onetime_link_resource_v2 = api_v2["security"]
 
 
         # --------------------------------------------------------------------
@@ -312,4 +314,21 @@ class RootStack(Stack):
                 pip_packages_layer,
             ],
         )
+
+        # --------------------------------------------------------------------
+        # One time link enpoint
+        # --------------------------------------------------------------------
+        OneTimeLinkStack(
+            self,
+            f"{app_env.get_stage_name()}-{server_name}-onetime-link-stack",
+            description="Stack for Onetime_link service",
+            api=onetime_link_resource_v2,
+            app_environment=app_env,
+            environment=environment["onetimelink"],
+            layers=[
+                shared_layer,
+                pip_packages_layer,
+            ],
+        )
+
 
