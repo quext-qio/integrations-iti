@@ -184,6 +184,9 @@ class EnvStack(NestedStack):
              "onetimelink": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
             },
+             "rentdynamics": {
+                "CURRENT_ENV": all_params["CURRENT_ENV"],
+            },
             
         }
 
