@@ -32,6 +32,36 @@ def lambda_handler(event, context):
             "isBase64Encoded": False  
         }
 
+    # Validate IPS
+    #Call IPS to get community id
+    communityUUID = path_parameters['communityUUID']
+    customerUUID = path_parameters['customerUUID']
+    purpose = "unitAvailability"
+    
+    code, ips_response =  IPSController().get_platform_data(communityUUID, customerUUID, purpose)
+    ips_response = json.loads(ips_response.text)
+
+    if "platformData" not in ips_response:
+        return {
+            "statusCode": "400",
+            "body": json.dumps({
+                "data": {},
+                "errors": [
+                    {
+                        "message": "IPS response does not contain platformData"
+                    }
+                ]
+            }),
+            "headers": {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",  
+            },
+            "isBase64Encoded": False  
+        }
+
+    # Add community_id to body
+    body["community_id"] = int(ips_response.get("platformData").get('communityID'))
+
     # Get Action
     action = path_parameters['action']
     

@@ -6,7 +6,7 @@ class UnitsAndFloorPlantsService(ServiceInterface):
         return {
             'statusCode': "200",
             'body': json.dumps({
-                'data': 'data from UnitsAndFloorPlantsService',
+                'data': body,
                 'errors': []
             }),
             'headers': {
