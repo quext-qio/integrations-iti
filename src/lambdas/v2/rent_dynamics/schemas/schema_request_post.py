@@ -32,16 +32,16 @@ class SchemaRequestPost(IValidator):
             },
             # Body
             "move_in_date": {
-                'required': True,
+                'required': False,
                 'type': 'string',
-                'empty': False,
+                'empty': True,
                 'regex': ValidationConstants.DATE_YYYY_MM_DD,
                 'meta': {'regex': "The move_in_date is not valid"}
             },
             "move_out_date": {
-                'required': True,
+                'required': False,
                 'type': 'string',
-                'empty': False,
+                'empty': True,
                 'regex': ValidationConstants.DATE_YYYY_MM_DD,
                 'meta': {'regex': "The move_out_date is not valid"}
             },
