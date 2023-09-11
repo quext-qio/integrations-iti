@@ -10,12 +10,12 @@ def lambda_handler(event, context):
         return response_acl
     
     # Get path parameters and body
-    path_parameters = json.loads(event['pathParameters'])
+    path_parameters = event['pathParameters']
     body = json.loads(event['body'])
     
     # Validate body and path parameters
-    dict_merged = {**path_parameters, **body}
-    is_valid, input_errors = SchemaRequestPost(dict_merged).is_valid()
+    all_params = {**path_parameters, **body}
+    is_valid, input_errors = SchemaRequestPost(all_params).is_valid()
     if not is_valid:
         return {
             "statusCode": "400",
