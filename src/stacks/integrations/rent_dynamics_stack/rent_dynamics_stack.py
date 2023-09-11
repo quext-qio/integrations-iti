@@ -26,7 +26,7 @@ class RentDynamicsStack(NestedStack):
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
             timeout=timeout,
-            code=lambda_.Code.from_asset("./src/lambdas/rent_dynamics"),
+            code=lambda_.Code.from_asset("./src/lambdas/v2/rent_dynamics"),
             handler="lambda_function.lambda_handler",
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-rent-dynamics-lambda-function",
@@ -35,8 +35,6 @@ class RentDynamicsStack(NestedStack):
         # --------------------------------------------------------------------
         # Add base resource to API Gateway
         # Resource to call rentdynamics endpoints (POST)
-
-
         post_endpoint = api.add_resource("{customerUUID}").add_resource("{action}").add_resource(
             "{communityUUID}",
             default_cors_preflight_options=apigateway_.CorsOptions(
@@ -71,7 +69,7 @@ class RentDynamicsStack(NestedStack):
             request_parameters={
                 'method.request.path.customerUUID': True,
                 'method.request.path.action': True,
-                'method.request.path.communityUUID': True,
+                'method.request.path.communityUUID': False,
             },
             method_responses=[
                 apigateway_.MethodResponse(

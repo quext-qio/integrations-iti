@@ -12,7 +12,7 @@ class ACL:
             return False, response
 
     @staticmethod
-    def check_permitions(event):
+    def check_permitions(event, check_endpoints=True):
         
         # Case: No API key in header or empty
         if 'x-api-key' not in event['headers'] or event['headers']['x-api-key'] == "":
@@ -59,6 +59,9 @@ class ACL:
             if "apiKey" in security_item:
                 if security_item["apiKey"] == api_key:
                     print(f"apiKey found: {security_item['apiKey']}")
+                    if not check_endpoints:
+                        # Case: Just check if API key exists
+                        return True, []
                     if "endpoints" not in security_item:
                         return False, {
                             'statusCode': "401",
