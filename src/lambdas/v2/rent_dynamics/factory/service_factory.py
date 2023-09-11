@@ -14,7 +14,7 @@ class ServiceFactory:
     def get_service(service_type_name: str) -> ServiceInterface:
         # Validate service type using enum constructor
         try:
-            service_type = ServiceType(service_type_name)
+            service_type = ServiceType(service_type_name.lower())
         except ValueError:
             raise Exception(f"Unsupported service type for Rent Dynamics: {service_type_name}")
         
