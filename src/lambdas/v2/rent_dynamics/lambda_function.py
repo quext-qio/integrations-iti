@@ -1,6 +1,7 @@
 import json
-from acl import ACL
 from schemas.schema_request_post import SchemaRequestPost
+from factory.service_factory import ServiceFactory
+from acl import ACL
 from IPSController import IPSController
 
 def lambda_handler(event, context):
@@ -31,40 +32,8 @@ def lambda_handler(event, context):
             "isBase64Encoded": False  
         }
 
-    # Get path parameters
-    customerUUID = path_parameters['customerUUID']
+    # Get Action
     action = path_parameters['action']
-    communityUUID = path_parameters['communityUUID']
-
-    #Call IPS to get community id
-    purpose = "unitAvailability"
-    code, ips_response =  IPSController().get_platform_data(communityUUID, customerUUID, purpose)
-    ips_response = json.loads(ips_response.text)
     
-    if "platformData" not in ips_response:
-        raise Exception("IPS response does not contain PlatformData")
-    
-    # Validate if platform in PlatformData
-    if "platform" not in ips_response["platformData"]:
-        raise Exception("IPS response does not contain platform")
-
-    parameter = {'community_id': int(ips_response['platformData']['communityID'])}
-    
-    #If Dates in payload, add it to parameters
-    if body:
-        parameter.update(body)
-    
-    # Validate path parameters
-
-    return {
-        "statusCode": "200",
-        "body": json.dumps({
-            "data": f"hello from rentdynamics {customerUUID}, {action}, {communityUUID}",
-            "errors": []
-        }),
-        "headers": {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",  
-        },
-        "isBase64Encoded": False  
-    }
+    # Factory based on action
+    return ServiceFactory.get_service(action).get_data(path_parameters, body)

@@ -7,7 +7,7 @@ from services.prospects_service import ProspectsService
 from services.properties_service import PropertiesService
 from services.transactions_service import TransactionsService
 from services.customer_events_service import CustomerEventsService
-
+from services.invalid_action_service import InvalidActionService
 
 class ServiceFactory:
     @staticmethod
@@ -15,9 +15,9 @@ class ServiceFactory:
         # Validate service type using enum constructor
         try:
             service_type = ServiceType(service_type_name.lower())
-        except ValueError:
-            raise Exception(f"Unsupported service type for Rent Dynamics: {service_type_name}")
-        
+        except Exception as e:
+            service_type = ServiceType.INVALID_ACTION
+            
         # Return service
         if service_type == ServiceType.CHARGE_CODES:
             return ChargeCodesService()
@@ -33,6 +33,8 @@ class ServiceFactory:
             return TransactionsService()
         elif service_type == ServiceType.CUSTOMER_EVENTS:
             return CustomerEventsService()
+        else:
+            return InvalidActionService()
         
             
         

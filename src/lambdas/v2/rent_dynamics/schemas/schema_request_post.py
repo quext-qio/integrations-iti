@@ -21,7 +21,7 @@ class SchemaRequestPost(IValidator):
                 'required': True,
                 'type': 'string',
                 'empty': False,
-                'allowed': ['unitsAndFloorPlans', 'residents', 'prospects', 'chargeCodes', 'properties', 'transactions', 'customerEvents']
+                'allowed': ['unitsAndFloorPlans', 'unitsandfloorplans', 'residents', 'prospects', 'chargeCodes', 'chargecodes', 'properties', 'transactions', 'customerEvents', 'customerevents']
             },
             "communityUUID": {
                 'required': True,
@@ -50,6 +50,12 @@ class SchemaRequestPost(IValidator):
 
     def is_valid(self):
         validator = Validator(self.schema_request_post, error_handler=CustomErrorHandler(self.schema_request_post))
+        
+        # Lowercase all string values
+        for clave, valor in self.data.items():
+            if isinstance(valor, str):  
+                self.data[clave] = valor.lower()
+            
         if validator.validate(self.data):
             return True, {}
         else:

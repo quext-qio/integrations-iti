@@ -9,4 +9,5 @@ class ServiceType(Enum):
     PROPERTIES = "properties"
     TRANSACTIONS = "transactions"
     CUSTOMER_EVENTS = "customerevents"
+    INVALID_ACTION = ""
     
