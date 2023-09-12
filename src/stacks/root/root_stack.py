@@ -349,6 +349,7 @@ class RootStack(Stack):
             layers=[
                 shared_layer,
                 pip_packages_layer,
+                mysql_layer
             ],
         )
 
