@@ -31,7 +31,7 @@ def lambda_handler(event, context):
             },
             "isBase64Encoded": False  
         }
-
+    
     # Validate IPS
     #Call IPS to get community id
     communityUUID = path_parameters['communityUUID']
@@ -40,6 +40,7 @@ def lambda_handler(event, context):
     
     code, ips_response =  IPSController().get_platform_data(communityUUID, customerUUID, purpose)
     ips_response = json.loads(ips_response.text)
+    print(ips_response)
 
     if "platformData" not in ips_response:
         return {
@@ -61,6 +62,7 @@ def lambda_handler(event, context):
 
     # Add community_id to body
     body["community_id"] = int(ips_response.get("platformData").get('communityID'))
+
 
     # Get Action
     action = path_parameters['action']

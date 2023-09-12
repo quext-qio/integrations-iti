@@ -12,4 +12,4 @@ from
   JOIN accounting_charge_code_property code_prop ON codes.id = code_prop.accounting_charge_code_id 
   JOIN accounting_charge_code_categories code_cat ON codes.accounting_charge_code_category_id = code_cat.id 
 WHERE 
-  code_prop.property_id = %s
+  code_prop.property_id = %(community_id)s
