@@ -5,14 +5,6 @@ from utils.mapper.newco_mapper import NewCoMapper
 
 class ChargeCodesService(ServiceInterface):
     def get_data(self, path_parameters: dict, body: dict):
-        # Get path parameters
-        # customerUUID = path_parameters['customerUUID']
-        # action = path_parameters['action']
-        # communityUUID = path_parameters['communityUUID']
-
-        # Get body parameters
-        # move_in_date = body['move_in_date']
-        # move_out_date = body['move_out_date']
         params = {
             'community_id': body['community_id']
         }
@@ -34,7 +26,7 @@ class ChargeCodesService(ServiceInterface):
             }
 
 
-        # Suceess response
+        # Success response
         return {
             'statusCode': "200",
             'body': json.dumps({

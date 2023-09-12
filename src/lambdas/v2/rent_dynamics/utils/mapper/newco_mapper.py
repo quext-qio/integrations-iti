@@ -15,18 +15,6 @@ class NewCoMapper:
 
     @staticmethod
     def get_chargeCodes_RentDynamics(params: dict):
-        # _config = getConfigData(dataSource)
-        # _ssh_config = getSSHConfigData(dataSource)
-        # db = []
-        # try:
-        #     db = executeQuery(RentDynamicsConstants.GET_CHARGECODES, _config, _ssh_config, [params])
-        # except:
-        #     responseObj = {QuextIntegrationConstants.DATA: {},
-        #                    QuextIntegrationConstants.ERROR: {}}
-        #     responseObj[QuextIntegrationConstants.ERROR][
-        #         QuextIntegrationConstants.MESSAGE] = 'Data fetch error'
-        #     return {}, responseObj
-
         try:
             with closing(db_object.get_db_session()) as session:
                 cursor = session.cursor(dictionary=True)
@@ -45,27 +33,36 @@ class NewCoMapper:
                 return True, result
         
         except Exception as e:
-            print(f"An error occurred while retrieving data from the database: {str(e)}")
-            return False, [{"error":f"An error occurred while retrieving data from the database: {str(e)}"}]
+            print(f"An error occurred while retrieving data of get charge codes from the database: {str(e)}")
+            return False, [{"message":f"An error occurred while retrieving data of get charge codes from the database: {str(e)}"}]
 
-        # if len(db) != 0:
-        #     for item in db:
-        #         if str(item['community_id']) not in data.data.community:
-        #             _community = Community("", "", str(item['community_id']),
-        #                                    "", 0,
-        #                                    Property('', [],
-        #                                             PhysicalLocation("", '', '',
-        #                                                              '', ''),
-        #                                             GpsLocation("", "")), [],
-        #                                    ContactMethods('', '', '', ''), None, None, None, None, Accounting())
-        #             data.data.community[str(item['community_id'])] = _community
+    @staticmethod
+    def get_customer_events_RentDynamics(params: dict):
+        try:
+            with closing(db_object.get_db_session()) as session:
+                cursor = session.cursor(dictionary=True)
+                path = "newco_queries/get_customer_events.sql"
+                output = db_object.read_query(path, "rent_dynamics", "customer_events", 0.0)
+                cursor.execute(output, params)
+                
+                # Fetch all rows
+                result = cursor.fetchall()    
+                for item in result:
+                    # Convert dates to string (created_at)
+                    item_created_at = item['created_at']
+                    if item_created_at is not None:
+                        item['created_at'] = item_created_at.strftime("%Y-%m-%d %H:%M:%S")
+                    
+                    # Convert dates to string (date)
+                    item_date = item['date']
+                    if item_date is not None:
+                        item['date'] = item_date.strftime("%Y-%m-%d %H:%M:%S")
 
-        #         _transactionCode = TransactionCode(item['charge_code_id'], item['charge_code_name'])
-        #         data.data.community[str(item['community_id'])].accounting.transaction_codes.append(_transactionCode)
-        #     return data, None
-        # else:
-        #     responseObj = {QuextIntegrationConstants.DATA: {},
-        #                    QuextIntegrationConstants.ERROR: {}}
-        #     responseObj[QuextIntegrationConstants.ERROR][
-        #         QuextIntegrationConstants.MESSAGE] = 'No Records Found'
-        #     return {}, responseObj
+
+                # TODO: Map the data to the expected format
+
+                return True, result
+        
+        except Exception as e:
+            print(f"An error occurred while retrieving data of get get customer events from the database: {str(e)}")
+            return False, [{"message":f"An error occurred while retrieving data of get get customer events from the database: {str(e)}"}]
