@@ -38,7 +38,7 @@ class NewCoMapper:
                 result = cursor.fetchall()
                 for item in result:
                     decimal_value = item['amount']
-                    item['amount'] = str(decimal_value)
+                    item['amount'] = float(decimal_value)
                 
                 # TODO: Map the data to the expected format
 
