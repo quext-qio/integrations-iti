@@ -2,6 +2,7 @@ import json
 from decimal import Decimal
 from contextlib import closing
 from controller.query_controller import QueryController
+from datetime import date, datetime
 
 
 def decimal_default(obj):
@@ -66,3 +67,43 @@ class NewCoMapper:
         except Exception as e:
             print(f"An error occurred while retrieving data of get get customer events from the database: {str(e)}")
             return False, [{"message":f"An error occurred while retrieving data of get get customer events from the database: {str(e)}"}]
+        
+    
+    @staticmethod
+    def get_residents_RentDynamics(params: dict):
+        try:
+            with closing(db_object.get_db_session()) as session:
+                cursor = session.cursor(dictionary=True)
+                path = "newco_queries/get_residents.sql"
+                output = db_object.read_query(path, "rent_dynamics", "get_residents", 0.0)
+                cursor.execute(output, params)
+                
+                # Fetch all rows
+                result = cursor.fetchall()    
+                for item in result:
+                    # Convert dates to string (lease_start)
+                    item_lease_start = item['lease_start']
+                    if item_lease_start is not None:
+                        item['lease_start'] = item_lease_start.strftime("%Y-%m-%d")
+                    
+                    # Convert dates to string (lease_expire)
+                    item_lease_expire = item['lease_expire']
+                    if item_lease_expire is not None:
+                        item['lease_expire'] = item_lease_expire.strftime("%Y-%m-%d")
+                        
+                     # Convert dates to string (move_in_date)
+                    item_move_in_date = item['move_in_date']
+                    if item_move_in_date is not None:
+                        item['move_in_date'] = item_move_in_date.strftime("%Y-%m-%d %H:%M:%S")
+                        
+                for item in result:
+                    for key, value in item.items():
+                        if isinstance(value, (date, datetime)):
+                            item[key] = value.strftime("%Y-%m-%d %H:%M:%S") if isinstance(value, datetime) else value.strftime("%Y-%m-%d")
+                    
+                # TODO: Map the data to the expected format
+                return True, result
+        
+        except Exception as e:
+            print(f"An error occurred while retrieving data of get Residents from the database: {str(e)}")
+            return False, [{"message":f"An error occurred while retrieving data of get residents from the database: {str(e)}"}]
