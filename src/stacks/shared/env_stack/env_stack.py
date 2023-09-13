@@ -181,8 +181,18 @@ class EnvStack(NestedStack):
                 "ACL_HOST": all_params["ACL_HOST"],
                 "JIRA_REPORTER_TOKEN": all_params["JIRA_REPORTER_TOKEN"],
             },
-             "onetimelink": {
+            "onetimelink": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
+            },
+            "rentdynamics": {
+                "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "ACL_HOST": all_params["ACL_HOST"],
+                "IPS_HOST": all_params["IPS_HOST"],
+                # Newco
+                "NEWCO_DB_HOST": all_params["NEWCO_DB_HOST"],
+                "NEWCO_DB_PASSWORD": all_params["NEWCO_DB_PASSWORD"],
+                "NEWCO_DB_NAME": all_params["NEWCO_DB_NAME"],
+                "NEWCO_DB_USER": all_params["NEWCO_DB_USER"],
             },
             
         }
