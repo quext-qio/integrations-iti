@@ -118,6 +118,32 @@ class NewCoMapper:
             return False, [{"message":f"An error occurred while retrieving data of get Units and floorplans from the database: {str(e)}"}]
         
 
+    @staticmethod
+    def get_transactions_RentDynamics(params: dict):
+        try:
+            with closing(db_object.get_db_session()) as session:
+                cursor = session.cursor(dictionary=True)
+                path = "newco_queries/get_transactions.sql"
+                output = db_object.read_query(path, "rent_dynamics", "get_transactions", 0.0)
+                cursor.execute(output, params)
+                
+                # Fetch all rows
+                result = cursor.fetchall()    
+                for item in result:
+                    decimal_value = item['amount']
+                    item['amount'] = float(decimal_value)
+                    for key, value in item.items():
+                        if isinstance(value, (date, datetime)):
+                            item[key] = value.strftime("%Y-%m-%d %H:%M:%S") if isinstance(value, datetime) else value.strftime("%Y-%m-%d")
+                    
+                # TODO: Map the data to the expected format
+                return True, result
+        
+        except Exception as e:
+            print(f"An error occurred while retrieving data of get transactions from the database: {str(e)}")
+            return False, [{"message":f"An error occurred while retrieving data of get transactions from the database: {str(e)}"}]
+        
+
         
 
     

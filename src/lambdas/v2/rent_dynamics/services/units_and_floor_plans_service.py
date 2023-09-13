@@ -9,7 +9,6 @@ class UnitsAndFloorPlantsService(ServiceInterface):
     def get_data(self, path_parameters: dict, body: dict):
         # Get body parameters
         community_id = body['community_id']
-
         
         # Create params required for the query
         params = {

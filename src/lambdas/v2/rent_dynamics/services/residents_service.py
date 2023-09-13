@@ -6,6 +6,19 @@ from utils.mapper.newco_mapper import NewCoMapper
 class ResidentsService(ServiceInterface):
     def get_data(self, path_parameters: dict, body: dict):
 
+        if 'move_in_date' not in body and 'move_out_date' not in body:
+            return {
+                'statusCode': "400",
+                'body': json.dumps({
+                    'data': {},
+                    'errors': [{"message": 'move_out_date and move_in_date are required for this action'}]
+                }),
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',  
+                },
+                'isBase64Encoded': False  
+            }
 
         # Get body parameters
         move_in_date = body['move_in_date']

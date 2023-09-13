@@ -14,10 +14,13 @@ def lambda_handler(event, context):
     # Get path parameters and body
     path_parameters = event['pathParameters']
     body = json.loads(event['body']) if "body" in event else {}
+
+    # Get Action
+    action = path_parameters['action']
     
     # Validate body and path parameters
     all_params = {**path_parameters, **body}
-    is_valid, input_errors = SchemaRequestPost(all_params).is_valid()
+    is_valid, input_errors = SchemaRequestPost(all_params, action).is_valid()
     if not is_valid:
         return {
             "statusCode": "400",
@@ -62,10 +65,6 @@ def lambda_handler(event, context):
 
     # Add community_id to body
     body["community_id"] = int(ips_response.get("platformData").get('communityID'))
-
-
-    # Get Action
-    action = path_parameters['action']
     
     # Factory based on action
     return ServiceFactory.get_service(action).get_data(path_parameters, body)
