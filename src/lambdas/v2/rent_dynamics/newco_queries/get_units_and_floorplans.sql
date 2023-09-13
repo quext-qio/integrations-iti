@@ -189,7 +189,7 @@ from
       JOIN resident_events ON resident_events.eventable_id = move_in_events.id_move_in_events 
       AND eventable_type = "App\\\\MoveInEvent" 
       AND resident_events.deleted_at IS NULL 
-      JOIN `DATABASE_NAME`.v_hlpr_residents res ON resident_events.resident_id = res.id 
+      JOIN v_hlpr_residents res ON resident_events.resident_id = res.id 
       AND res.deleted_at IS NULL 
       JOIN unit_leases ON unit_leases.resident_id = res.id 
       JOIN persons on res.person_id = persons.id 
