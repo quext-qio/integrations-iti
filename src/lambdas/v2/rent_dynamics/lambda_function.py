@@ -5,7 +5,6 @@ from acl import ACL
 from IPSController import IPSController
 
 def lambda_handler(event, context):
-    print(event)
     # Validate ACL
     is_acl_valid, response_acl = ACL.check_permitions(event, check_endpoints=False)
     if not is_acl_valid:
@@ -13,7 +12,10 @@ def lambda_handler(event, context):
     
     # Get path parameters and body
     path_parameters = event['pathParameters']
-    body = json.loads(event['body']) if "body" in event else {}
+    if "body" in event and event['body'] is not None:
+        body = json.loads(event['body'])
+    else:
+        body = {}
 
     # Get Action
     action = path_parameters['action']
