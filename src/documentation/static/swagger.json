@@ -6,8 +6,7 @@
     "description": "Immediate Transaction Information Swagger for Quext's Integrations Team",
     "contact": {
       "name": "Quext",
-      "url": "https://onequext.com/",
-      "email": "randald.villegas@freshconsulting.com"
+      "url": "https://onequext.com/"
     }
   },
   "host": "integrations-api.stage.quext.io",
