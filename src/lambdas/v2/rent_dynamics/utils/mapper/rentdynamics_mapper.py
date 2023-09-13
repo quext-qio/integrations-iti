@@ -170,3 +170,20 @@ class RentDynamicsMapper:
 
         result.extend(list(unit_dict.values()))
         return result
+    
+    @staticmethod
+    def setPropertyDetails(data):
+        result = []
+        for item in data:
+            # here we have to replace 'communityUUID' string with actual community UUID
+            _data = {'propertyId': item["id"],
+                     'name': item["name"],
+                     'address': item["address"],
+                     'city': item["city"],
+                     'state': item["state"],
+                     'zip': item["postal"],
+                     'phoneNumber': item["phone"]
+                     }
+            
+            result.append(_data)
+        return result
