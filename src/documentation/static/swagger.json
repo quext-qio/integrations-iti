@@ -1,0 +1,268 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Quext's Integrations",
+    "version": "1.0.0",
+    "description": "Immediate Transaction Information Swagger for Quext's Integrations Team",
+    "contact": {
+      "name": "Quext",
+      "url": "https://onequext.com/",
+      "email": "randald.villegas@freshconsulting.com"
+    }
+  },
+  "host": "integrations-api.stage.quext.io",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "securityDefinitions": {
+    "APIKeyHeader": {
+      "type": "apiKey",
+      "name": "x-api-key",
+      "in": "header",
+      "description": "API Key for Quext Integrations"
+    }
+  },
+  "paths": {
+    "/api/v1/placepay/new-account": {
+      "post": {
+        "tags": [
+          "Placepay"
+        ],
+        "description": "Create new account",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Create User Data",
+            "in": "body",
+            "description": "JSON data of user to be created",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PlacepayUser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account created"
+          },
+          "400": {
+            "description": "Bad request data"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/v1/placepay/token": {
+      "get": {
+        "tags": [
+          "Placepay"
+        ],
+        "description": "Create new access token related to an account",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "query",
+            "description": "Placepay accountId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad request data"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/v2/general/guestcards": {
+      "post": {
+        "tags": [
+          "Guestcards"
+        ],
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "description": "Save prospects information",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Prospect Data",
+            "in": "body",
+            "description": "JSON data of prospect to be created",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Prospect"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "PlacepayUser": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "fullName": {
+          "type": "string"
+        },
+        "userType": {
+          "type": "string",
+          "enum": [
+            "payer"
+          ]
+        }
+      }
+    },
+    "Prospect": {
+      "type": "object",
+      "properties": {
+        "platformData": {
+          "type": "object",
+          "properties": {
+            "customerUUID": {
+              "type": "string"
+            },
+            "communityUUID": {
+              "type": "string"
+            }
+          }
+        },
+        "guest": {
+          "type": "object",
+          "properties":{
+            "first_name": {
+              "type": "string"
+            },
+            "last_name": {
+              "type": "string"
+            },
+            "phone": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            } 
+          }
+        },
+        "guestComment": {
+          "type": "string"
+        },
+        "guestPreference": {
+          "type": "object",
+          "properties": {
+            "desiredBeds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ONE_BEDROOM",
+                  "TWO_BEDROOM",
+                  "THREE_BEDROOM"
+                ]
+              }
+            },
+            "desiredRent": {
+              "type": "integer"
+            },
+            "desiredBaths": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "moveInDate": {
+              "type": "string",
+              "format": "date"
+            },
+            "contactPreference": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "sms",
+                  "email",
+                  "phone"
+                ]
+              }
+            },
+            "leaseTermMonths": {
+              "type": "integer"
+            },
+            "noOfOccupants": {
+              "type": "integer"
+            },
+            "moveInReason": {
+              "type": "string"
+            },
+            "preferredAmenities": {
+              "type": "string"
+            }
+          }
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "ws",
+            "dh"
+          ]
+        },
+        "tourScheduleData": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        }
+      }
+    }
+  }
+}
