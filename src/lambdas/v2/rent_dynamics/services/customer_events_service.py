@@ -5,25 +5,21 @@ from utils.mapper.newco_mapper import NewCoMapper
 
 class CustomerEventsService(ServiceInterface):
     def get_data(self, path_parameters: dict, body: dict):
-        # Get path parameters
-        # customerUUID = path_parameters['customerUUID']
-        # action = path_parameters['action']
-        # communityUUID = path_parameters['communityUUID']
 
         # Get body parameters
-        move_in_date = body['move_in_date']
-        move_out_date = body['move_out_date']
+        start_date = body['start_date']
+        end_date = body['end_date']
         community_id = body['community_id']
 
         # Validate the dates
-        move_in_date_obj = datetime.strptime(move_in_date, '%Y-%m-%d')
-        move_out_date_obj = datetime.strptime(move_out_date, '%Y-%m-%d')
-        if move_out_date_obj <= move_in_date_obj:
+        start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
+        if end_date_obj <= start_date_obj:
             return {
                 'statusCode': "400",
                 'body': json.dumps({
                     'data': {},
-                    'errors': [{"message": 'move_out_date must be greater than move_in_date'}]
+                    'errors': [{"message": 'end_date must be greater than start_date'}]
                 }),
                 'headers': {
                     'Content-Type': 'application/json',
@@ -35,8 +31,8 @@ class CustomerEventsService(ServiceInterface):
         # Create params required for the query
         params = {
             'community_id': community_id,
-            'start_date': move_in_date,
-            'end_date': move_out_date,
+            'start_date': start_date,
+            'end_date': end_date,
         }
 
         # Get data from database

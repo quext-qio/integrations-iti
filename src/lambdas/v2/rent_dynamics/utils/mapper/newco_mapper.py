@@ -2,6 +2,7 @@ import json
 from decimal import Decimal
 from contextlib import closing
 from controller.query_controller import QueryController
+from utils.mapper.rentdynamics_mapper import RentDynamicsMapper
 from datetime import date, datetime
 
 
@@ -29,9 +30,9 @@ class NewCoMapper:
                     decimal_value = item['amount']
                     item['amount'] = float(decimal_value)
                 
-                # TODO: Map the data to the expected format
+                data = RentDynamicsMapper.setChargeCode(result)
 
-                return True, result
+                return True, data
         
         except Exception as e:
             print(f"An error occurred while retrieving data of get charge codes from the database: {str(e)}")
@@ -60,9 +61,9 @@ class NewCoMapper:
                         item['date'] = item_date.strftime("%Y-%m-%d %H:%M:%S")
 
 
-                # TODO: Map the data to the expected format
+                data = RentDynamicsMapper.setCustomerEventDetails(result)
 
-                return True, result
+                return True, data
         
         except Exception as e:
             print(f"An error occurred while retrieving data of get get customer events from the database: {str(e)}")
@@ -86,8 +87,8 @@ class NewCoMapper:
                         if isinstance(value, (date, datetime)):
                             item[key] = value.strftime("%Y-%m-%d %H:%M:%S") if isinstance(value, datetime) else value.strftime("%Y-%m-%d")
                     
-                # TODO: Map the data to the expected format
-                return True, result
+                data = RentDynamicsMapper.setResidentDetails(result)
+                return True, data
         
         except Exception as e:
             print(f"An error occurred while retrieving data of get Residents from the database: {str(e)}")
@@ -110,8 +111,8 @@ class NewCoMapper:
                         if isinstance(value, (date, datetime)):
                             item[key] = value.strftime("%Y-%m-%d %H:%M:%S") if isinstance(value, datetime) else value.strftime("%Y-%m-%d")
                     
-                # TODO: Map the data to the expected format
-                return True, result
+                data = RentDynamicsMapper.setUnitDetails(result)
+                return True, data
         
         except Exception as e:
             print(f"An error occurred while retrieving data of get Units and floorplans from the database: {str(e)}")
@@ -136,8 +137,8 @@ class NewCoMapper:
                         if isinstance(value, (date, datetime)):
                             item[key] = value.strftime("%Y-%m-%d %H:%M:%S") if isinstance(value, datetime) else value.strftime("%Y-%m-%d")
                     
-                # TODO: Map the data to the expected format
-                return True, result
+                data = RentDynamicsMapper.setTransaction(result)
+                return True, data
         
         except Exception as e:
             print(f"An error occurred while retrieving data of get transactions from the database: {str(e)}")

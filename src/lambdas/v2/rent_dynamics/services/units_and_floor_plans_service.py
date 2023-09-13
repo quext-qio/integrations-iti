@@ -1,6 +1,5 @@
 import json
 from abstract.service_interface import ServiceInterface
-from datetime import datetime
 from abstract.service_interface import ServiceInterface
 from utils.mapper.newco_mapper import NewCoMapper
 

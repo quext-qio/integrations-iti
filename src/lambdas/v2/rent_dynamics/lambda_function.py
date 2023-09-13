@@ -22,7 +22,7 @@ def lambda_handler(event, context):
     
     # Validate body and path parameters
     all_params = {**path_parameters, **body}
-    is_valid, input_errors = SchemaRequestPost(all_params, action).is_valid()
+    is_valid, input_errors = SchemaRequestPost(all_params, action.lower()).is_valid()
     if not is_valid:
         return {
             "statusCode": "400",
@@ -45,7 +45,6 @@ def lambda_handler(event, context):
     
     code, ips_response =  IPSController().get_platform_data(communityUUID, customerUUID, purpose)
     ips_response = json.loads(ips_response.text)
-    print(ips_response)
 
     if "platformData" not in ips_response:
         return {

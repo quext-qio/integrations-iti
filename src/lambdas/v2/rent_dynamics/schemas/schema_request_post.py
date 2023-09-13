@@ -29,7 +29,7 @@ community_schema ={
             }
 
 schemas = {
-    'unitsAndFloorPlans': {
+    'unitsandfloorplans': {
         "customerUUID": customer_schema,
         "action": action_schema,
         "communityUUID": community_schema
@@ -77,7 +77,7 @@ schemas = {
                 'empty': False,
             },
     },
-    'customerEvents': {
+    'customerevents': {
         "customerUUID": customer_schema,
         "action": action_schema,
         "communityUUID": community_schema,
@@ -96,7 +96,7 @@ schemas = {
                 'meta': {'regex': "The move_out_date is not valid"}
             },
     },
-    'chargeCodes': {
+    'chargecodes': {
         "customerUUID": customer_schema,
         "action": action_schema,
         "communityUUID": community_schema
