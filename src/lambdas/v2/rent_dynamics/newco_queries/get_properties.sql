@@ -9,4 +9,4 @@ select
 from 
   properties 
 where 
-  id = %s
+  id = %(community_id)s

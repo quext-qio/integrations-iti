@@ -16,6 +16,26 @@ class NewCoMapper:
     db_object = QueryController() 
 
     @staticmethod
+    def get_properties_RentDynamics(params: dict):
+        try:
+            with closing(db_object.get_db_session()) as session:
+                cursor = session.cursor(dictionary=True)
+                path = "newco_queries/get_properties.sql"
+                output = db_object.read_query(path, "rent_dynamics", "properties", 0.0)
+                cursor.execute(output, params)
+                
+                # Fetch all rows
+                result = cursor.fetchall()
+                
+                data = RentDynamicsMapper.setPropertyDetails(result)
+
+                return True, data
+        
+        except Exception as e:
+            print(f"An error occurred while retrieving data of get charge codes from the database: {str(e)}")
+            return False, [{"message":f"An error occurred while retrieving data of get charge codes from the database: {str(e)}"}]
+        
+    @staticmethod
     def get_chargeCodes_RentDynamics(params: dict):
         try:
             with closing(db_object.get_db_session()) as session:
