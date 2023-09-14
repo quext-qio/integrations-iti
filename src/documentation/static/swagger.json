@@ -488,8 +488,8 @@
         }
       }
     },
-    "/api/v2/salesforce/liftoff":{
-      "get":{
+    "/api/v2/salesforce/liftoff": {
+      "get": {
         "tags": [
           "Salesforce"
         ],
@@ -506,6 +506,48 @@
           "application/json"
         ],
         "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        }
+      }
+    },
+    "/api/v2/jira/qoops": {
+      "post": {
+        "tags": [
+          "Jira"
+        ],
+        "description": "Endpoint to report issues to Jira",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Qoops Data",
+            "in": "body",
+            "description": "Information of the issue to be reported",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JiraQoopsBody"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful operation"
@@ -699,6 +741,56 @@
         "end_date": {
           "type": "string",
           "format": "date"
+        }
+      }
+    },
+    "JiraQoopsBody": {
+      "type": "object",
+      "properties": {
+        "project_name": {
+          "type": "string"
+        },
+        "ticket_summary": {
+          "type": "string"
+        },
+        "ticket_description": {
+          "type": "string"
+        },
+        "issue_type": {
+          "type": "string",
+          "enum": [
+            "Bug",
+            "Task"
+          ]
+        },
+        "priority": {
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "list_issues": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "testing": {
+          "type": "string",
+          "enum": [
+            "True",
+            "False"
+          ]
         }
       }
     }
