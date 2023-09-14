@@ -25,7 +25,7 @@ class CommunitiesStack(NestedStack):
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
             timeout=timeout,
-            code=lambda_.Code.from_asset("./src/lambdas/communities"),
+            code=lambda_.Code.from_asset("./src/lambdas/v1/communities"),
             handler="lambda_function.lambda_handler",
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-auth-get-communities",
