@@ -88,7 +88,7 @@ class PayladHandler:
  
     def get_agent_info(self, source, ips):
         if ips["platformData"]["platform"] == "Spherexx":
-            agent_id, first_name, last_name = "", "Leasing","Lori"
+            agent_id, first_name, last_name = "", "",""
         agent_id, last_name = "", ""
         if source == "ws":
             last_name = GuestcardsConstants.WEBSITES
