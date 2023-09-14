@@ -28,7 +28,7 @@ class SalesforceStack(NestedStack):
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_8,
             timeout=timeout,
-            code=lambda_.Code.from_asset("./src/lambdas/salesforce"),
+            code=lambda_.Code.from_asset("./src/lambdas/v2/salesforce"),
             handler="lambda_function.lambda_handler",
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-salesforce-dynamic-lambda-function",
