@@ -103,7 +103,7 @@ class QoopsStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Add the API GW Integration to the API GW Resource
-        api.add_method(
+        api.add_resource("qoops").add_method(
             "POST",
             api_resource_sqs_integration,
             method_responses=[method_response]

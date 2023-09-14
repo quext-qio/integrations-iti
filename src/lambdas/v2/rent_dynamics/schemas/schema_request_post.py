@@ -34,6 +34,11 @@ schemas = {
         "action": action_schema,
         "communityUUID": community_schema
     },
+    'properties': {
+        "customerUUID": customer_schema,
+        "action": action_schema,
+        "communityUUID": community_schema
+    },
     'residents': {
         "customerUUID": customer_schema,
         "action": action_schema,
