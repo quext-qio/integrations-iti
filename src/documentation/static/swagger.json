@@ -26,7 +26,7 @@
     "/api/v1/placepay/new-account": {
       "post": {
         "tags": [
-          "Placepay"
+          "PlacePay"
         ],
         "description": "Create new account",
         "consumes": [
@@ -51,10 +51,10 @@
             "description": "Account created"
           },
           "400": {
-            "description": "Bad request data"
+            "description": "Bad Request"
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal Server Error"
           }
         }
       }
@@ -62,7 +62,7 @@
     "/api/v1/placepay/token": {
       "get": {
         "tags": [
-          "Placepay"
+          "PlacePay"
         ],
         "description": "Create new access token related to an account",
         "consumes": [
@@ -85,10 +85,71 @@
             "description": "Successful operation"
           },
           "400": {
-            "description": "Bad request data"
+            "description": "Bad Request"
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/engrain/status": {
+      "get": {
+        "tags": [
+          "Engrain"
+        ],
+        "description": "Get status of Engrain Job",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/engrain/job": {
+      "patch": {
+        "tags": [
+          "Engrain"
+        ],
+        "description": "In all environments, updating is allowed using this endpoint, but by default, all jobs are inactive. Only the job in the production environment will be active.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Run Job Permission",
+            "in": "body",
+            "description": "The 'run' value will be sent as a string, either 'True' or 'False,' to update the job's permission to run or not.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EngrainJobPermission"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -117,7 +178,7 @@
             "description": "JSON data of prospect to be created",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Prospect"
+              "$ref": "#/definitions/GuestcardProspect"
             }
           }
         ],
@@ -132,7 +193,331 @@
             "description": "Unauthorized"
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        }
+      }
+    },
+    "/api/v2/rentdynamics/{customerUUID}/chargeCodes/{communityUUID}": {
+      "post": {
+        "tags": [
+          "RentDynamics"
+        ],
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "description": "Rent Dynamics API",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "customerUUID",
+            "in": "path",
+            "description": "UUID for valid customer in Rent Dynamics",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "communityUUID",
+            "in": "path",
+            "description": "UUID for valid community in Rent Dynamics",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        }
+      }
+    },
+    "/api/v2/rentdynamics/{customerUUID}/residents/{communityUUID}": {
+      "post": {
+        "tags": [
+          "RentDynamics"
+        ],
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "description": "Rent Dynamics API",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "customerUUID",
+            "in": "path",
+            "description": "UUID for valid customer in Rent Dynamics",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "communityUUID",
+            "in": "path",
+            "description": "UUID for valid community in Rent Dynamics",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Resident Body",
+            "in": "body",
+            "description": "Body with dates range to get residents information (move_in_date, move_out_date)",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RentDynamicsResidentBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        }
+      }
+    },
+    "/api/v2/rentdynamics/{customerUUID}/transactions/{communityUUID}": {
+      "post": {
+        "tags": [
+          "RentDynamics"
+        ],
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "description": "Rent Dynamics API",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "customerUUID",
+            "in": "path",
+            "description": "UUID for valid customer in Rent Dynamics",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "communityUUID",
+            "in": "path",
+            "description": "UUID for valid community in Rent Dynamics",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Transactions Body",
+            "in": "body",
+            "description": "Body with dates range to get transactions information by resident id (start_date, end_date, resident_id)",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RentDynamicsTransactionsBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        }
+      }
+    },
+    "/api/v2/rentdynamics/{customerUUID}/customerEvents/{communityUUID}": {
+      "post": {
+        "tags": [
+          "RentDynamics"
+        ],
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "description": "Rent Dynamics API",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "customerUUID",
+            "in": "path",
+            "description": "UUID for valid customer in Rent Dynamics",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "communityUUID",
+            "in": "path",
+            "description": "UUID for valid community in Rent Dynamics",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Customer Events Body",
+            "in": "body",
+            "description": "Body with dates range to get customer events information (start_date, end_date)",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RentDynamicsCustomerEventsBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        }
+      }
+    },
+    "/api/v2/rentdynamics/{customerUUID}/unitsAndFloorPlans/{communityUUID}": {
+      "post": {
+        "tags": [
+          "RentDynamics"
+        ],
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "description": "Rent Dynamics API",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "customerUUID",
+            "in": "path",
+            "description": "UUID for valid customer in Rent Dynamics",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "communityUUID",
+            "in": "path",
+            "description": "UUID for valid community in Rent Dynamics",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        }
+      }
+    },
+    "/api/v2/salesforce/liftoff":{
+      "get":{
+        "tags": [
+          "Salesforce"
+        ],
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "description": "Salesforce API",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
           },
           "502": {
             "description": "Bad Gateway"
@@ -159,7 +544,19 @@
         }
       }
     },
-    "Prospect": {
+    "EngrainJobPermission": {
+      "type": "object",
+      "properties": {
+        "run": {
+          "type": "string",
+          "enum": [
+            "False",
+            "True"
+          ]
+        }
+      }
+    },
+    "GuestcardProspect": {
       "type": "object",
       "properties": {
         "platformData": {
@@ -175,7 +572,7 @@
         },
         "guest": {
           "type": "object",
-          "properties":{
+          "properties": {
             "first_name": {
               "type": "string"
             },
@@ -187,7 +584,7 @@
             },
             "email": {
               "type": "string"
-            } 
+            }
           }
         },
         "guestComment": {
@@ -260,6 +657,48 @@
               "format": "date"
             }
           }
+        }
+      }
+    },
+    "RentDynamicsResidentBody": {
+      "type": "object",
+      "properties": {
+        "move_in_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "move_out_date": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "RentDynamicsTransactionsBody": {
+      "type": "object",
+      "properties": {
+        "start_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "resident_id": {
+          "type": "string"
+        }
+      }
+    },
+    "RentDynamicsCustomerEventsBody": {
+      "type": "object",
+      "properties": {
+        "start_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date"
         }
       }
     }
