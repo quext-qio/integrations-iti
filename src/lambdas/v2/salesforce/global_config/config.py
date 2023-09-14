@@ -1,5 +1,4 @@
 import os
-import json
 
 salesforce_config = {
     'username': os.environ['SALESFORCE_USERNAME'],

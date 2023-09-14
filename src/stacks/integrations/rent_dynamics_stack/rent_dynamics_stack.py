@@ -7,34 +7,36 @@ from aws_cdk import (
 from constructs import Construct
 from src.utils.enums.app_environment import AppEnvironment
 
-class ConserviceStack(NestedStack):
+class RentDynamicsStack(NestedStack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict, app_environment: AppEnvironment, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
-        # Constants
+        # Guestcards
         timeout=Duration.seconds(900)
         allow_methods=['OPTIONS', 'POST']
 
         # --------------------------------------------------------------------
-        # Create lambda function instance for (# POST /conservice)
+        # Create lambda function instance for (# POST /general/rent-dynamics)
         lambda_function = lambda_.Function(
             self, 
-            f"{app_environment.get_stage_name()}-conservice-lambda-function",
-            description="Handles the Conservice endpoint requests", 
+            f"{app_environment.get_stage_name()}-rent-dynamics-lambda-function",
+            description="This Lambda is responsible of rent-dynamics endpoints", 
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
             timeout=timeout,
-            code=lambda_.Code.from_asset("./src/lambdas/v1/conservice"),
+            code=lambda_.Code.from_asset("./src/lambdas/v2/rent_dynamics"),
             handler="lambda_function.lambda_handler",
             layers=layers,
-            function_name=f"{app_environment.get_stage_name()}-conservice-lambda-function",
+            function_name=f"{app_environment.get_stage_name()}-rent-dynamics-lambda-function",
         )
 
-        # -------------------------------------------------------------------- 
-        # Add a resource to the base API and configure CORS options for the resource 
-        api = api.add_resource("conservice",
+        # --------------------------------------------------------------------
+        # Add base resource to API Gateway
+        # Resource to call rentdynamics endpoints (POST)
+        post_endpoint = api.add_resource("{customerUUID}").add_resource("{action}").add_resource(
+            "{communityUUID}",
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
                 allow_origins=apigateway_.Cors.ALL_ORIGINS
@@ -44,7 +46,7 @@ class ConserviceStack(NestedStack):
         # --------------------------------------------------------------------
         # Create a Lambda integration instance
         # POST
-        post_endpoint_lambda_integration = apigateway_.LambdaIntegration(
+        endpoint_lambda_integration = apigateway_.LambdaIntegration(
             lambda_function,
             proxy=True,
             integration_responses=[
@@ -54,16 +56,21 @@ class ConserviceStack(NestedStack):
                     response_parameters={
                         'method.response.header.Access-Control-Allow-Origin': "'*'"
                     }
-                )
+                ),
             ],
         )
 
+
         # --------------------------------------------------------------------
         # Add a POST method to endpoint
-        api.add_method(
+        post_endpoint.add_method(
             'POST', 
-            post_endpoint_lambda_integration,
-            request_parameters={},
+            endpoint_lambda_integration,
+            request_parameters={
+                'method.request.path.customerUUID': True,
+                'method.request.path.action': True,
+                'method.request.path.communityUUID': False,
+            },
             method_responses=[
                 apigateway_.MethodResponse(
                     status_code="200",
@@ -73,3 +80,5 @@ class ConserviceStack(NestedStack):
                 )
             ],
         )
+
+        

@@ -25,7 +25,7 @@ def lambda_handler(event, context):
                 ticket_description = input['ticket_description']
                 list_issues = input['list_issues']
                 priority = input['priority']
-                testing = True if "testing" in input and "true" == input['testing'] else False
+                testing = True if "testing" in input and "True" == input['testing'] else False
                 print("JIRA Parameters ready")
 
                 # Create instance of jira class
