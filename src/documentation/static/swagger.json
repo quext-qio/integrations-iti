@@ -9,7 +9,7 @@
       "url": "https://onequext.com/"
     }
   },
-  "host": "integrations-api.stage.quext.io",
+  "host": "integrations-api.dev.quext.io",
   "basePath": "/",
   "schemes": [
     "https"
@@ -211,7 +211,7 @@
             "APIKeyHeader": []
           }
         ],
-        "description": "Rent Dynamics API",
+        "description": "The 'chargeCodes' action retrieves property fee and charge details from the NewCo database.",
         "consumes": [
           "application/json"
         ],
@@ -263,7 +263,7 @@
             "APIKeyHeader": []
           }
         ],
-        "description": "Rent Dynamics API",
+        "description": "The 'residents' action, retrieves distinct resident details from the NewCo database",
         "consumes": [
           "application/json"
         ],
@@ -324,7 +324,7 @@
             "APIKeyHeader": []
           }
         ],
-        "description": "Rent Dynamics API",
+        "description": "The 'transactions' action, retrieves transaction details from the NewCo database, including ID, date, amount, type, notes, and charge code (if available)",
         "consumes": [
           "application/json"
         ],
@@ -385,7 +385,7 @@
             "APIKeyHeader": []
           }
         ],
-        "description": "Rent Dynamics API",
+        "description": "The 'customerEvents' action retrieves applicant-related events from the NewCo property management system, including event type, ID, creation date, and event details.",
         "consumes": [
           "application/json"
         ],
@@ -446,7 +446,7 @@
             "APIKeyHeader": []
           }
         ],
-        "description": "Rent Dynamics API",
+        "description": "The 'unitsAndFloorPlans' action retrieves information related to units and floor plans from the NewCo property management system",
         "consumes": [
           "application/json"
         ],
@@ -557,6 +557,146 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        }
+      }
+    },
+    "/api/v1/general/communities":{
+      "post": {
+        "tags": [
+          "General"
+        ],
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "description": "Get community by customer UUID",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "community Body",
+            "in": "body",
+            "description": "Schema with customer UUID",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GeneralCommunitiesBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        }
+      }
+    },
+    "/api/v1/general/customers": {
+      "post":{
+        "tags": [
+          "General"
+        ],
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "description": "Get all customers",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        }
+      }
+    },
+    "/api/v2/tour/tour-availability": {
+      "post": {
+        "tags": [
+          "Tour"
+        ],
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "description": "Get tour availability",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Tour Availability Body",
+            "in": "body",
+            "description": "Schema with platformData and timeData",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TourAvailabilityBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "500": {
             "description": "Internal Server Error"
@@ -791,6 +931,43 @@
             "True",
             "False"
           ]
+        }
+      }
+    },
+    "GeneralCommunitiesBody": {
+      "type": "object",
+      "properties": {
+        "customerUUID": {
+          "type": "string"
+        }
+      }
+    },
+    "TourAvailabilityBody": {
+      "type": "object",
+      "properties":{
+        "platformData": {
+          "type": "object",
+          "properties": {
+            "customerUUID": {
+              "type": "string"
+            },
+            "communityUUID": {
+              "type": "string"
+            }
+          }
+        },
+        "timeData": {
+          "type": "object",
+          "properties": {
+            "fromDate": {
+              "type": "string",
+              "format": "date"
+            },
+            "toDate": {
+              "type": "string",
+              "format": "date"
+            }
+          }
         }
       }
     }

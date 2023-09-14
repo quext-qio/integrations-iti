@@ -150,6 +150,7 @@ class RootStack(Stack):
 
         # --------------------------------------------------------------------
         # Transunion endpoints
+        # TODO: Create a swagger for this endpoint
         # --------------------------------------------------------------------
         TransUnionStack(
             self, 
@@ -166,6 +167,7 @@ class RootStack(Stack):
 
         # --------------------------------------------------------------------
         # Units endpoints
+        # TODO: Create a swagger for this endpoint
         # --------------------------------------------------------------------
         UnitsStack(
             self, 
@@ -217,6 +219,7 @@ class RootStack(Stack):
 
         # --------------------------------------------------------------------
         # Residents endpoints
+        # TODO: Create a swagger for this endpoint
         # --------------------------------------------------------------------
         ResidentsStack(
             self, 
@@ -269,6 +272,7 @@ class RootStack(Stack):
 
         # --------------------------------------------------------------------
         # Conservice endpoints
+        # TODO: Create a swagger for this endpoint
         # --------------------------------------------------------------------
         ConserviceStack(
             self, 
@@ -320,6 +324,7 @@ class RootStack(Stack):
 
         # --------------------------------------------------------------------
         # One time link enpoint
+        # TODO: Create a swagger for this endpoint
         # --------------------------------------------------------------------
         OneTimeLinkStack(
             self,

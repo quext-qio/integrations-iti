@@ -26,7 +26,7 @@ class TourAvailabilityStack(NestedStack):
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
             timeout=timeout,
-            code=lambda_.Code.from_asset("./src/lambdas/tour_availability"),
+            code=lambda_.Code.from_asset("./src/lambdas/v2/tour_availability"),
             handler="lambda_function.lambda_handler",
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-tour-availability-lambda-function",
