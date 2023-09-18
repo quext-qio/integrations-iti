@@ -1,4 +1,4 @@
-import json
+import json, os
 import requests
 from constants.Constants import *
 
@@ -25,7 +25,7 @@ def lambda_handler(event, context):
     fragment = event[QUERY_STRING_PARAM][FRAGMENT]
     
     # Define the URL of the external service
-    base_url = HOST
+    base_url = os.environ[HOST]
     endpoint = PATH.format(fragment=fragment)
     url = f"{base_url}{endpoint}"
     
