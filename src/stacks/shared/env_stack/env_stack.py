@@ -183,6 +183,7 @@ class EnvStack(NestedStack):
             },
             "onetimelink": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "IPS_HOST": all_params["IPS_HOST"],
             },
             "rentdynamics": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
