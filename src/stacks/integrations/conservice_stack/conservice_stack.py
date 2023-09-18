@@ -26,7 +26,7 @@ class ConserviceStack(NestedStack):
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
             timeout=timeout,
-            code=lambda_.Code.from_asset("./src/lambdas/v1/conservice"),
+            code=lambda_.Code.from_asset("./src/lambdas/v2/conservice"),
             handler="lambda_function.lambda_handler",
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-conservice-lambda-function",
