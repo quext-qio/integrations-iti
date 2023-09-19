@@ -2,14 +2,14 @@ import json
 from abstract.service_interface import ServiceInterface
 
 class InvalidActionService(ServiceInterface):
-    def get_data(self, body: dict):
+    def get_data(self, path_parameters: dict, body: dict):
         return {
             'statusCode': "400",
             'body': json.dumps({
                 'data': {},
                 'errors': [
                     {
-                        'message': 'Invalid Parameter value'
+                        'message': 'Invalid action'
                     }
                 ]
             }),

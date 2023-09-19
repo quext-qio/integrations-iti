@@ -1,35 +1,27 @@
 from abstract.service_interface import ServiceInterface
 from utils.shared.service_enum import ServiceType
-from services.charge_codes_service import ChargeCodesService
-from services.add_charges_service import AddChargesService
-from services.lease_charges import LeaseChargesService
-from services.tenants import TenantsService 
+from services.charges_code_service import ChargesCodeService
 from services.properties_service import PropertiesService
-from services.recurring_transactions_service import RecurringTransactionsService
+from services.add_charges_service import AddChargesService
+from services.urls_date_required_services import URLDateRequiredServices
 from services.invalid_action_service import InvalidActionService
 
 class ServiceFactory:
     @staticmethod
     def get_service(service_type_name: str) -> ServiceInterface:
         # Validate service type using enum constructor
-        try:
-            service_type = ServiceType(service_type_name.lower())
-        except Exception as e:
-            service_type = ServiceType.INVALID_ACTION
-            
+       
+        service_type = service_type_name.lower()
+       
         # Return service
-        if service_type == ServiceType.CHARGE_CODES:
-            return ChargeCodesService()
-        elif service_type == ServiceType.LEASE_CHARGES:
-            return LeaseChargesService()
-        elif service_type == ServiceType.TENANTS:
-            return TenantsService()
-        elif service_type == ServiceType.ADD_CHARGES:
+        if service_type == ServiceType.CHARGES_ENDPOINTS.value:
+            return ChargesCodeService()
+        elif service_type == ServiceType.ADD_CHARGES.value:
             return AddChargesService()
-        elif service_type == ServiceType.GET_PROPERTIES:
+        elif service_type == ServiceType.PROPERTIES.value:
             return PropertiesService()
-        elif service_type == ServiceType.GET_RECURRING_TRANSACTIONS:
-            return RecurringTransactionsService()
+        elif service_type in ServiceType.URLS_DATE_REQUIRED.value:
+            return URLDateRequiredServices()
         else:
             return InvalidActionService()
         

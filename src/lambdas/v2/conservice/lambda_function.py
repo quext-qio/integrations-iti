@@ -35,5 +35,6 @@ def lambda_handler(event, context):
         }
     
     
-    # Factory based on action
+    #Get data from conservice outgoing
+    
     return ServiceFactory.get_service(parameter).get_data(body)

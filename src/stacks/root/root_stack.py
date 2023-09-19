@@ -277,7 +277,7 @@ class RootStack(Stack):
         ConserviceStack(
             self, 
             f"{app_env.get_stage_name()}-{server_name}-conservice-stack", 
-            api=general_resource_v1, 
+            api=general_resource_v2, 
             app_environment=app_env,
             description="Stack for conservice endpoints",
             environment=environment["conservice"],

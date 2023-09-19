@@ -52,7 +52,7 @@ schemas = {
         
     },
     'get-properties': {
-       "Parameter": parameter_schema,
+       "Parameter": parameter_schema
     },
     'add-charges': {
         "Parameter": parameter_schema,

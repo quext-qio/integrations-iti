@@ -2,9 +2,10 @@ import json, requests
 from abstract.service_interface import ServiceInterface
 from constants.constants import Constants
 
-class PropertiesService(ServiceInterface):
+class ChargesCodeService(ServiceInterface):
     def get_data(self, body: dict):
-        conservice_outgoing = Constants.HOST + Constants.PATH
+        parameter = body['Parameter']
+        conservice_outgoing = f'{Constants.HOST}{Constants.PATH}/{parameter}'
         headers = {
             'Content-Type': 'application/json'
         }
@@ -12,9 +13,7 @@ class PropertiesService(ServiceInterface):
         try:
             # Call conservice outgoing
             response = requests.get(conservice_outgoing, headers=headers, params= body)
-            response_data = {
-                    "properties": [self.exclude_keys(item) for item in json.loads(response.text)["properties"]]
-                }
+            response_data = json.loads(response.text)
 
        
             return {
@@ -48,11 +47,3 @@ class PropertiesService(ServiceInterface):
                 'isBase64Encoded': False  
             }
     
-
-                
-    def exclude_keys(self, d, keys=['methods']):
-        """
-        Remove the method keys from the input payload 
-        and return the dict
-        """
-        return {x: d[x] for x in d if x not in keys}
