@@ -13,13 +13,15 @@ class URLDateRequiredServices(ServiceInterface):
         }
 
         try:
-            start_date = body["start_date"] if body["start_date"] else self.calculate_start_date()
-            body['start_date'] = start_date
+            # Calculate the start_date as no more than 3 months ago
+            if "start_date" in body:
+                start_date = body["start_date"] if body["start_date"] else self.calculate_start_date()
+                body['start_date'] = start_date
 
             # Call conservice outgoing
             response = requests.get(conservice_outgoing, headers=headers, params= body)
 
-                # Calculate the start_date as no more than 3 months ago
+               
             if response.status_code == Constants.HTTP_GOOD_RESPONSE_CODE:
                 data = json.loads(response.text)
                 tenants = parameter == "tenants"
