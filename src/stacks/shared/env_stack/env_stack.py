@@ -168,6 +168,7 @@ class EnvStack(NestedStack):
             "conservice": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST"],
+                "IPS_HOST": all_params["IPS_HOST"],
             },
             "salesforce": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
