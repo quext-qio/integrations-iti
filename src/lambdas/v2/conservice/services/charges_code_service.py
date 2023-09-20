@@ -4,7 +4,7 @@ from constants.constants import Constants
 
 class ChargesCodeService(ServiceInterface):
     def get_data(self, body: dict):
-        parameter = body['Parameter']
+        parameter = body[Constants.PARAMETER]
         conservice_outgoing = f'{Constants.HOST}{Constants.PATH}/{parameter}'
         headers = {
             'Content-Type': 'application/json'
@@ -17,7 +17,7 @@ class ChargesCodeService(ServiceInterface):
 
        
             return {
-                'statusCode': "200",
+                'statusCode': Constants.HTTP_GOOD_RESPONSE_CODE,
                 'body': json.dumps({
                     'data': response_data,
                     'errors': {}
@@ -31,7 +31,7 @@ class ChargesCodeService(ServiceInterface):
 
         except Exception as e:
             return {
-                'statusCode': "400",
+                'statusCode': Constants.HTTP_BAD_RESPONSE_CODE,
                 'body': json.dumps({
                     'data': {},
                     'errors': [

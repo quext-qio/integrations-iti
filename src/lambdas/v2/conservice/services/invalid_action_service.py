@@ -1,10 +1,11 @@
 import json
 from abstract.service_interface import ServiceInterface
+from constants.constants import Constants
 
 class InvalidActionService(ServiceInterface):
     def get_data(self, path_parameters: dict, body: dict):
         return {
-            'statusCode': "400",
+            'statusCode': Constants.HTTP_BAD_RESPONSE_CODE,
             'body': json.dumps({
                 'data': {},
                 'errors': [

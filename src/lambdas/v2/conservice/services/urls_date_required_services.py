@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 
 class URLDateRequiredServices(ServiceInterface):
     def get_data(self, body: dict):
-        parameter = body['Parameter']
+        parameter = body[Constants.PARAMETER]
         conservice_outgoing = f"{Constants.HOST}{Constants.PATH}/{parameter}"
         headers = {
             'Content-Type': 'application/json'
@@ -14,9 +14,9 @@ class URLDateRequiredServices(ServiceInterface):
 
         try:
             # Calculate the start_date as no more than 3 months ago
-            if "start_date" in body:
-                start_date = body["start_date"] if body["start_date"] else self.calculate_start_date()
-                body['start_date'] = start_date
+            if Constants.START_DATE in body:
+                start_date = body[Constants.START_DATE] if body[Constants.START_DATE] else self.calculate_start_date()
+                body[Constants.START_DATE] = start_date
 
             # Call conservice outgoing
             response = requests.get(conservice_outgoing, headers=headers, params= body)
@@ -24,17 +24,17 @@ class URLDateRequiredServices(ServiceInterface):
                
             if response.status_code == Constants.HTTP_GOOD_RESPONSE_CODE:
                 data = json.loads(response.text)
-                tenants = parameter == "tenants"
+                tenants = parameter == Constants.TENANTS
                 filtered_data = self.filter_current_residents(data, tenants)
                 
                 # Replace the array data with the filtered results
                 if tenants:
-                    data["leases"] = filtered_data
+                    data[Constants.LEASES] = filtered_data
                 else:
-                    data["charges"] = filtered_data
+                    data[Constants.CHARGES] = filtered_data
 
                 return {
-                    'statusCode': "200",
+                    'statusCode': Constants.HTTP_GOOD_RESPONSE_CODE,
                     'body': json.dumps({
                         'data': data,
                         'errors': {}
@@ -66,7 +66,7 @@ class URLDateRequiredServices(ServiceInterface):
             
         except Exception as e:
             return {
-                'statusCode': "400",
+                'statusCode': Constants.HTTP_BAD_RESPONSE_CODE,
                 'body': json.dumps({
                     'data': {},
                     'errors': [

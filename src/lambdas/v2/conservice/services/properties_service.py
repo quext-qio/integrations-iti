@@ -13,12 +13,12 @@ class PropertiesService(ServiceInterface):
             # Call conservice outgoing
             response = requests.get(conservice_outgoing, headers=headers, params= body)
             response_data = {
-                    "properties": [self.exclude_keys(item) for item in json.loads(response.text)["properties"]]
+                    "properties": [self.exclude_keys(item) for item in json.loads(response.text)[Constants.PROPERTIES]]
                 }
 
        
             return {
-                'statusCode': "200",
+                'statusCode': Constants.HTTP_GOOD_RESPONSE_CODE,
                 'body': json.dumps({
                     'data': response_data,
                     'errors': {}
@@ -32,7 +32,7 @@ class PropertiesService(ServiceInterface):
 
         except Exception as e:
             return {
-                'statusCode': "400",
+                'statusCode': Constants.HTTP_BAD_RESPONSE_CODE,
                 'body': json.dumps({
                     'data': {},
                     'errors': [
@@ -50,7 +50,7 @@ class PropertiesService(ServiceInterface):
     
 
                 
-    def exclude_keys(self, d, keys=['methods']):
+    def exclude_keys(self, d, keys=[Constants.METHODS]):
         """
         Remove the method keys from the input payload 
         and return the dict

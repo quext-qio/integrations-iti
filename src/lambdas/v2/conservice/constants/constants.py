@@ -13,3 +13,11 @@ class Constants:
     MISSING_CHARGES = 'missing charges'
     PROPERTIES = 'properties'
     METHODS = 'methods'
+    CHARGES = 'charges'
+    PARAMETER = 'Parameter'
+    START_DATE = 'start_date'
+    TENANTS = 'tenants'
+    LEASES = 'leases'
+    CHARGES = 'charges'
+    BODY = 'body'
+
