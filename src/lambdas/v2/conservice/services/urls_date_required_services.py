@@ -90,8 +90,8 @@ class URLDateRequiredServices(ServiceInterface):
         return start_date
 
     def filter_current_residents(self, data, tenants):
-        residents_key = "leases" if tenants else "charges"
-        filtered_residents = [resident for resident in data[residents_key] if resident['resident-status'] == 'current']
+        residents_key = Constants.LEASES if tenants else Constants.CHARGES
+        filtered_residents = [resident for resident in data[residents_key] if resident[Constants.RESIDENT_STATUS] == Constants.CURRENT]
         return filtered_residents
 
   
