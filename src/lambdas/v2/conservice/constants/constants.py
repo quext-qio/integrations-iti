@@ -20,4 +20,6 @@ class Constants:
     LEASES = 'leases'
     CHARGES = 'charges'
     BODY = 'body'
+    RESIDENT_STATUS = 'resident-status'
+    CURRENT = "current"
 
