@@ -164,6 +164,7 @@ class EnvStack(NestedStack):
                 "DH_REALPAGE_ILM_APIKEY": all_params["DH_REALPAGE_ILM_APIKEY"],
                 "WS_REALPAGE_L2L_APIKEY": all_params["WS_REALPAGE_L2L_APIKEY"],
                 "DH_REALPAGE_L2L_APIKEY": all_params["DH_REALPAGE_L2L_APIKEY"],
+                "LICENSE_KEY" : all_params["LICENSE_KEY"]
             },
             "conservice": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],

@@ -5,7 +5,8 @@ class RealpageConstants:
     LEASING_AGENT_ID = "76832549"
     START_TIME = "T08:00:00"
     END_TIME = "T17:00:00"
-    DHWSDL = ""
+    DHWSDL = "https://gateway.rpx.realpage.com/rpxgateway/partner/DigitalHuman/DigitalHuman.svc/GetWSDL"
+    ILMWSDL = "https://gateway.rpx.realpage.com/rpxgateway/partner/Websites-ILM/Websites-ILM.svc/GetWSDL"
     REALPAGE = "RealPage"
     AUTHDTO = 'AuthDTO'
     PMCID = 'pmcid'
