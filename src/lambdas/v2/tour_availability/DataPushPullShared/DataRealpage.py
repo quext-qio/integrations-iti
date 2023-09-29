@@ -8,13 +8,13 @@ import suds
 
 class DataRealpage:
         
-    def get_tour_availability(self, partners, event, ips_response):
+    def get_tour_availability(self, ips_response, input):
         """
         Get tour availability from Realpage
         """
         
         logging.info("Availability: RealPage")  
-        response_list = self.get_available_times(partners, event, ips_response)
+        response_list = self.get_available_times(input, ips_response)
         if len(response_list) > 0:
             return response_list, []
 
@@ -23,50 +23,23 @@ class DataRealpage:
             
         return [], {"message": "Please contact the leasing office by phone to schedule a tour."}
         
-    def get_available_times(self, partners , payload, ips_response):
+    def get_available_times(self, payload, ips_response):
         """
         Returns the available times based on the start date and end date
         """
-        outgoingIPSPartnerChannelResponse = partners
         partner = ips_response["platformData"]["platform"]  
-        ips_partner_response = outgoingIPSPartnerChannelResponse
-        partner_uuid = ips_partner_response[RealpageConstants.CONTENT][0]['uuid'] and len(
-            ips_partner_response.get(RealpageConstants.CONTENT)) > 0 if "content" in ips_partner_response else ""
-
-        api_creds = ""
-        outgoingIPSSecurityResponse = ""
-        pmcid = ""
-        siteid = ""
-        licensekey = ""
+     
+        licensekey = ilm_config[f"dh_realpage_onsite_apikey"]
         client = None
-        if partner_uuid != "":  
-                host = os.environ['ACL_HOST']
-                outgoingIPSSecurityResponse = requests.get(f'{host}/api/partners/security/{partner_uuid}?redacted=off')
-                security_response = json.loads(outgoingIPSSecurityResponse.text)
-
-                #CREATING CLIENT CONNECTION WITH API CREDENTIALS RETURNED FROM SECURITY RESPONSE
-                if len(security_response[RealpageConstants.CONTENT]) > 0:
-                    for i in security_response[RealpageConstants.CONTENT]:
-                        if i[RealpageConstants.PARTNER_NAME] == RealpageConstants.REALPAGE:
-                            api_creds = i[RealpageConstants.SECURITY][RealpageConstants.CREDENTIALS][0][RealpageConstants.BODY][RealpageConstants.DH] # getting api credentials
-                            imp = suds.xsd.doctor.Import(RealpageConstants.IMPORT_HOST, location=RealpageConstants.IMPORT_LOCATION)
-                            imp.filter.add(RealpageConstants.XML_SOAP)
-                            doctor = suds.xsd.doctor.ImportDoctor(imp)
-                            client = suds.Client(api_creds[RealpageConstants.WSDL], doctor=doctor)  # creating client connection
-                            pmcid = api_creds[RealpageConstants.PMCID]
-                            siteid = api_creds[RealpageConstants.SITEID]
-                            licensekey = api_creds[RealpageConstants.LICENSE_KEY]
-                            break
-
-        if not client:
-            client = suds.Client(f"{ilm_config['ilm_host']}" if partner.lower() in ["realpage_ilm", "realpage_l2l"] else RealpageConstants.DHWSDL)  # creating client connection
+       
+        client = suds.Client(RealpageConstants.ILMWSDL if partner.lower() in ["realpage_ilm", "realpage_l2l"] else RealpageConstants.DHWSDL)  # creating client connection
 
         factory = client.factory
         # Preparing auth details from service request
         _auth = client.factory.create(RealpageConstants.AUTHDTO)
-        _auth.pmcid = pmcid if pmcid != "" else ips_response["platformData"]["foreign_customer_id"]
-        _auth.siteid = siteid if siteid != "" else ips_response["platformData"]["foreign_community_id"]
-        _auth.licensekey = ilm_config[f"ws_realpage_ilm_apikey"] if partner in ["realpage_ilm", "realpage_l2l"] else licensekey
+        _auth.pmcid = ips_response["platformData"]["foreign_customer_id"]
+        _auth.siteid = ips_response["platformData"]["foreign_community_id"]
+        _auth.licensekey = ilm_config[f"ws_realpage_ilm_apikey"] if partner.lower() in ["realpage_ilm", "realpage_l2l"] else licensekey
         
         date_diff = datetime.strptime(payload[RealpageConstants.TIME_DATA][RealpageConstants.TO_DATE], RealpageConstants.DAYFORMAT) - \
                     datetime.strptime(payload[RealpageConstants.TIME_DATA][RealpageConstants.FROM_DATE], RealpageConstants.DAYFORMAT)
@@ -79,7 +52,7 @@ class DataRealpage:
         
         # Set the attributes of the getappointmenttimesparam object
         getappointmenttimesparam.checkall = False
-        getappointmenttimesparam.leasingagentid = RealpageConstants.LEASING_AGENT_ID
+        getappointmenttimesparam.leasingagentid =  "0" if partner.lower() in ["realpage_ilm", "realpage_l2l"] else RealpageConstants.LEASING_AGENT_ID
         getappointmenttimesparam.startdatetime = payload[RealpageConstants.TIME_DATA][RealpageConstants.FROM_DATE] + RealpageConstants.START_TIME
         getappointmenttimesparam.enddatetime = toDate + RealpageConstants.END_TIME
         response = client.service.getagentsappointmenttimes(auth=_auth, getappointmenttimesparam=getappointmenttimesparam)
