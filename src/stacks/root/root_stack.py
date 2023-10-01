@@ -187,7 +187,6 @@ class RootStack(Stack):
 
         # --------------------------------------------------------------------
         # Communities endpoints
-        # TODO: Create a swagger for this endpoint
         # --------------------------------------------------------------------
         CommunitiesStack(
             self, 
@@ -204,7 +203,6 @@ class RootStack(Stack):
 
         # --------------------------------------------------------------------
         # Customers endpoints
-        # TODO: Create a swagger for this endpoint
         # --------------------------------------------------------------------
         CustomersStack(
             self, 
@@ -257,7 +255,6 @@ class RootStack(Stack):
 
         # --------------------------------------------------------------------
         # Tours endpoints
-        # TODO: Create a swagger for this endpoint
         # --------------------------------------------------------------------
         TourAvailabilityStack(
             self, 
