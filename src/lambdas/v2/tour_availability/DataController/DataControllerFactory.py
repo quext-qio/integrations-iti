@@ -1,4 +1,4 @@
-from .DataController import DataController
+from DataController.DataController import DataController
 from DataPushPullShared.DataFunnel import DataFunnel
 from DataPushPullShared.DataEntrata import DataEntrata
 from DataPushPullShared.DataRealpage import DataRealpage
