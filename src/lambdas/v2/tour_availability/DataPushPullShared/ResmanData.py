@@ -14,7 +14,7 @@ class DataResman:
         }
         try:
             outgoing_quext_response = requests.post(url, headers=headers, json=body)
-            return json.loads(outgoing_quext_response.text)[QuextConstants.AVAILABLE_TIMES], []
+            return json.loads(outgoing_quext_response.text)[QuextConstants.AVAILABLE_TIMES], {}
         except Exception as e:
             logging.error(f"Error Quext endpoint: {e}")
             return [], f"Error from Quext: {e}"
