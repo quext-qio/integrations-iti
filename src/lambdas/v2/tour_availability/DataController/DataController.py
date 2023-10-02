@@ -4,7 +4,7 @@ class DataController:
 
     def built_response(self, data):
         # build proper response structure for every partner
-        code = 200 if self.errors else 502
+        code = 502 if self.errors else 200
         response = { 
             "data": {   
                 "availableTimes": data   
