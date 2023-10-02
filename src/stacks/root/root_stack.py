@@ -19,6 +19,7 @@ from src.stacks.integrations.salesforce_stack.salesforce_stack import Salesforce
 from src.stacks.integrations.onetime_link_stack.onetime_link_stack import OneTimeLinkStack
 from src.stacks.integrations.rent_dynamics_stack.rent_dynamics_stack import RentDynamicsStack
 from src.stacks.integrations.qoops.qoops_stack import QoopsStack
+from src.stacks.integrations.trupay_google_stack.trupay_google_stack import TruePayGoogleStack
 
 # [RootStack] is the main [Stack] for the project
 # It is responsible for load all [NestedStack] and share resources between them
@@ -355,6 +356,22 @@ class RootStack(Stack):
                 shared_layer,
                 pip_packages_layer,
                 mysql_layer
+            ],
+        )
+
+        # --------------------------------------------------------------------
+        # TruPay Google Job
+        # --------------------------------------------------------------------
+        TruePayGoogleStack(
+            self, 
+            f"{app_env.get_stage_name()}-{server_name}-trupay-google-stack",
+            app_environment=app_env,
+            description="Stack for TruPay Google Job",
+            environment=environment["trupay-google"],
+            layers=[
+                mysql_layer,
+                pip_packages_layer,
+                shared_layer,
             ],
         )
 

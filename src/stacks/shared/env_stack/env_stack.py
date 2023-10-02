@@ -197,7 +197,10 @@ class EnvStack(NestedStack):
                 "NEWCO_DB_NAME": all_params["NEWCO_DB_NAME"],
                 "NEWCO_DB_USER": all_params["NEWCO_DB_USER"],
             },
-            
+            "trupay-google": {
+                "CURRENT_ENV": all_params["CURRENT_ENV"],
+                "ACL_HOST": all_params["ACL_HOST"],
+            },
         }
 
         self.env = environment_dict

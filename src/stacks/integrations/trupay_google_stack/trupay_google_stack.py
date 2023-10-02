@@ -10,7 +10,7 @@ from constructs import Construct
 from src.utils.enums.app_environment import AppEnvironment
 
 class TruePayGoogleStack(NestedStack):
-    def __init__(self, scope: Construct, construct_id: str, environment: dict[str, str], api: apigateway_.RestApi, layers:list, app_environment: AppEnvironment, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, environment: dict[str, str], layers:list, app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Set maximun timeout for lambda functions
