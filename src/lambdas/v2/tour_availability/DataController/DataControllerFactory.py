@@ -18,7 +18,7 @@ class DataControllerFactory:
         if "platformData" in ips_response and "platform" in ips_response["platformData"]:
             partner = ips_response["platformData"]["platform"]
         elif code != 200:
-             return  code, { "errors": [ { "message": ips_response } ] }
+             return  code, { "error": [ { "message": ips_response } ] }
         
 
         dict1 = input["timeData"]

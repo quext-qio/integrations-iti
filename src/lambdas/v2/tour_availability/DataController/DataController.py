@@ -9,6 +9,6 @@ class DataController:
             "data": {   
                 "availableTimes": data   
             },  
-            "errors": self.errors    
+            "error": self.errors    
         }
         return code, response
