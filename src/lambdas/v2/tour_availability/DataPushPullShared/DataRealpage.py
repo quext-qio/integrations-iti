@@ -1,5 +1,4 @@
-import os
-import datetime, json, logging, requests
+import datetime, logging
 from datetime import  datetime, timedelta
 from Utils.Constants.RealpageConstants import RealpageConstants
 from configuration.realpage_config import ilm_config
@@ -16,7 +15,7 @@ class DataRealpage:
         logging.info("Availability: RealPage")  
         response_list = self.get_available_times(input, ips_response)
         if len(response_list) > 0:
-            return response_list, []
+            return response_list, {}
 
         elif len(response_list) == 0:
             logging.warn("RealPage services is not responding or has provided an empty payload.")
