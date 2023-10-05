@@ -58,17 +58,17 @@ class EnvStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Create a dict with the environment variables depending of integration
-        stage_name = app_environment.get_stage_name()
+        custom_domain_name = app_environment.get_api_domain_config()["custom_domain_name"]
         
         environment_dict = {
             "placepay": {
-                "STAGE": stage_name,
+                "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "PLACE_PAY_API_KEY": all_params["PLACE_PAY_API_KEY"],
                 "ACL_HOST": all_params["ACL_HOST"],
             },
             "guestcards": {
-                "STAGE": stage_name,
+                "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST"],
                 # Realpage
@@ -98,7 +98,7 @@ class EnvStack(NestedStack):
                 "FUNNEL_API_KEY": all_params["FUNNEL_API_KEY"],
             },
             "transunion": {
-                "STAGE": stage_name,
+                "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST"],
                 # Identity
@@ -119,7 +119,7 @@ class EnvStack(NestedStack):
                 "LEASING_FIND_BY_NUMBER": all_params["LEASING_FIND_BY_NUMBER"],
             },
             "units": {
-                "STAGE": stage_name,
+                "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST"],
                 "RESMAN_INTEGRATION_PARTNER_ID": all_params["RESMAN_INTEGRATION_PARTNER_ID"],
@@ -132,19 +132,19 @@ class EnvStack(NestedStack):
                 "ENGRAIN_API_KEY": all_params["ENGRAIN_API_KEY"],
             },
             "communities": {
-                "STAGE": stage_name,
+                "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST"],
                 "AUTH_HOST": all_params["AUTH_HOST"],
             },
             "customers": {
-                "STAGE": stage_name,
+                "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST"],
                 "AUTH_HOST": all_params["AUTH_HOST"],
             },
             "residents": {
-                "STAGE": stage_name,
+                "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST"],
                 "NEWCO_DB_HOST": all_params["NEWCO_DB_HOST"],
@@ -153,7 +153,7 @@ class EnvStack(NestedStack):
                 "NEWCO_DB_USER": all_params["NEWCO_DB_USER"],
             },
             "engrain": {
-                "STAGE": stage_name,
+                "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST"],
                 "ENGRAIN_API_KEY": all_params["ENGRAIN_API_KEY"],
@@ -165,7 +165,7 @@ class EnvStack(NestedStack):
                 "NEWCO_DB_USER": all_params["NEWCO_DB_USER"],
             },
             "touravailability": {
-                "STAGE": stage_name,
+                "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST"],
                 "FUNNEL_API_KEY": all_params["FUNNEL_API_KEY"],
@@ -178,13 +178,13 @@ class EnvStack(NestedStack):
                 "LICENSE_KEY" : all_params["LICENSE_KEY"]
             },
             "conservice": {
-                "STAGE": stage_name,
+                "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST"],
                 "IPS_HOST": all_params["IPS_HOST"],
             },
             "salesforce": {
-                "STAGE": stage_name,
+                "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST"],
                 "SALESFORCE_USERNAME": all_params["SALESFORCE_USERNAME"],
@@ -192,18 +192,18 @@ class EnvStack(NestedStack):
                 "SALESFORCE_SECURITY_TOKEN": all_params["SALESFORCE_SECURITY_TOKEN"],
             },
             "qoops": {
-                "STAGE": stage_name,
+                "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST"],
                 "JIRA_REPORTER_TOKEN": all_params["JIRA_REPORTER_TOKEN"],
             },
             "onetimelink": {
-                "STAGE": stage_name,
+                "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "IPS_HOST": all_params["IPS_HOST"],
             },
             "rentdynamics": {
-                "STAGE": stage_name,
+                "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST"],
                 "IPS_HOST": all_params["IPS_HOST"],
@@ -214,7 +214,7 @@ class EnvStack(NestedStack):
                 "NEWCO_DB_USER": all_params["NEWCO_DB_USER"],
             },
             "trupay-google": {
-                "STAGE": stage_name,
+                "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST"],
             },

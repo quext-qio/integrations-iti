@@ -9,9 +9,10 @@ class QoopsLogger(logging.Logger):
     """
     Class to get information about errors ans critical issues
     """
-    url = "https://integrations-api.dev.quext.io/api/v2/jira"
+    custom_domain_name = os.environ['CUSTOM_DOMAIN_NAME']
+    stage = os.environ['CURRENT_ENV']
+    url = f"https://{custom_domain_name}/api/v2/jira"
     headers = {'Content-Type': 'application/json'}
-    stage = os.environ['STAGE']
 
     def __init__(self, name=inspect.stack()[1][3], level=logging.DEBUG):
         return super(QoopsLogger, self).__init__(name, level)
