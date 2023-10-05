@@ -94,10 +94,6 @@ class Logger():
         logger = logging.getLogger(f"{service_name}")
         logger.setLevel(logging.INFO)
 
-        # Create file handler that logs error and higher level messages 
-        # file_handler = logging.FileHandler('automation.log')
-        # file_handler.setLevel(logging.ERROR)
-
         # Create console handler for all logs
         console_handler = logging.StreamHandler()
         console_handler.setLevel(level)
@@ -107,10 +103,8 @@ class Logger():
 
         # Set formatter in file and console
         console_handler.setFormatter(formatter)
-        #file_handler.setFormatter(formatter)
 
         # Add the handlers to logger
         logger.addHandler(console_handler)
-        #logger.addHandler(file_handler)
         
         return logger

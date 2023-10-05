@@ -3,13 +3,12 @@ from datetime import datetime
 from qoops_logger import Logger
 
 # Create Logger instance
-logger = Logger().instance(f"ITI:{__name__}")
+logger = Logger().instance(f"ITI: TruPay Google Lambda Function")
 
 # ----------------------------------------------------------------------------------------
 def lambda_handler(event, context):
     now = datetime.now()
-    print(f"TruPay Google Lambda Function: {now.strftime('%d/%m/%Y %H:%M:%S')}")
-    logger.warning("Hi, I'm warning msg")
+    logger.info(f"TruPay Google Lambda Function: {now.strftime('%d/%m/%Y %H:%M:%S')}")
     # Get all users information from TruPay API
     trupay_users = get_trupay_users()
 
