@@ -83,7 +83,7 @@ class QoopsLogger(logging.Logger):
 # ----------------------------------------------------------------------------
 class Logger():
     """
-    Class to allow logic for creation of .log files
+    Class to allow logic for creation of log and report issues
     """
     
     def instance(self, service_name, level=logging.INFO):
@@ -95,16 +95,20 @@ class Logger():
         logger.setLevel(logging.INFO)
 
         # Create console handler for all logs
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(level)
+        # console_handler = logging.StreamHandler()
+        # console_handler.setLevel(level)
+
+        # Create CloudWatch logs handler
+        cloudwatch_handler = logging.StreamHandler()
+        cloudwatch_handler.setLevel(level)
 
         # Create formatter
         formatter = logging.Formatter('AUTOMATION_LOG %(asctime)s - %(levelname)s - %(name)s : %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
         # Set formatter in file and console
-        console_handler.setFormatter(formatter)
+        cloudwatch_handler.setFormatter(formatter)
 
         # Add the handlers to logger
-        logger.addHandler(console_handler)
+        logger.addHandler(cloudwatch_handler)
         
         return logger
