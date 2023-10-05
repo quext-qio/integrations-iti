@@ -13,7 +13,7 @@ class _QoopsLogger(logging.Logger):
     """
     custom_domain_name = os.environ['CUSTOM_DOMAIN_NAME']
     stage = os.environ['CURRENT_ENV']
-    url = f"https://{custom_domain_name}/api/v2/jira"
+    url = f"https://{custom_domain_name}/api/v2/jira/qoops"
     headers = {'Content-Type': 'application/json'}
 
     def __init__(self, name=inspect.stack()[1][3], level=logging.DEBUG):
