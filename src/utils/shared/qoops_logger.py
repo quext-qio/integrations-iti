@@ -5,7 +5,9 @@ import requests
 import os
 
 # ----------------------------------------------------------------------------
-class QoopsLogger(logging.Logger):
+# This class is used to handle errors and critical issues
+# Important: It is used to override a logger but should not be used directly
+class _QoopsLogger(logging.Logger):
     """
     Class to get information about errors ans critical issues
     """
@@ -15,7 +17,7 @@ class QoopsLogger(logging.Logger):
     headers = {'Content-Type': 'application/json'}
 
     def __init__(self, name=inspect.stack()[1][3], level=logging.DEBUG):
-        return super(QoopsLogger, self).__init__(name, level)
+        return super(_QoopsLogger, self).__init__(name, level)
 
     # Method to handle errors
     def error(self, msg, *args, **kwargs):
@@ -28,7 +30,7 @@ class QoopsLogger(logging.Logger):
             project_name="QIN",
         )
         information_detail = self.call_jira_endpoint(msg, payload)
-        return super(QoopsLogger, self).error(information_detail, *args, **kwargs)
+        return super(_QoopsLogger, self).error(information_detail, *args, **kwargs)
 
     # Method to handle critical issues
     def critical(self, msg, *args, **kwargs):
@@ -41,7 +43,7 @@ class QoopsLogger(logging.Logger):
             project_name="QIN",
         )
         information_detail = self.call_jira_endpoint(msg, payload)
-        return super(QoopsLogger, self).critical(information_detail, *args, **kwargs)
+        return super(_QoopsLogger, self).critical(information_detail, *args, **kwargs)
 
     # Create payload for jira required input
     def create_payload(
@@ -66,20 +68,27 @@ class QoopsLogger(logging.Logger):
     # Method to report issues
     def call_jira_endpoint(self, msg, payload):
         information_detail = f"{msg}."
-        response = requests.request(
-            "POST",
-            self.url,
-            headers=self.headers,
-            data=payload,
-        )
+        try:
+            response = requests.request(
+                "POST",
+                self.url,
+                headers=self.headers,
+                data=payload,
+            )
 
-        # If get success response from Jira SQS, will add ticket's id into log detail
-        if response.status_code == 200:
-            data = json.loads(response.text)
-            information_detail = information_detail + f" SQS Response {data}"
-        return information_detail
+            # If get success response from Jira SQS, will add SQS response log detail
+            if response.status_code == 200:
+                data = json.loads(response.text)
+                information_detail = information_detail + f" SQS Response {data}"
+            return information_detail
+        except Exception as e:
+            information_detail = information_detail + f" SQS Error {str(e)}"
+            return information_detail
 
 
+# ----------------------------------------------------------------------------
+# This class is used to create logger instance
+# If you need to create a logger, please use this class
 # ----------------------------------------------------------------------------
 class Logger():
     """
@@ -88,22 +97,18 @@ class Logger():
     
     def instance(self, service_name, level=logging.INFO):
         # Set custom class to handle error and critical issues
-        logging.setLoggerClass(QoopsLogger)
+        logging.setLoggerClass(_QoopsLogger)
 
         # Get logger by service name  
         logger = logging.getLogger(f"{service_name}")
         logger.setLevel(logging.INFO)
-
-        # Create console handler for all logs
-        # console_handler = logging.StreamHandler()
-        # console_handler.setLevel(level)
 
         # Create CloudWatch logs handler
         cloudwatch_handler = logging.StreamHandler()
         cloudwatch_handler.setLevel(level)
 
         # Create formatter
-        formatter = logging.Formatter('AUTOMATION_LOG %(asctime)s - %(levelname)s - %(name)s : %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+        formatter = logging.Formatter('[AUTOMATION_LOG] "Date": %(asctime)s - "Level": %(levelname)s - "Name": %(name)s - "Message": %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
         # Set formatter in file and console
         cloudwatch_handler.setFormatter(formatter)
