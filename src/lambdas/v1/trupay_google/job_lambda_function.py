@@ -3,7 +3,7 @@ from datetime import datetime
 from qoops_logger import Logger
 
 # Create Logger instance
-logger = Logger().instance(f"ITI: TruPay Google Lambda Function")
+logger = Logger().instance(f"(ITI) TruPay Google Lambda")
 
 # ----------------------------------------------------------------------------------------
 def lambda_handler(event, context):

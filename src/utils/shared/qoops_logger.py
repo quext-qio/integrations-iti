@@ -82,6 +82,7 @@ class _QoopsLogger(logging.Logger):
                 information_detail = information_detail + f" SQS Response {data}"
             return information_detail
         except Exception as e:
+            print(f"Error Calling Qoops Endpoint: {str(e)}")
             information_detail = information_detail + f" SQS Error {str(e)}"
             return information_detail
 
