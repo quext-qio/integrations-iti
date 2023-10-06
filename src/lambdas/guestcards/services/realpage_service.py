@@ -1,4 +1,4 @@
-import json
+import json, re
 from abstract.service_interface import ServiceInterface
 from constants.realpage_constants import RealpageConstants
 from utils.service_response import ServiceResponse
