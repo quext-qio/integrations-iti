@@ -60,8 +60,12 @@ class RealPageService(ServiceInterface):
 
             # Assuming you have a generated class for PhoneNumber
             _phone_number = factory.create('PhoneNumber')
-            _phone_number.type = "Home"
-            _phone_number.number = customer["phone"]
+            cleaned_phone_number = ''.join(filter(str.isdigit, customer["phone"])) 
+            if len(cleaned_phone_number) == 10:
+                cleaned_phone_number = "1" + cleaned_phone_number
+
+            _phone_number.type = "Mobile"
+            _phone_number.number = self.clean_and_validate_phone_number("+"+cleaned_phone_number)
 
             # Assuming you have a generated class for ArrayOfPhoneNumber
             array_of_phone_number = factory.create('ArrayOfPhoneNumber')
@@ -187,5 +191,25 @@ class RealPageService(ServiceInterface):
                     'isBase64Encoded': False  
                 } 
 
-    
+    def clean_and_validate_phone_number(self, number):
+            """
+            Cleans and validates US phone number using regular expression.
+            Returns cleaned phone number if valid, otherwise returns None.
+            """
+            # Regular expression pattern for US phone numbers
+            pattern = re.compile(r'^(\+1)?[\s-]?\(?(\d{3})\)?[\s-]?(\d{3})[\s-]?(\d{4})$')
+            # Check if the number matches the pattern
+            match = pattern.match(number)
+            if not match:
+                return None
+            # Extract and format the phone number components
+            country_code = match.group(1)
+            area_code = match.group(2)
+            prefix = match.group(3)
+            suffix = match.group(4)
+            # Clean the phone number by removing country code and non-digit characters
+            phone_number = f"{country_code} {area_code}-{prefix}-{suffix}"
+            # Return the cleaned phone number
+            return phone_number
+        
         
