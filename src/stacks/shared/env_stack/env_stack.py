@@ -217,6 +217,11 @@ class EnvStack(NestedStack):
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST"],
+                # Trupay            
+                "TRUPAY_COMPANY_SHORT_NAME": all_params["TRUPAY_COMPANY_SHORT_NAME"],
+                "TRUPAY_USERNAME": all_params["TRUPAY_USERNAME"],
+                "TRUPAY_PASSWORD": all_params["TRUPAY_PASSWORD"],
+                "TRUPAY_API_KEY": all_params["TRUPAY_API_KEY"],
             },
         }
 
