@@ -5,7 +5,6 @@ class ACL:
     def _loadSecurity() -> tuple:
         host = os.environ['ACL_HOST']
         url = f'{host}/api/partners/security?redacted=off'
-        print(url)
         response = requests.get(url)
         if response.status_code == 200:
             return True, response
