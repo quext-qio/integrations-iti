@@ -92,6 +92,9 @@ class EnvStack(NestedStack):
                 "QXT_CALENDAR_TOUR_HOST": all_params["QXT_CALENDAR_TOUR_HOST"],
                 #Funnel
                 "FUNNEL_API_KEY": all_params["FUNNEL_API_KEY"],
+                #Entrata
+                "ENTRATA_APIKEY" : all_params["ENTRATA_APIKEY"],
+                "ENTRATA_HOST" : all_params["ENTRATA_HOST"],
             },
             "transunion": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
@@ -164,6 +167,8 @@ class EnvStack(NestedStack):
                 "DH_REALPAGE_ILM_APIKEY": all_params["DH_REALPAGE_ILM_APIKEY"],
                 "WS_REALPAGE_L2L_APIKEY": all_params["WS_REALPAGE_L2L_APIKEY"],
                 "DH_REALPAGE_L2L_APIKEY": all_params["DH_REALPAGE_L2L_APIKEY"],
+                "ENTRATA_APIKEY" : all_params["ENTRATA_APIKEY"],
+                "ENTRATA_HOST" : all_params["ENTRATA_HOST"],
                 "LICENSE_KEY" : all_params["LICENSE_KEY"]
             },
             "conservice": {

@@ -40,7 +40,7 @@ class DataControllerFactory:
             data, errors = DataFunnel().get_tour_availability(ips_response, input)
             return DataController(errors).built_response(data)    
         elif partner == "Entrata":
-            data, errors = DataEntrata().get_tour_availability()
+            data, errors = DataEntrata().get_tour_availability(ips_response, input)
             return DataController(errors).built_response(data)   
         elif  "realpage" in partner.lower():
             data, errors = DataRealpage().get_tour_availability(ips_response, input)
