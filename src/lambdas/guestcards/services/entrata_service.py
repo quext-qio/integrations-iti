@@ -13,7 +13,7 @@ class EntrataService(ServiceInterface):
 
             headers = {
             "Content-Type": "application/json",
-            "Authorization": f'Basic {entrata_config["api_key"]}' 
+            "Authorization": f'Basic {entrata_config[EntrataConstants.APIKEY]}' 
             }
             _headers = headers
             tour_comment = None
@@ -22,16 +22,16 @@ class EntrataService(ServiceInterface):
             tour_schedule = False
             tour_information = None
             times = []
-            tour = body["tourScheduleData"] if "tourScheduleData" in body else {}
+            tour = body[EntrataConstants.TOUR_DATA] if EntrataConstants.TOUR_DATA in body else {}
             if tour:
-                    appointment_date = body["tourScheduleData"]["start"]
+                    appointment_date = body[EntrataConstants.TOUR_DATA]["start"]
                     if appointment_date != "":
                       
                         converted_date = datetime.strptime(appointment_date.replace("T", " ")[0:appointment_date.index("Z")].strip(), '%Y-%m-%d %H:%M:%S')
                         format_date = converted_date.strftime("%B %d, %Y")
                         hour = f'{converted_date.hour}:{converted_date.minute}'
-                        times , tour_errors= self.get_entrata_available_times(ips_response, body["tourScheduleData"])
-                        available_times = times["availableTimes"]
+                        times , tour_errors= self.get_entrata_available_times(ips_response, body[EntrataConstants.TOUR_DATA])
+                        available_times = times["availableTimes"] if "availableTimes" in times else []
                         if appointment_date.replace("T", " ")[0:appointment_date.index("Z")] not in available_times:
                             tour_requested = appointment_date
                             tour_error = "Not created. No time slots available for that start time"
@@ -42,7 +42,7 @@ class EntrataService(ServiceInterface):
                             tour_comment = "Tour Scheduled for " + format_date + " at " + hour
                         
                     
-            data = self.__get_from_payload_for_guestcards(body, ips_response["platformData"]["foreign_community_id"],97627,tour, tour_comment)
+            data = self.__get_from_payload_for_guestcards(body, ips_response, tour, tour_comment)
             request_body = {
                             "auth": {
                                 "type": "basic"
@@ -57,18 +57,19 @@ class EntrataService(ServiceInterface):
 
             _params = self.__get_parameters(EntrataConstants.GUESTCARD_METHOD)
 
-            outgoing_entrata = f'{entrata_config["host"]}/api/leads'
+            outgoing_entrata = f'{entrata_config[EntrataConstants.HOST]}/api/leads'
             response = requests.post(outgoing_entrata, data=json.dumps(request_body), params=_params, headers=_headers)
             # Checking for Empty list
             response = json.loads(response.text)
-            response_body = response["response"]["result"]["prospects"]["prospect"][0]
-            error = response["response"]["error"]["message"] if "error" in response["response"] else response_body["message"]
-            if "error" in response["response"] or ("code" in response["response"] and  response["response"]["code"] != 200):
+            response_body = response[EntrataConstants.RESPONSE][EntrataConstants.RESULT][EntrataConstants.PROSPECTS][EntrataConstants.PROSPECT][0] if EntrataConstants.RESULT in response[EntrataConstants.RESPONSE] else response[EntrataConstants.RESPONSE]
+            
+            if EntrataConstants.ERROR in response[EntrataConstants.RESPONSE] or (EntrataConstants.CODE in response[EntrataConstants.RESPONSE] and  response[EntrataConstants.RESPONSE][EntrataConstants.CODE] != 200):
+                error = response[EntrataConstants.RESPONSE][EntrataConstants.ERROR][EntrataConstants.MESSAGE] if EntrataConstants.ERROR in response[EntrataConstants.RESPONSE] else response_body[EntrataConstants.MESSAGE]
                 return {
-                            'statusCode': response["response"]["code"] if "code" in response["response"] else 500,
+                            'statusCode': response[EntrataConstants.RESPONSE][EntrataConstants.CODE] if EntrataConstants.CODE in response[EntrataConstants.RESPONSE] else 500,
                             'body': json.dumps({
                                 'data': [],
-                                'errors': [{"message": error}]
+                                'errors': [{EntrataConstants.MESSAGE: error}]
                             }),
                             'headers': {
                                 'Content-Type': 'application/json',
@@ -77,7 +78,7 @@ class EntrataService(ServiceInterface):
                             'isBase64Encoded': False  
                         }
             
-            tour_schedule_id = response_body["applicantId"] if tour_schedule else ""
+            tour_schedule_id = response_body[EntrataConstants.APPLICANT_ID] if tour_schedule else ""
             if tour_requested != "":
                 tour_information = {
                     "availableTimes": times,
@@ -87,9 +88,9 @@ class EntrataService(ServiceInterface):
                     "tourError": tour_error
                 }
             serviceResponse = ServiceResponse(
-                    guest_card_id= response_body["applicantId"],
-                    first_name=body["guest"]["first_name"],
-                    last_name=body["guest"]["last_name"],
+                    guest_card_id= response_body[EntrataConstants.APPLICANT_ID],
+                    first_name=body[EntrataConstants.GUEST][EntrataConstants.FIRST_NAME],
+                    last_name=body[EntrataConstants.GUEST][EntrataConstants.LAST_NAME],
                     tour_information=tour_information,
                 ).format_response()
             
@@ -110,30 +111,31 @@ class EntrataService(ServiceInterface):
                     
         
    
-    def __get_from_payload_for_guestcards(self, payload, property_id, lead_source_id, tour_info, tour_comment = None):
+    def __get_from_payload_for_guestcards(self, payload, ips, tour_info, tour_comment = None):
 
-        prospect = payload["guest"]
+        prospect = payload[EntrataConstants.GUEST]
 
-        customer_preference = payload["guestPreference"]
+        customer_preference = payload[EntrataConstants.GUEST_PREFERENCE]
         bedroooms_data = []
         contact_types = customer_preference.get("contactPreference", [])
-        if "desiredBeds" in customer_preference:
+        if EntrataConstants.DESIRED_BEDS in customer_preference:
                 # Map string to int using [bedroom_mapping]
-                for i in range(len(customer_preference["desiredBeds"])):
-                    string_beds = customer_preference["desiredBeds"][i]
+                for i in range(len(customer_preference[EntrataConstants.DESIRED_BEDS])):
+                    string_beds = customer_preference[EntrataConstants.DESIRED_BEDS][i]
                     bedroooms_data.append(bedroom_mapping.get(string_beds, 0))
         bedrooms = str(max(bedroooms_data)) if len(bedroooms_data) > 0 else 0
 
-        desired_bathroom = customer_preference.get("desiredBaths",0) # Default value if not specified in the payload
-        desired_rent = customer_preference.get("desiredRent", 0)
-        occupants = customer_preference.get("noOfOccupants", 0)
-        lease_term_months = customer_preference.get("leaseTermMonths", 0)
-        preferred_amenities = customer_preference.get("preferredAmenities", "")
+        desired_bathroom = customer_preference.get(EntrataConstants.DESIRED_BATHS,0) # Default value if not specified in the payload
+        desired_rent = customer_preference.get(EntrataConstants.DESIRED_RENT, 0)
+        occupants = customer_preference.get(EntrataConstants.NO_OCCUPANTS, 0)
+        lease_term_months = customer_preference.get(EntrataConstants.LEASE_TERMS, 0)
+        preferred_amenities = customer_preference.get(EntrataConstants.PREFERRED_AMENITIES, "")
         
-        move_in_date = datetime.strptime(payload["guestPreference"]["moveInDate"], "%Y-%m-%dT%H:%M:%SZ")
-        move_date = move_in_date.strftime("%m/%d/%YT%I:%M:%S")
+        move_in_date = datetime.strptime(payload[EntrataConstants.GUEST_PREFERENCE][EntrataConstants.MOVE_IN_DATE], "%Y-%m-%dT%H:%M:%SZ")
+        move_date = move_in_date.strftime(EntrataConstants.ENTRATA_DATE)
 
-        now_date = datetime.now(timezone('MST')).strftime("%m/%d/%YT%H:%M:%S")
+        now_date = datetime.now(timezone('MST')).strftime(EntrataConstants.ENTRATA_DATE)
+        event_reason_id = ips["platformData"][EntrataConstants.EVENTREASON_ID] if EntrataConstants.EVENTREASON_ID in ips["platformData"] and ips["platformData"][EntrataConstants.EVENTREASON_ID] != 0 else str(EntrataConstants.EVENT_REASON_ID)
 
         event = {
             "event": [
@@ -141,7 +143,7 @@ class EntrataService(ServiceInterface):
                     "typeId": EntrataConstants.GUESTCARD_ID,
                     "type": EntrataConstants.GUESTCARD_METHOD,
                     "date": now_date,
-                    "eventReason": customer_preference.get("moveInReason", "")
+                    "eventReason": customer_preference.get(EntrataConstants.MOVEIN_REASON, "")
                 }
             ]
         }
@@ -153,29 +155,29 @@ class EntrataService(ServiceInterface):
                         "type": EntrataConstants.BOOK_TOUR_EVENT,
                         "date": now_date,
                         "comments": tour_comment,
-                        "eventReasonId": str(EntrataConstants.EVENT_REASON_ID)
+                        "eventReasonId": event_reason_id
                     }
                 ]
             }
 
         param_dict = {
-            "propertyId": property_id,
-            "prospects": {
-                "prospect": {
+            "propertyId": ips["platformData"]["foreign_community_id"],
+            EntrataConstants.PROSPECTS: {
+                EntrataConstants.PROSPECT: {
                     "leadSource": {
-                        "originatingLeadSourceId": lead_source_id
+                        "originatingLeadSourceId": ips["platformData"][EntrataConstants.LEADSOURCE_ID]
                     },
                     "createdDate": now_date,
                     "customers": {
                         "customer": {
                             "name": {
-                                "firstName": prospect["first_name"],
-                                "lastName": prospect["last_name"]
+                                "firstName": prospect[EntrataConstants.FIRST_NAME],
+                                "lastName": prospect[EntrataConstants.LAST_NAME]
                             },
                             "phone": {
-                                "personalPhoneNumber": prospect["phone"]
+                                "personalPhoneNumber": prospect[EntrataConstants.PHONE]
                             },
-                            "email": prospect["email"] or '',
+                            "email": prospect[EntrataConstants.EMAIL] or '',
                             "marketingPreferences": {
                                 "email": {
                                     "optInLeadCommunication": EntrataConstants.EMAIL in contact_types and "1" or "0",
@@ -190,7 +192,7 @@ class EntrataService(ServiceInterface):
                     },
                     "customerPreferences": {
                         "desiredMoveInDate": move_date,
-                        "desiredRent": {
+                        EntrataConstants.DESIRED_RENT: {
                             "min": desired_rent,
                             "max": desired_rent
                         },
@@ -212,7 +214,7 @@ class EntrataService(ServiceInterface):
     def get_entrata_available_times(self, ips, date_tour):
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f'Basic {entrata_config["api_key"]}' 
+            "Authorization": f'Basic {entrata_config[EntrataConstants.APIKEY]}' 
             }
         _headers = headers
         tour_start = datetime.strptime(date_tour["start"], "%Y-%m-%dT%H:%M:%SZ")
@@ -239,13 +241,13 @@ class EntrataService(ServiceInterface):
             "method": str(EntrataConstants.GET_CALENDAR_AVAILABILITY)
         }
 
-        outgoing_entrata = f'{entrata_config["host"]}/api/properties'
+        outgoing_entrata = f'{entrata_config[EntrataConstants.HOST]}/api/properties'
         response = requests.post(outgoing_entrata, data=json.dumps(request_body), params=_params, headers=_headers)
         # Checking for Empty list
         response = json.loads(response.text)
-        if "error" in response[EntrataConstants.RESPONSE]:
+        if EntrataConstants.ERROR in response[EntrataConstants.RESPONSE]:
             logging.info("Got no records for Tour Availability from Entrata")
-            return [], {"message": response[EntrataConstants.RESPONSE]["error"]["message"] }
+            return [], {EntrataConstants.MESSAGE: response[EntrataConstants.RESPONSE][EntrataConstants.ERROR][EntrataConstants.MESSAGE] }
         res = (response[EntrataConstants.RESPONSE][EntrataConstants.RESULT][
                 EntrataConstants.PROPERTY_CALENDAR_AVAILABILITY])
         for value in res[EntrataConstants.AVAILABLE_HOURS][EntrataConstants.AVAILABLE_HOUR]:
