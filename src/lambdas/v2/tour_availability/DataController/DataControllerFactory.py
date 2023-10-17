@@ -3,6 +3,7 @@ from DataPushPullShared.DataFunnel import DataFunnel
 from DataPushPullShared.DataEntrata import DataEntrata
 from DataPushPullShared.DataRealpage import DataRealpage
 from DataPushPullShared.ResmanData import DataResman
+from DataPushPullShared.DataSpherexx import DataSpherexx
 from schemas.SchemaRequest import SchemaRequest
 from IPSController import IPSController
 
@@ -41,6 +42,9 @@ class DataControllerFactory:
             return DataController(errors).built_response(data)    
         elif partner == "Entrata":
             data, errors = DataEntrata().get_tour_availability(ips_response, input)
+            return DataController(errors).built_response(data)   
+        elif partner == "Spherexx":
+            data, errors = DataSpherexx().get_tour_availability(ips_response, input)
             return DataController(errors).built_response(data)   
         elif  "realpage" in partner.lower():
             data, errors = DataRealpage().get_tour_availability(ips_response, input)

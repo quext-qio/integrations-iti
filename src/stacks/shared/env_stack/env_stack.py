@@ -169,7 +169,10 @@ class EnvStack(NestedStack):
                 "DH_REALPAGE_L2L_APIKEY": all_params["DH_REALPAGE_L2L_APIKEY"],
                 "ENTRATA_APIKEY" : all_params["ENTRATA_APIKEY"],
                 "ENTRATA_HOST" : all_params["ENTRATA_HOST"],
-                "LICENSE_KEY" : all_params["LICENSE_KEY"]
+                "LICENSE_KEY" : all_params["LICENSE_KEY"],
+                 # Spherexx
+                "SPHEREXX_USERNAME": all_params["SPHEREXX_USERNAME"],
+                "SPHEREXX_PASSWORD": all_params["SPHEREXX_PASSWORD"],
             },
             "conservice": {
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
