@@ -1,11 +1,4 @@
-from enum import Enum
 from dataclasses import dataclass
-
-class Status(Enum):
-    ACTIVE = "Active"
-    DECEASED = "Deceased"
-    TERMINATED = "Terminated"
-    TEST_EMPLOYEE = "TEST Employee"
 
 @dataclass
 class Employee:
@@ -14,5 +7,5 @@ class Employee:
     username: str
     first_name: str
     last_name: str
-    status: Status
+    status: str
     dates: dict
