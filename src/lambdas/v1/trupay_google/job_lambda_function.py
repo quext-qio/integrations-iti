@@ -12,9 +12,7 @@ logger = Logger().instance(f"(ITI) TruPay Google Lambda")
 # ----------------------------------------------------------------------------------------
 # Lambda Handler
 def lambda_handler(event, context):
-    now = datetime.now()
-    logger.info(
-        f"Starting Job TruPay Google: {now.strftime('%d/%m/%Y %H:%M:%S')}")
+    logger.info(f"Starting Job TruPay Google")
 
     # Get required token from TruPay Login API
     jwt = get_trupay_token()
