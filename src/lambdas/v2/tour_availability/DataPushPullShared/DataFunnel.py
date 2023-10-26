@@ -44,4 +44,4 @@ class DataFunnel:
             new_date = f"{list_date[0]} {list_date[1]}"
             new_data.append(new_date)
     
-        return new_data, []
+        return new_data, {}

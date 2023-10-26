@@ -96,6 +96,9 @@ class EnvStack(NestedStack):
                 "QXT_CALENDAR_TOUR_HOST": all_params["QXT_CALENDAR_TOUR_HOST"],
                 #Funnel
                 "FUNNEL_API_KEY": all_params["FUNNEL_API_KEY"],
+                #Entrata
+                "ENTRATA_APIKEY" : all_params["ENTRATA_APIKEY"],
+                "ENTRATA_HOST" : all_params["ENTRATA_HOST"],
             },
             "transunion": {
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,
@@ -175,7 +178,12 @@ class EnvStack(NestedStack):
                 "DH_REALPAGE_ILM_APIKEY": all_params["DH_REALPAGE_ILM_APIKEY"],
                 "WS_REALPAGE_L2L_APIKEY": all_params["WS_REALPAGE_L2L_APIKEY"],
                 "DH_REALPAGE_L2L_APIKEY": all_params["DH_REALPAGE_L2L_APIKEY"],
-                "LICENSE_KEY" : all_params["LICENSE_KEY"]
+                "ENTRATA_APIKEY" : all_params["ENTRATA_APIKEY"],
+                "ENTRATA_HOST" : all_params["ENTRATA_HOST"],
+                "LICENSE_KEY" : all_params["LICENSE_KEY"],
+                 # Spherexx
+                "SPHEREXX_USERNAME": all_params["SPHEREXX_USERNAME"],
+                "SPHEREXX_PASSWORD": all_params["SPHEREXX_PASSWORD"],
             },
             "conservice": {
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,
