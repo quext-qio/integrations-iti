@@ -5,6 +5,7 @@ from src.utils.enums.app_environment import AppEnvironment
 from src.stacks.shared.env_stack.env_stack import EnvStack
 from src.stacks.shared.layers_stack.layers_stack import LayersStack
 from src.stacks.shared.api_stack.api_stack import APIStack
+from src.stacks.shared.vpc_stack.vpc_stack import VpcStack
 from src.stacks.integrations.placepay_stack.placepay_stack import PlacepayStack
 from src.stacks.integrations.guestcards_stack.guestcards_stack import GuestcardsStack
 from src.stacks.integrations.transunion_stack.transunion_stack import TransUnionStack
@@ -19,6 +20,7 @@ from src.stacks.integrations.salesforce_stack.salesforce_stack import Salesforce
 from src.stacks.integrations.onetime_link_stack.onetime_link_stack import OneTimeLinkStack
 from src.stacks.integrations.rent_dynamics_stack.rent_dynamics_stack import RentDynamicsStack
 from src.stacks.integrations.qoops.qoops_stack import QoopsStack
+from src.stacks.integrations.trupay_google_stack.trupay_google_stack import TruePayGoogleStack
 
 # [RootStack] is the main [Stack] for the project
 # It is responsible for load all [NestedStack] and share resources between them
@@ -26,7 +28,6 @@ class RootStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, app_env: AppEnvironment, server_name:str, **kwargs):
         super().__init__(scope, construct_id, **kwargs)
-
         # --------------------------------------------------------------------
         # [Shared] Env Stack
         # --------------------------------------------------------------------
@@ -104,6 +105,25 @@ class RootStack(Stack):
         salesforce_resource_v2 = api_v2["salesforce"]
         onetime_link_resource_v2 = api_v2["security"]
         rent_dynamics_resource_v2 = api_v2["rentdynamics"]
+
+
+
+        # TODO: CREATE VPC
+        # --------------------------------------------------------------------
+        # [Shared] VPC Stack
+        # --------------------------------------------------------------------
+        vpc_stack = VpcStack(
+            self, 
+            f"{app_env.get_stage_name()}-{server_name}-vpc-stack",
+            app_environment=app_env,
+            api=general_resource_v1,
+            environment=environment["placepay"],
+            layers=[
+                shared_layer,
+                pip_packages_layer,
+            ],
+        )
+        vpc=vpc_stack.get_vpc
 
 
         # --------------------------------------------------------------------
@@ -355,6 +375,22 @@ class RootStack(Stack):
                 shared_layer,
                 pip_packages_layer,
                 mysql_layer
+            ],
+        )
+
+        # --------------------------------------------------------------------
+        # TruPay Google Job
+        # --------------------------------------------------------------------
+        TruePayGoogleStack(
+            self, 
+            f"{app_env.get_stage_name()}-{server_name}-trupay-google-stack",
+            app_environment=app_env,
+            description="Stack for TruPay Google Job",
+            environment=environment["trupay-google"],
+            layers=[
+                mysql_layer,
+                pip_packages_layer,
+                shared_layer,
             ],
         )
 
