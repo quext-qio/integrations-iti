@@ -59,10 +59,6 @@ class EnvStack(NestedStack):
         # --------------------------------------------------------------------
         # Create a dict with the environment variables depending of integration
         custom_domain_name = app_environment.get_api_domain_config()["custom_domain_name"]
-        
-        #TODO: Testing internal URL
-        all_params["ACL_HOST"] = all_params["ACL_HOST_INTERNAL"]
-
 
         environment_dict = {
             "placepay": {
