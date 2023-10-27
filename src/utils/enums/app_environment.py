@@ -107,3 +107,39 @@ class AppEnvironment(Enum):
             return AppEnvironment.PROD
         else:
             raise ValueError(f"Unknown stage [get_current_stage()]: {stage_name}")
+        
+    # --------------------------------------------------------------------
+    # Returns account id
+    def get_account_id(self) -> str:
+        if self == AppEnvironment.LOCAL:
+            return "000000000000" #TODO: Set account id
+        elif self == AppEnvironment.DEV:
+            return "633546161654"
+        elif self == AppEnvironment.QA:
+            return "633546161654"
+        elif self == AppEnvironment.STAGE:
+            return "323546893515"
+        elif self == AppEnvironment.RC:
+            return "323546893515"
+        elif self == AppEnvironment.PROD:
+            return "283107020475"
+        else:
+            raise ValueError(f"Unknown stage [get_account_id()]: {self.value}")
+        
+    # --------------------------------------------------------------------
+    # Returns region
+    def get_region(self) -> str:
+        if self == AppEnvironment.LOCAL:
+            return "us-east-1"
+        elif self == AppEnvironment.DEV:
+            return "us-east-1"
+        elif self == AppEnvironment.QA:
+            return "us-east-1"
+        elif self == AppEnvironment.STAGE:
+            return "us-east-1"
+        elif self == AppEnvironment.RC:
+            return "us-east-1"
+        elif self == AppEnvironment.PROD:
+            return "us-east-1"
+        else:
+            raise ValueError(f"Unknown stage [get_region()]: {self.value}")
