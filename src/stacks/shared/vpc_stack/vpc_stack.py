@@ -15,32 +15,6 @@ class VpcStack(NestedStack):
     
     def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-        
-        # vpc = ec2_.Vpc(
-        #     self, f"{app_environment.get_stage_name()}-iti-vpc",
-        #     vpc_name=f"{app_environment.get_stage_name()}-iti-vpc",
-        #     max_azs=2,
-        #     nat_gateways=2,
-        #     ip_addresses=ec2_.IpAddresses.cidr("10.0.0.0/16"),
-        #     subnet_configuration=[
-        #         ec2_.SubnetConfiguration(
-        #             name="Public",
-        #             subnet_type=ec2_.SubnetType.PUBLIC,
-        #             cidr_mask=24
-        #         ), 
-        #         ec2_.SubnetConfiguration(
-        #             name="Private",
-        #             subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS,
-        #             cidr_mask=24
-        #         ), 
-        #         # ec2_.SubnetConfiguration(
-        #         #     subnet_type=ec2_.SubnetType.PRIVATE_ISOLATED,
-        #         #     name="Private",
-        #         #     cidr_mask=24
-        #         # )
-        #     ],
-        #     nat_gateway_provider=ec2_.NatProvider.gateway(),
-        # )
 
         # --------------------------------------------------------------------
         #TODO: Read id from app_environment
