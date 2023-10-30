@@ -23,7 +23,7 @@ class VpcStack(NestedStack):
         vpc = ec2_.Vpc.from_lookup(
             self, f"{app_environment.get_stage_name()}-iti-vpc", 
             vpc_id=vpc_id,
-            is_default=True,
+            #is_default=True,
             #vpc_name=f"{app_environment.get_stage_name()}-iti-vpc"
         )
 
