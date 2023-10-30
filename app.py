@@ -21,12 +21,12 @@ cdk.Tags.of(app).add(key="team", value='integration', priority=300)
 cdk.Tags.of(app).add(key="environment", value=stage.get_stage_name(), priority=300)
 cdk.Tags.of(app).add(key="service", value=service_name, priority=300)
 
-# --------------------------------------------------------------------
-# Env configuration
-env_config = cdk.Environment(
-    account=stage.get_account_id(),
-    region=stage.get_region(),
-)
+# # --------------------------------------------------------------------
+# # Env configuration
+# env_config = cdk.Environment(
+#     account=stage.get_account_id(),
+#     region=stage.get_region(),
+# )
 
 # --------------------------------------------------------------------
 # Root stack
@@ -35,7 +35,7 @@ root_stack = RootStack(
     f"{stage.get_stage_name()}-{server_name}-root-stack",
     app_env=stage,
     server_name=server_name,
-    env=env_config,
+    #env=env_config,
 )
 
 # --------------------------------------------------------------------
