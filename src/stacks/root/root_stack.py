@@ -112,18 +112,18 @@ class RootStack(Stack):
         # --------------------------------------------------------------------
         # [Shared] VPC Stack
         # --------------------------------------------------------------------
-        # vpc_stack = VpcStack(
-        #     self, 
-        #     f"{app_env.get_stage_name()}-{server_name}-vpc-stack",
-        #     app_environment=app_env,
-        #     api=general_resource_v1,
-        #     environment=environment["placepay"],
-        #     layers=[
-        #         shared_layer,
-        #         pip_packages_layer,
-        #     ],
-        # )
-        # vpc=vpc_stack.get_vpc
+        vpc_stack = VpcStack(
+            self, 
+            f"{app_env.get_stage_name()}-{server_name}-vpc-stack",
+            app_environment=app_env,
+            api=general_resource_v1,
+            environment=environment["placepay"],
+            layers=[
+                shared_layer,
+                pip_packages_layer,
+            ],
+        )
+        vpc=vpc_stack.get_vpc
 
 
         # --------------------------------------------------------------------
