@@ -18,13 +18,17 @@ class VpcStack(NestedStack):
 
         # --------------------------------------------------------------------
         #TODO: Read id from app_environment
+        # vpc_id = "vpc-02ef368fcc88d90de"
+        # vpc = ec2_.Vpc.from_lookup(
+        #     self, f"{app_environment.get_stage_name()}-iti-vpc", 
+        #     vpc_id=vpc_id,
+        #     vpc_name=f"{app_environment.get_stage_name()}-iti-vpc"
+        # )
+
         vpc_id = "vpc-02ef368fcc88d90de"
-        # Get VPC by id
         vpc = ec2_.Vpc.from_lookup(
             self, f"{app_environment.get_stage_name()}-iti-vpc", 
             vpc_id=vpc_id,
-            #is_default=True,
-            #vpc_name=f"{app_environment.get_stage_name()}-iti-vpc"
         )
 
 
