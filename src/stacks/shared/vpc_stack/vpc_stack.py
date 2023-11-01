@@ -17,6 +17,10 @@ class VpcStack(NestedStack):
     def get_security_group(self):
         return self.security_group
     
+    @property
+    def get_subnet_selection(self):
+        return self.subnet_selection
+    
     def __init__(self, scope: Construct, construct_id: str, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
@@ -41,6 +45,13 @@ class VpcStack(NestedStack):
         self.security_group = security_group
 
         # --------------------------------------------------------------------
+        # Subnet selection [Private with Egress]
+        subnet_selection = ec2_.SubnetSelection(
+            subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS,
+        )
+        self.subnet_selection = subnet_selection
+
+        # --------------------------------------------------------------------
         # Create lambda function instance test VPC 
         lambda_function = lambda_.Function(
             self, 
@@ -55,4 +66,5 @@ class VpcStack(NestedStack):
             function_name=f"{app_environment.get_stage_name()}-vpc-lambda",
             vpc=vpc,
             security_groups=[security_group],
+            vpc_subnets=subnet_selection,
         )
