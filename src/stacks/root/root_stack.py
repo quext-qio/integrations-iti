@@ -68,6 +68,23 @@ class RootStack(Stack):
         salesforce_layer = layer_stack.get_salesforce_layer
         jira_layer = layer_stack.get_jira_layer
 
+        # --------------------------------------------------------------------
+        # [Shared] VPC Stack
+        # --------------------------------------------------------------------
+        vpc_stack = VpcStack(
+            self, 
+            f"{app_env.get_stage_name()}-{server_name}-vpc-stack",
+            app_environment=app_env,
+            environment=environment["placepay"],
+            layers=[
+                shared_layer,
+                pip_packages_layer,
+            ],
+        )
+        vpc=vpc_stack.get_vpc
+        security_group=vpc_stack.get_security_group
+
+
 
         # --------------------------------------------------------------------
         # [Shared] API Stack
@@ -105,25 +122,6 @@ class RootStack(Stack):
         salesforce_resource_v2 = api_v2["salesforce"]
         onetime_link_resource_v2 = api_v2["security"]
         rent_dynamics_resource_v2 = api_v2["rentdynamics"]
-
-
-
-        # TODO: CREATE VPC
-        # --------------------------------------------------------------------
-        # [Shared] VPC Stack
-        # --------------------------------------------------------------------
-        vpc_stack = VpcStack(
-            self, 
-            f"{app_env.get_stage_name()}-{server_name}-vpc-stack",
-            app_environment=app_env,
-            environment=environment["placepay"],
-            layers=[
-                shared_layer,
-                pip_packages_layer,
-            ],
-        )
-        vpc=vpc_stack.get_vpc
-        security_group=vpc_stack.get_security_group
 
 
         # --------------------------------------------------------------------

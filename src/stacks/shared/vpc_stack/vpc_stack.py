@@ -27,6 +27,7 @@ class VpcStack(NestedStack):
             self, f"{app_environment.get_stage_name()}-iti-vpc", 
             vpc_id=vpc_id,
         )
+        self.vpc = vpc
 
         # --------------------------------------------------------------------
         # Read Security Group by id
@@ -37,6 +38,7 @@ class VpcStack(NestedStack):
             security_group_id=security_group_id,
             mutable=False,
         )
+        self.security_group = security_group
 
         # --------------------------------------------------------------------
         # Create lambda function instance test VPC 
@@ -54,6 +56,3 @@ class VpcStack(NestedStack):
             vpc=vpc,
             security_groups=[security_group],
         )
-
-        self.vpc = vpc
-        self.security_group = security_group
