@@ -80,5 +80,5 @@ class VpcStack(NestedStack):
             function_name=f"{app_environment.get_stage_name()}-vpc-lambda",
             vpc=vpc,
             security_groups=[security_group],
-            vpc_subnets=private_subnets.subnets[0],
+            vpc_subnets=private_subnets,
         )
