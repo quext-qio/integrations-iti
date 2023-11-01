@@ -43,7 +43,7 @@ class VpcStack(NestedStack):
         else:
             print(f"VPC Private subnet found [PRIVATE_WITH_EGRESS]: {len(private_subnets.subnets)}")
             for subnet in private_subnets.subnets:
-                print(f"VPC Private subnet: {subnet.internet_connectivity_established}")
+                print(f"VPC Private subnet ID: {subnet.subnet_id}")
             
 
 
@@ -66,7 +66,7 @@ class VpcStack(NestedStack):
             peer=ec2_.Peer.any_ipv4(),
             connection=ec2_.Port.all_traffic()
         )
-        self.security_group
+        self.security_group = security_group
 
 
         # --------------------------------------------------------------------
