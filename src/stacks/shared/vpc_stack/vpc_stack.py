@@ -43,7 +43,7 @@ class VpcStack(NestedStack):
         else:
             print(f"VPC Private subnet found [PRIVATE_WITH_EGRESS]: {len(private_subnets.subnets)}")
             for subnet in private_subnets.subnets:
-                print(f"VPC Private subnet: {subnet.__dict__}")
+                print(f"VPC Private subnet: {subnet.internet_connectivity_established}")
             
 
 
@@ -54,7 +54,7 @@ class VpcStack(NestedStack):
             self, 
             id=f"{app_environment.get_stage_name()}-iti-security-group", 
             security_group_id=security_group_id,
-            mutable=False,
+            #mutable=False,
         )
         self.security_group = security_group
 
