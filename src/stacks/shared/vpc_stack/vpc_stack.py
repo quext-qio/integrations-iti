@@ -25,12 +25,21 @@ class VpcStack(NestedStack):
         #     vpc_name=f"{app_environment.get_stage_name()}-iti-vpc"
         # )
 
+        # --------------------------------------------------------------------
+        # Read VPC by id
         vpc_id = "vpc-02ef368fcc88d90de"
         vpc = ec2_.Vpc.from_lookup(
             self, f"{app_environment.get_stage_name()}-iti-vpc", 
             vpc_id=vpc_id,
         )
 
+        # --------------------------------------------------------------------
+        # Read Security Group by id
+        security_group_id = "sg-0f69387252f2af376"
+        security_group = ec2_.SecurityGroup.from_security_group_id(
+            self, f"{app_environment.get_stage_name()}-iti-security-group", 
+            security_group_id=security_group_id,
+        )
 
         # --------------------------------------------------------------------
         # Create lambda function instance test VPC 
@@ -46,6 +55,7 @@ class VpcStack(NestedStack):
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-vpc-lambda",
             vpc=vpc,
+            security_groups=[security_group],
         )
 
         self.vpc = vpc
