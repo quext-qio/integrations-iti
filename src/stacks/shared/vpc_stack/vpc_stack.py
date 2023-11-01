@@ -43,10 +43,12 @@ class VpcStack(NestedStack):
         security_group = ec2_.SecurityGroup.from_security_group_id(
             self, f"{app_environment.get_stage_name()}-iti-security-group", 
             security_group_id=security_group_id,
-            allow_all_outbound=True,
-            mutable=False,
-            #allow_all_ipv6_outbound=True,
         )
+        
+            #allow_all_outbound=True,
+            #mutable=False,
+            #allow_all_ipv6_outbound=True,
+
         # security_group.add_ingress_rule(
         #     peer=ec2_.Peer.any_ipv4(),
         #     connection=ec2_.Port.all_traffic()
