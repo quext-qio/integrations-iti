@@ -83,7 +83,6 @@ class RootStack(Stack):
         )
         vpc=vpc_stack.get_vpc
         security_group=vpc_stack.get_security_group
-        subnet_selection=vpc_stack.get_subnet_selection
 
 
 

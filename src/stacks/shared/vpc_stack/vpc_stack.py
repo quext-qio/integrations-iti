@@ -17,10 +17,6 @@ class VpcStack(NestedStack):
     def get_security_group(self):
         return self.security_group
     
-    @property
-    def get_subnet_selection(self):
-        return self.subnet_selection
-    
     def __init__(self, scope: Construct, construct_id: str, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
@@ -32,6 +28,21 @@ class VpcStack(NestedStack):
             vpc_id=vpc_id,
         )
         self.vpc = vpc
+        print(f"""
+            VPC found: {vpc.vpc_id}
+            VPC: {vpc}
+        """)
+
+        # --------------------------------------------------------------------
+        private_subnets = vpc.select_subnets(subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS)
+        print(f"""
+            VPC Subnet: {private_subnets}
+        """)
+        if len(private_subnets.subnets) == 0:
+            raise Exception("VPC Private subnet not found [PRIVATE_WITH_EGRESS]")
+        else:
+            print(f"VPC Private subnet found [PRIVATE_WITH_EGRESS]: {len(private_subnets.subnets)}")
+
 
         # --------------------------------------------------------------------
         # Read Security Group by id
@@ -46,11 +57,13 @@ class VpcStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Subnet selection [Private with Egress]
-        subnet_selection = ec2_.SubnetSelection(
-            subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS,
-        )
-        self.subnet_selection = subnet_selection
+        # subnet_selection = ec2_.SubnetSelection(
+        #     subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS,
+        # )
+        # self.subnet_selection = subnet_selection
 
+
+        
         # --------------------------------------------------------------------
         # Create lambda function instance test VPC 
         lambda_function = lambda_.Function(
@@ -66,5 +79,5 @@ class VpcStack(NestedStack):
             function_name=f"{app_environment.get_stage_name()}-vpc-lambda",
             vpc=vpc,
             security_groups=[security_group],
-            vpc_subnets=subnet_selection,
+            vpc_subnets=private_subnets[0],
         )
