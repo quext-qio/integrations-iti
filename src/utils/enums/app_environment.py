@@ -112,7 +112,7 @@ class AppEnvironment(Enum):
     # Returns account id
     def get_account_id(self) -> str:
         if self == AppEnvironment.LOCAL:
-            return "000000000000" #TODO: Set account id
+            return "445841279194" 
         elif self == AppEnvironment.DEV:
             return "633546161654"
         elif self == AppEnvironment.QA:
@@ -143,3 +143,39 @@ class AppEnvironment(Enum):
             return "us-east-1"
         else:
             raise ValueError(f"Unknown stage [get_region()]: {self.value}")
+        
+    # --------------------------------------------------------------------
+    # Returns VPC id
+    def get_vpc_id(self) -> str:
+        if self == AppEnvironment.LOCAL:
+            return "vpc-02ef368fcc88d90de" #TODO: Set correct vpc id
+        elif self == AppEnvironment.DEV:
+            return "vpc-02ef368fcc88d90de"
+        elif self == AppEnvironment.QA:
+            return "vpc-02ef368fcc88d90de"
+        elif self == AppEnvironment.STAGE:
+            return "vpc-02ef368fcc88d90de" #TODO: Set correct vpc id
+        elif self == AppEnvironment.RC:
+            return "vpc-02ef368fcc88d90de" #TODO: Set correct vpc id
+        elif self == AppEnvironment.PROD:
+            return "vpc-02ef368fcc88d90de" #TODO: Set correct vpc id
+        else:
+            raise ValueError(f"Unknown stage [get_vpc_id()]: {self.value}")
+        
+    # --------------------------------------------------------------------
+    # Returns Security Group id
+    def get_security_group_id(self) -> str:
+        if self == AppEnvironment.LOCAL:
+            return "sg-0f69387252f2af376" #TODO: Set correct security group id
+        elif self == AppEnvironment.DEV:
+            return "sg-0f69387252f2af376"
+        elif self == AppEnvironment.QA:
+            return "sg-0f69387252f2af376"
+        elif self == AppEnvironment.STAGE:
+            return "sg-0f69387252f2af376" #TODO: Set correct security group id
+        elif self == AppEnvironment.RC:
+            return "sg-0f69387252f2af376" #TODO: Set correct security group id
+        elif self == AppEnvironment.PROD:
+            return "sg-0f69387252f2af376" #TODO: Set correct security group id
+        else:
+            raise ValueError(f"Unknown stage [get_security_group_id()]: {self.value}")

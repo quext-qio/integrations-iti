@@ -13,21 +13,16 @@ class VpcStack(NestedStack):
     def get_vpc(self):
         return self.vpc
     
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs) -> None:
+    @property
+    def get_security_group(self):
+        return self.security_group
+    
+    def __init__(self, scope: Construct, construct_id: str, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # --------------------------------------------------------------------
-        #TODO: Read id from app_environment
-        # vpc_id = "vpc-02ef368fcc88d90de"
-        # vpc = ec2_.Vpc.from_lookup(
-        #     self, f"{app_environment.get_stage_name()}-iti-vpc", 
-        #     vpc_id=vpc_id,
-        #     vpc_name=f"{app_environment.get_stage_name()}-iti-vpc"
-        # )
-
-        # --------------------------------------------------------------------
         # Read VPC by id
-        vpc_id = "vpc-02ef368fcc88d90de"
+        vpc_id = app_environment.get_vpc_id()
         vpc = ec2_.Vpc.from_lookup(
             self, f"{app_environment.get_stage_name()}-iti-vpc", 
             vpc_id=vpc_id,
@@ -35,7 +30,7 @@ class VpcStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Read Security Group by id
-        security_group_id = "sg-0f69387252f2af376"
+        security_group_id = app_environment.get_security_group_id()
         security_group = ec2_.SecurityGroup.from_security_group_id(
             self, 
             id=f"{app_environment.get_stage_name()}-iti-security-group", 
@@ -61,3 +56,4 @@ class VpcStack(NestedStack):
         )
 
         self.vpc = vpc
+        self.security_group = security_group

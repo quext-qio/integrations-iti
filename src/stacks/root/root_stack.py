@@ -116,7 +116,6 @@ class RootStack(Stack):
             self, 
             f"{app_env.get_stage_name()}-{server_name}-vpc-stack",
             app_environment=app_env,
-            api=general_resource_v1,
             environment=environment["placepay"],
             layers=[
                 shared_layer,
@@ -124,6 +123,7 @@ class RootStack(Stack):
             ],
         )
         vpc=vpc_stack.get_vpc
+        security_group=vpc_stack.get_security_group
 
 
         # --------------------------------------------------------------------
