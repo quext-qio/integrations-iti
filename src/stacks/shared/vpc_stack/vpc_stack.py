@@ -49,21 +49,30 @@ class VpcStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Read Security Group by id
-        security_group_id = app_environment.get_security_group_id()
-        security_group = ec2_.SecurityGroup.from_security_group_id(
-            self, 
-            id=f"{app_environment.get_stage_name()}-iti-security-group", 
-            security_group_id=security_group_id,
-            #mutable=False,
+        # security_group_id = app_environment.get_security_group_id()
+        # security_group = ec2_.SecurityGroup.from_security_group_id(
+        #     self, 
+        #     id=f"{app_environment.get_stage_name()}-iti-security-group", 
+        #     security_group_id=security_group_id,
+        #     #mutable=False,
+        # )
+        # self.security_group = security_group
+
+        security_group = ec2_.SecurityGroup(
+            self, f"{app_environment.get_stage_name()}-iti-security-group", 
+            vpc=vpc,
         )
-        self.security_group = security_group
+        security_group.add_ingress_rule(
+            peer=ec2_.Peer.any_ipv4(),
+            connection=ec2_.Port.all_traffic()
+        )
+
 
         # --------------------------------------------------------------------
         # Subnet selection [Private with Egress]
-        # subnet_selection = ec2_.SubnetSelection(
-        #     subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS,
-        # )
-        # self.subnet_selection = subnet_selection
+        vpc_subnets = ec2_.SubnetSelection(
+            subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS,
+        )
 
 
         
@@ -82,5 +91,5 @@ class VpcStack(NestedStack):
             function_name=f"{app_environment.get_stage_name()}-vpc-lambda",
             vpc=vpc,
             security_groups=[security_group],
-            vpc_subnets=ec2_.SubnetSelection(subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS),
+            vpc_subnets=vpc_subnets,
         )
