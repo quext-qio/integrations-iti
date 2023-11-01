@@ -38,13 +38,13 @@ class VpcStack(NestedStack):
 
 
         # --------------------------------------------------------------------
-        # Read Security Group by id
+        # TODO: Read Security Group by id
         security_group_id = app_environment.get_security_group_id()
         security_group = ec2_.SecurityGroup.from_security_group_id(
             self, f"{app_environment.get_stage_name()}-iti-security-group", 
             security_group_id=security_group_id,
         )
-        
+
             #allow_all_outbound=True,
             #mutable=False,
             #allow_all_ipv6_outbound=True,
@@ -54,14 +54,6 @@ class VpcStack(NestedStack):
         #     connection=ec2_.Port.all_traffic()
         # )
         self.security_group = security_group
-
-
-
-        # # --------------------------------------------------------------------
-        # # Subnet selection [Private with Egress]
-        # vpc_subnets = ec2_.SubnetSelection(
-        #     subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS,
-        # )
 
 
         
@@ -79,6 +71,12 @@ class VpcStack(NestedStack):
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-vpc-lambda",
             vpc=vpc,
+            vpc_subnets=ec2_.SubnetSelection(
+                subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS,
+            ),
             security_groups=[security_group],
-            #vpc_subnets=vpc_subnets,
+            role=iam_.Role.from_role_arn(
+                self, f"{app_environment.get_stage_name()}-vpc-lambda-role",
+                role_arn='arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters',                          
+            )
         )
