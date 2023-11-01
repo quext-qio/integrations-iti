@@ -168,9 +168,9 @@ class AppEnvironment(Enum):
         if self == AppEnvironment.LOCAL:
             return "sg-0f69387252f2af376" #TODO: Set correct security group id
         elif self == AppEnvironment.DEV:
-            return "sg-0f69387252f2af376"
+            return "sg-022fe237df1589313"
         elif self == AppEnvironment.QA:
-            return "sg-0f69387252f2af376"
+            return "sg-022fe237df1589313"
         elif self == AppEnvironment.STAGE:
             return "sg-0f69387252f2af376" #TODO: Set correct security group id
         elif self == AppEnvironment.RC:
