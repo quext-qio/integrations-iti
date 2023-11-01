@@ -72,6 +72,7 @@ class VpcStack(NestedStack):
           availability_zones = Fn.get_azs(),
           private_subnet_ids = ["subnet-0196f5bf0f381892d", "subnet-065e07a109ceae4b8", "subnet-00cce04ed38272020"]
         )
+        self.vpc = vpc
 
         lambda_role = iam_.Role( 
             self,f"{app_environment.get_stage_name()}-vpc-lambda-role",                       
