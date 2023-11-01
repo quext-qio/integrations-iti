@@ -66,6 +66,7 @@ class VpcStack(NestedStack):
             peer=ec2_.Peer.any_ipv4(),
             connection=ec2_.Port.all_traffic()
         )
+        self.security_group
 
 
         # --------------------------------------------------------------------
