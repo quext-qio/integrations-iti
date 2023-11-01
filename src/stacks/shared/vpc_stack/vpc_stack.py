@@ -14,30 +14,30 @@ class VpcStack(NestedStack):
     def __init__(self, scope: Construct, construct_id: str, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # # --------------------------------------------------------------------
-        # # Read VPC by id
-        # vpc_id = app_environment.get_vpc_id()
-        # vpc = ec2_.Vpc.from_lookup(
-        #     self, f"{app_environment.get_stage_name()}-iti-vpc", 
-        #     vpc_id=vpc_id,
-        # )
-        # self.vpc = vpc
-        # print(f"""
-        #     VPC found: {vpc.vpc_id}
-        #     VPC: {vpc}
-        # """)
+        # --------------------------------------------------------------------
+        # Read VPC by id
+        vpc_id = app_environment.get_vpc_id()
+        vpc = ec2_.Vpc.from_lookup(
+            self, f"{app_environment.get_stage_name()}-iti-vpc", 
+            vpc_id=vpc_id,
+        )
+        self.vpc = vpc
+        print(f"""
+            VPC found: {vpc.vpc_id}
+            VPC: {vpc}
+        """)
 
-        # # --------------------------------------------------------------------
-        # private_subnets = vpc.select_subnets(subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS)
-        # print(f"""
-        #     VPC Subnet: {private_subnets}
-        # """)
-        # if len(private_subnets.subnets) == 0:
-        #     raise Exception("VPC Private subnet not found [PRIVATE_WITH_EGRESS]")
-        # else:
-        #     print(f"VPC Private subnet found [PRIVATE_WITH_EGRESS]: {len(private_subnets.subnets)}")
-        #     for subnet in private_subnets.subnets:
-        #         print(f"VPC Private subnet ID: {subnet.subnet_id}")
+        # --------------------------------------------------------------------
+        private_subnets = vpc.select_subnets(subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS)
+        print(f"""
+            VPC Subnet: {private_subnets}
+        """)
+        if len(private_subnets.subnets) == 0:
+            raise Exception("VPC Private subnet not found [PRIVATE_WITH_EGRESS]")
+        else:
+            print(f"VPC Private subnet found [PRIVATE_WITH_EGRESS]: {len(private_subnets.subnets)}")
+            for subnet in private_subnets.subnets:
+                print(f"VPC Private subnet ID: {subnet.subnet_id}")
             
 
 
@@ -55,37 +55,6 @@ class VpcStack(NestedStack):
         # )
         # self.security_group = security_group
 
-
-
-        # --------------------------------------------------------------------
-        #TEST 
-        vpc = ec2_.Vpc.from_vpc_attributes( self, 'dev_vpc',
-          vpc_id = app_environment.get_vpc_id(),
-          availability_zones = Fn.get_azs(),
-          private_subnet_ids = ["subnet-0196f5bf0f381892d", "subnet-065e07a109ceae4b8", "subnet-00cce04ed38272020"]
-        )
-        lambda_role = iam_.Role( 
-            self,f"{app_environment.get_stage_name()}-vpc-lambda-role",                       
-            assumed_by=iam_.ServicePrincipal('lambda.amazonaws.com'),
-            role_name = f"{app_environment.get_stage_name()}-vpc-lambda-role",
-        )
-        iam_.ManagedPolicy(
-            self, f"{app_environment.get_stage_name()}-vpc-managed-policy",
-            statements = [
-                iam_.PolicyStatement(
-                    effect = iam_.Effect.ALLOW,
-                    actions = [
-                        "ec2:CreateNetworkInterface",
-                        "ec2:DescribeNetworkInterfaces",
-                        "ec2:DeleteNetworkInterface",
-                        "ec2:AssignPrivateIpAddresses",
-                        "ec2:UnassignPrivateIpAddresses"
-                    ],
-                    resources = ["*"]
-               )
-            ],
-            roles = [lambda_role]
-        )
 
 
         # # --------------------------------------------------------------------
@@ -110,7 +79,7 @@ class VpcStack(NestedStack):
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-vpc-lambda",
             vpc=vpc,
-            role = lambda_role,
+            #role = lambda_role,
             #security_groups=[security_group],
             #vpc_subnets=vpc_subnets,
         )
