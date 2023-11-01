@@ -81,8 +81,6 @@ class RootStack(Stack):
                 pip_packages_layer,
             ],
         )
-        vpc=vpc_stack.get_vpc
-        security_group=vpc_stack.get_security_group
 
 
 

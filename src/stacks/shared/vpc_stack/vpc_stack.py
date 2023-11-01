@@ -11,14 +11,6 @@ from aws_cdk import (
 from src.utils.enums.app_environment import AppEnvironment
 
 class VpcStack(NestedStack):
-    @property
-    def get_vpc(self):
-        return self.vpc
-    
-    @property
-    def get_security_group(self):
-        return self.security_group
-    
     def __init__(self, scope: Construct, construct_id: str, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
@@ -72,8 +64,6 @@ class VpcStack(NestedStack):
           availability_zones = Fn.get_azs(),
           private_subnet_ids = ["subnet-0196f5bf0f381892d", "subnet-065e07a109ceae4b8", "subnet-00cce04ed38272020"]
         )
-        self.vpc = vpc
-
         lambda_role = iam_.Role( 
             self,f"{app_environment.get_stage_name()}-vpc-lambda-role",                       
             assumed_by=iam_.ServicePrincipal('lambda.amazonaws.com'),
@@ -98,11 +88,11 @@ class VpcStack(NestedStack):
         )
 
 
-        # --------------------------------------------------------------------
-        # Subnet selection [Private with Egress]
-        vpc_subnets = ec2_.SubnetSelection(
-            subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS,
-        )
+        # # --------------------------------------------------------------------
+        # # Subnet selection [Private with Egress]
+        # vpc_subnets = ec2_.SubnetSelection(
+        #     subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS,
+        # )
 
 
         
