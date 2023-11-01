@@ -41,7 +41,7 @@ class VpcStack(NestedStack):
         if len(private_subnets.subnets) == 0:
             raise Exception("VPC Private subnet not found [PRIVATE_WITH_EGRESS]")
         else:
-            print(f"VPC Private subnet found [PRIVATE_WITH_EGRESS]: {len(private_subnets)}")
+            print(f"VPC Private subnet found [PRIVATE_WITH_EGRESS]: {len(private_subnets.subnets)}")
             print(private_subnets.__dict__)
 
 
