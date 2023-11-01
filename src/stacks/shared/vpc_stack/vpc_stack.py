@@ -37,9 +37,10 @@ class VpcStack(NestedStack):
         # Read Security Group by id
         security_group_id = "sg-0f69387252f2af376"
         security_group = ec2_.SecurityGroup.from_security_group_id(
-            self, f"{app_environment.get_stage_name()}-iti-security-group", 
+            self, 
+            id=f"{app_environment.get_stage_name()}-iti-security-group", 
             security_group_id=security_group_id,
-            vpc=vpc,
+            mutable=False,
         )
 
         # --------------------------------------------------------------------
