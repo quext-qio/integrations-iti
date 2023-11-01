@@ -23,19 +23,15 @@ class VpcStack(NestedStack):
         )
         self.vpc = vpc
         print(f"""
-            VPC found: {vpc.vpc_id}
-            VPC: {vpc}
+        VPC found: {vpc.vpc_id}    
         """)
 
         # --------------------------------------------------------------------
         private_subnets = vpc.select_subnets(subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS)
-        print(f"""
-            VPC Subnet: {private_subnets}
-        """)
         if len(private_subnets.subnets) == 0:
             raise Exception("VPC Private subnet not found [PRIVATE_WITH_EGRESS]")
         else:
-            print(f"VPC Private subnet found [PRIVATE_WITH_EGRESS]: {len(private_subnets.subnets)}")
+            print(f"VPC [PRIVATE_WITH_EGRESS]: {len(private_subnets.subnets)}")
             for subnet in private_subnets.subnets:
                 print(f"VPC Private subnet ID: {subnet.subnet_id}")
             
@@ -43,17 +39,17 @@ class VpcStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Read Security Group by id
-        # security_group_id = app_environment.get_security_group_id()
-        # security_group = ec2_.SecurityGroup.from_security_group_id(
-        #     self, 
-        #     id=f"{app_environment.get_stage_name()}-iti-security-group", 
-        #     security_group_id=security_group_id,
-        # )
+        security_group_id = app_environment.get_security_group_id()
+        security_group = ec2_.SecurityGroup.from_security_group_id(
+            self, 
+            id=f"{app_environment.get_stage_name()}-iti-security-group", 
+            security_group_id=security_group_id,
+        )
         # security_group.add_ingress_rule(
         #     peer=ec2_.Peer.any_ipv4(),
         #     connection=ec2_.Port.all_traffic()
         # )
-        # self.security_group = security_group
+        self.security_group = security_group
 
 
 
@@ -79,7 +75,6 @@ class VpcStack(NestedStack):
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-vpc-lambda",
             vpc=vpc,
-            #role = lambda_role,
-            #security_groups=[security_group],
+            security_groups=[security_group],
             #vpc_subnets=vpc_subnets,
         )
