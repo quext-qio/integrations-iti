@@ -42,7 +42,9 @@ class VpcStack(NestedStack):
             raise Exception("VPC Private subnet not found [PRIVATE_WITH_EGRESS]")
         else:
             print(f"VPC Private subnet found [PRIVATE_WITH_EGRESS]: {len(private_subnets.subnets)}")
-            print(private_subnets.__dict__)
+            for subnet in private_subnets.subnets:
+                print(f"VPC Private subnet: {subnet.__dict__}")
+            
 
 
         # --------------------------------------------------------------------
@@ -80,5 +82,5 @@ class VpcStack(NestedStack):
             function_name=f"{app_environment.get_stage_name()}-vpc-lambda",
             vpc=vpc,
             security_groups=[security_group],
-            vpc_subnets=private_subnets,
+            vpc_subnets=ec2_.SubnetSelection(subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS),
         )
