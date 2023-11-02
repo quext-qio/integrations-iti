@@ -49,20 +49,11 @@ class VpcStack(NestedStack):
             #mutable=False,
             #allow_all_ipv6_outbound=True,
 
-        # security_group.add_ingress_rule(
-        #     peer=ec2_.Peer.any_ipv4(),
-        #     connection=ec2_.Port.all_traffic()
-        # )
+        security_group.add_ingress_rule(
+            peer=ec2_.Peer.any_ipv4(),
+            connection=ec2_.Port.all_traffic()
+        )
         self.security_group = security_group
-
-
-        # subnet_selection = ec2_.SubnetSelection(
-        #     subnet_filters=[
-        #         ec2_.SubnetFilter.by_ids(
-        #             subnet_ids=["subnet-0196f5bf0f381892d", "subnet-065e07a109ceae4b8", "subnet-00cce04ed38272020"]
-        #         )
-        #     ]
-        # )
         
         # --------------------------------------------------------------------
         # Create lambda function instance test VPC 
@@ -81,10 +72,5 @@ class VpcStack(NestedStack):
             vpc_subnets=ec2_.SubnetSelection(
                 subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS,
             ),
-            #vpc_subnets=subnet_selection,
             security_groups=[security_group],
-            # role=iam_.Role.from_role_arn(
-            #     self, f"{app_environment.get_stage_name()}-vpc-lambda-role",
-            #     role_arn='arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters',                          
-            # )
         )
