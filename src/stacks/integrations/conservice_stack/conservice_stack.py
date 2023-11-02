@@ -9,7 +9,6 @@ from src.utils.enums.app_environment import AppEnvironment
 
 
 class ConserviceStack(NestedStack):
-
     def __init__(
         self, scope: Construct,
         construct_id: str,
@@ -20,7 +19,7 @@ class ConserviceStack(NestedStack):
         vpc,
         vpc_subnets,
         security_groups,
-        **kwargs
+        **kwargs,
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 

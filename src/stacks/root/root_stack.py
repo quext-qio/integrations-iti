@@ -147,6 +147,9 @@ class RootStack(Stack):
                 shared_layer,
                 pip_packages_layer,
             ],
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
         )
         
         
@@ -165,6 +168,9 @@ class RootStack(Stack):
                 shared_layer,
                 suds_layer
             ],
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
         )
 
         # --------------------------------------------------------------------
@@ -182,6 +188,9 @@ class RootStack(Stack):
                 pip_packages_layer,
                 shared_layer,
             ],
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
         )
 
         # --------------------------------------------------------------------
@@ -202,6 +211,9 @@ class RootStack(Stack):
                 suds_layer, 
                 shared_layer,
             ],
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
         )
 
         # --------------------------------------------------------------------
@@ -218,6 +230,9 @@ class RootStack(Stack):
                 pip_packages_layer,
                 shared_layer,
             ],
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
         )
 
         # --------------------------------------------------------------------
@@ -234,6 +249,9 @@ class RootStack(Stack):
                 pip_packages_layer,
                 shared_layer,
             ],
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
         )
 
         # --------------------------------------------------------------------
@@ -253,6 +271,9 @@ class RootStack(Stack):
                 crypto_layer,
                 mysql_layer,
             ],
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
         )
 
         # --------------------------------------------------------------------
@@ -270,6 +291,9 @@ class RootStack(Stack):
                 pip_packages_layer,
                 shared_layer,
             ],
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
         )
 
         # --------------------------------------------------------------------
@@ -287,6 +311,9 @@ class RootStack(Stack):
                 suds_layer,
                 shared_layer
             ],
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
         )
 
         # --------------------------------------------------------------------
@@ -325,6 +352,9 @@ class RootStack(Stack):
                 shared_layer,
                 pip_packages_layer,
             ],
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
         )
         
         # --------------------------------------------------------------------
@@ -342,6 +372,9 @@ class RootStack(Stack):
                 shared_layer,
                 pip_packages_layer,
             ],
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
         )
 
         # --------------------------------------------------------------------
@@ -359,6 +392,9 @@ class RootStack(Stack):
                 shared_layer,
                 pip_packages_layer,
             ],
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
         )
 
 
@@ -378,6 +414,9 @@ class RootStack(Stack):
                 pip_packages_layer,
                 mysql_layer
             ],
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
         )
 
         # --------------------------------------------------------------------
@@ -394,5 +433,8 @@ class RootStack(Stack):
                 pip_packages_layer,
                 shared_layer,
             ],
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
         )
 

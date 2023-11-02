@@ -10,7 +10,17 @@ from constructs import Construct
 from src.utils.enums.app_environment import AppEnvironment
 
 class TruePayGoogleStack(NestedStack):
-    def __init__(self, scope: Construct, construct_id: str, environment: dict[str, str], layers:list, app_environment: AppEnvironment, **kwargs) -> None:
+    def __init__(
+        self, scope: Construct, 
+        construct_id: str, 
+        environment: dict[str, str], 
+        layers:list, 
+        app_environment: AppEnvironment, 
+        vpc,
+        vpc_subnets,
+        security_groups,
+        **kwargs,
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Set maximun timeout for lambda functions
@@ -31,6 +41,9 @@ class TruePayGoogleStack(NestedStack):
             function_name=f"{app_environment.get_stage_name()}-trupay-google-job-lambda-function",
             layers=layers,
             timeout=timeout,
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
         )
 
         # Create a CloudWatch Event Rule
