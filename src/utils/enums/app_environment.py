@@ -154,11 +154,11 @@ class AppEnvironment(Enum):
         elif self == AppEnvironment.QA:
             return "vpc-02ef368fcc88d90de"
         elif self == AppEnvironment.STAGE:
-            return "vpc-02ef368fcc88d90de" #TODO: Set correct vpc id
+            return "vpc-026831c28ea2b50a9"
         elif self == AppEnvironment.RC:
-            return "vpc-02ef368fcc88d90de" #TODO: Set correct vpc id
+            return "vpc-026831c28ea2b50a9" 
         elif self == AppEnvironment.PROD:
-            return "vpc-02ef368fcc88d90de" #TODO: Set correct vpc id
+            return "vpc-026831c28ea2b50a9" #TODO: Set correct vpc id for prod
         else:
             raise ValueError(f"Unknown stage [get_vpc_id()]: {self.value}")
         

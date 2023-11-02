@@ -2,7 +2,6 @@ from aws_cdk import (
     NestedStack,
     Duration,
     aws_lambda as lambda_,
-    aws_ec2 as ec2_,
     aws_apigateway as apigateway_,
 )
 from constructs import Construct
@@ -18,9 +17,9 @@ class ConserviceStack(NestedStack):
         layers: list,
         environment: dict,
         app_environment: AppEnvironment,
-        vpc:  ec2_.Vpc,
-        vpc_subnets: ec2_.SubnetSelection,
-        security_groups: list[ec2_.SecurityGroup],
+        vpc,
+        vpc_subnets,
+        security_groups,
         **kwargs
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)

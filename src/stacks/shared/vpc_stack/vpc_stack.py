@@ -13,15 +13,15 @@ from src.utils.enums.app_environment import AppEnvironment
 
 class VpcStack(NestedStack):
     @property
-    def vpc(self) -> ec2_.Vpc:
+    def vpc(self):
         return self._vpc
     
     @property
-    def vpc_subnets(self) -> ec2_.SubnetSelection:
+    def vpc_subnets(self):
         return self._vpc_subnets
     
     @property
-    def security_groups(self) -> list[ec2_.SecurityGroup]:
+    def security_groups(self):
         return self._security_groups
 
     def __init__(self, scope: Construct, construct_id: str, layers: list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs) -> None:
