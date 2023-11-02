@@ -83,8 +83,8 @@ class VpcStack(NestedStack):
             # ),
             vpc_subnets=subnet_selection,
             security_groups=[security_group],
-            role=iam_.Role.from_role_arn(
-                self, f"{app_environment.get_stage_name()}-vpc-lambda-role",
-                role_arn='arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters',                          
-            )
+            # role=iam_.Role.from_role_arn(
+            #     self, f"{app_environment.get_stage_name()}-vpc-lambda-role",
+            #     role_arn='arn:aws:iam::273056594042:role/cdk-integrationApi-get-ssm-parameters',                          
+            # )
         )
