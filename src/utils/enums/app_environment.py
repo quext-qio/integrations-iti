@@ -166,16 +166,16 @@ class AppEnvironment(Enum):
     # Returns Security Group id
     def get_security_group_id(self) -> str:
         if self == AppEnvironment.LOCAL:
-            return "sg-0f69387252f2af376" #TODO: Set correct security group id
+            return "sg-0d2c9d0899d2d8c28" #TODO: Set correct security group id
         elif self == AppEnvironment.DEV:
-            return "sg-0f69387252f2af376"
+            return "sg-0d2c9d0899d2d8c28"
         elif self == AppEnvironment.QA:
-            return "sg-0f69387252f2af376"
+            return "sg-0d2c9d0899d2d8c28"
         elif self == AppEnvironment.STAGE:
-            return "sg-0f69387252f2af376" #TODO: Set correct security group id
+            return "sg-0d2c9d0899d2d8c28" #TODO: Set correct security group id
         elif self == AppEnvironment.RC:
-            return "sg-0f69387252f2af376" #TODO: Set correct security group id
+            return "sg-0d2c9d0899d2d8c28" #TODO: Set correct security group id
         elif self == AppEnvironment.PROD:
-            return "sg-0f69387252f2af376" #TODO: Set correct security group id
+            return "sg-0d2c9d0899d2d8c28" #TODO: Set correct security group id
         else:
             raise ValueError(f"Unknown stage [get_security_group_id()]: {self.value}")

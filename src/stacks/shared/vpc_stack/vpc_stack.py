@@ -10,15 +10,16 @@ from aws_cdk import (
 )
 from src.utils.enums.app_environment import AppEnvironment
 
+
 class VpcStack(NestedStack):
-    def __init__(self, scope: Construct, construct_id: str, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, layers: list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # --------------------------------------------------------------------
         # Read VPC by id
         vpc_id = app_environment.get_vpc_id()
         vpc = ec2_.Vpc.from_lookup(
-            self, f"{app_environment.get_stage_name()}-iti-vpc", 
+            self, f"{app_environment.get_stage_name()}-iti-vpc",
             vpc_id=vpc_id,
         )
         self.vpc = vpc
@@ -27,40 +28,41 @@ class VpcStack(NestedStack):
         """)
 
         # --------------------------------------------------------------------
+        # Subnet selection
         private_subnets = vpc.select_subnets(subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS)
+        subnet_ids = []
         if len(private_subnets.subnets) == 0:
-            raise Exception("VPC Private subnet not found [PRIVATE_WITH_EGRESS]")
+            raise Exception(
+                "VPC Private subnet not found [PRIVATE_WITH_EGRESS]")
         else:
             print(f"VPC [PRIVATE_WITH_EGRESS]: {len(private_subnets.subnets)}")
             for subnet in private_subnets.subnets:
-                print(f"VPC Private subnet ID: {subnet.subnet_id}")
-            
+                subnet_ids.append(subnet.subnet_id)
+                print(f"Subnet ID: {subnet.subnet_id}")
 
+        subnet_selection = ec2_.SubnetSelection(
+            subnet_filters=[
+                ec2_.SubnetFilter.by_ids(
+                    subnet_ids=subnet_ids
+                )
+            ]
+        )
 
         # --------------------------------------------------------------------
         # TODO: Read Security Group by id
         security_group_id = app_environment.get_security_group_id()
         security_group = ec2_.SecurityGroup.from_security_group_id(
-            self, f"{app_environment.get_stage_name()}-iti-security-group", 
+            self, f"{app_environment.get_stage_name()}-iti-security-group",
             security_group_id=security_group_id,
         )
-
-            #allow_all_outbound=True,
-            #mutable=False,
-            #allow_all_ipv6_outbound=True,
-
-        # security_group.add_ingress_rule(
-        #     peer=ec2_.Peer.any_ipv4(),
-        #     connection=ec2_.Port.all_traffic()
-        # )
         self.security_group = security_group
-        
+
         # --------------------------------------------------------------------
-        # Create lambda function instance test VPC 
+        # Create lambda function instance test VPC
         lambda_function = lambda_.Function(
-            self, 
+            self,
             f"{app_environment.get_stage_name()}-vpc-lambda",
-            description="This Lambda is responsible to test VPC", 
+            description="This Lambda is responsible to test VPC",
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
             timeout=Duration.seconds(30),
@@ -69,8 +71,6 @@ class VpcStack(NestedStack):
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-vpc-lambda",
             vpc=vpc,
-            vpc_subnets=ec2_.SubnetSelection(
-                subnet_type=ec2_.SubnetType.PRIVATE_WITH_EGRESS,
-            ),
+            vpc_subnets=subnet_selection,
             security_groups=[security_group],
         )
