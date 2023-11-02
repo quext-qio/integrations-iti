@@ -82,7 +82,7 @@ class RootStack(Stack):
             ],
         )
         vpc = vpc_stack.vpc
-        subnet_selection = vpc_stack.subnet_selection
+        vpc_subnets = vpc_stack.vpc_subnets
         security_groups = vpc_stack.security_groups
 
 
@@ -305,7 +305,7 @@ class RootStack(Stack):
                 shared_layer,
             ],
             vpc=vpc,
-            vpc_subnets=subnet_selection,
+            vpc_subnets=vpc_subnets,
             security_groups=security_groups,
         )
 

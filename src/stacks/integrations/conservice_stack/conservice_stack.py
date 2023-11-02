@@ -19,7 +19,7 @@ class ConserviceStack(NestedStack):
             environment: dict, 
             app_environment: AppEnvironment, 
             vpc:  ec2_.Vpc,
-            subnet_selection: ec2_.SubnetSelection,
+            vpc_subnets: ec2_.SubnetSelection,
             security_groups: list[ec2_.SecurityGroup],
             **kwargs
         ) -> None:
@@ -44,7 +44,7 @@ class ConserviceStack(NestedStack):
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-conservice-lambda-function",
             vpc=vpc,
-            vpc_subnets=subnet_selection,
+            vpc_subnets=vpc_subnets,
             security_groups=security_groups,
         )
 

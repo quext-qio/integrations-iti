@@ -17,8 +17,8 @@ class VpcStack(NestedStack):
         return self._vpc
     
     @property
-    def subnet_selection(self) -> ec2_.SubnetSelection:
-        return self._subnet_selection
+    def vpc_subnets(self) -> ec2_.SubnetSelection:
+        return self._vpc_subnets
     
     @property
     def security_groups(self) -> list[ec2_.SecurityGroup]:
@@ -52,14 +52,14 @@ class VpcStack(NestedStack):
                 subnet_ids.append(subnet.subnet_id)
                 print(f"Subnet ID: {subnet.subnet_id}")
 
-        subnet_selection = ec2_.SubnetSelection(
+        vpc_subnets = ec2_.SubnetSelection(
             subnet_filters=[
                 ec2_.SubnetFilter.by_ids(
                     subnet_ids=subnet_ids
                 )
             ]
         )
-        self._subnet_selection = subnet_selection
+        self._vpc_subnets = vpc_subnets
 
         # --------------------------------------------------------------------
         # TODO: Read Security Group by id
@@ -84,6 +84,6 @@ class VpcStack(NestedStack):
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-vpc-lambda",
             vpc=vpc,
-            vpc_subnets=subnet_selection,
+            vpc_subnets=vpc_subnets,
             security_groups=[security_group],
         )
