@@ -49,10 +49,10 @@ class VpcStack(NestedStack):
             #mutable=False,
             #allow_all_ipv6_outbound=True,
 
-        security_group.add_ingress_rule(
-            peer=ec2_.Peer.any_ipv4(),
-            connection=ec2_.Port.all_traffic()
-        )
+        # security_group.add_ingress_rule(
+        #     peer=ec2_.Peer.any_ipv4(),
+        #     connection=ec2_.Port.all_traffic()
+        # )
         self.security_group = security_group
         
         # --------------------------------------------------------------------
