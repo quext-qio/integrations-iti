@@ -12,6 +12,18 @@ from src.utils.enums.app_environment import AppEnvironment
 
 
 class VpcStack(NestedStack):
+    @property
+    def vpc(self) -> ec2_.Vpc:
+        return self._vpc
+    
+    @property
+    def subnet_selection(self) -> ec2_.SubnetSelection:
+        return self._subnet_selection
+    
+    @property
+    def security_groups(self) -> list[ec2_.SecurityGroup]:
+        return self._security_groups
+
     def __init__(self, scope: Construct, construct_id: str, layers: list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
@@ -22,7 +34,7 @@ class VpcStack(NestedStack):
             self, f"{app_environment.get_stage_name()}-iti-vpc",
             vpc_id=vpc_id,
         )
-        self.vpc = vpc
+        self._vpc = vpc
         print(f"""
         VPC found: {vpc.vpc_id}    
         """)
@@ -47,6 +59,7 @@ class VpcStack(NestedStack):
                 )
             ]
         )
+        self._subnet_selection = subnet_selection
 
         # --------------------------------------------------------------------
         # TODO: Read Security Group by id
@@ -55,7 +68,7 @@ class VpcStack(NestedStack):
             self, f"{app_environment.get_stage_name()}-iti-security-group",
             security_group_id=security_group_id,
         )
-        self.security_group = security_group
+        self._security_groups = [security_group]
 
         # --------------------------------------------------------------------
         # Create lambda function instance test VPC

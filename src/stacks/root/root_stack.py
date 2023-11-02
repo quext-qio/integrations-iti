@@ -81,6 +81,9 @@ class RootStack(Stack):
                 pip_packages_layer,
             ],
         )
+        vpc = vpc_stack.vpc
+        subnet_selection = vpc_stack.subnet_selection
+        security_groups = vpc_stack.security_groups
 
 
 
