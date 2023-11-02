@@ -303,7 +303,10 @@ class RootStack(Stack):
             layers=[
                 pip_packages_layer,
                 shared_layer,
-            ]
+            ],
+            vpc=vpc,
+            vpc_subnets=subnet_selection,
+            security_groups=security_groups,
         )
 
         # --------------------------------------------------------------------
