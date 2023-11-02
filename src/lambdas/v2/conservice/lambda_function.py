@@ -2,7 +2,7 @@ import json
 from schemas.schema_request_post import SchemaRequestPost
 from factory.service_factory import ServiceFactory
 from constants.constants import Constants
-from acl import ACL
+from utils.shared.acl import ACL
 
 def lambda_handler(event, context):
     # Validate ACL
