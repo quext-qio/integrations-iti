@@ -12,17 +12,17 @@ from src.utils.enums.app_environment import AppEnvironment
 class ConserviceStack(NestedStack):
 
     def __init__(
-            self, scope: Construct, 
-            construct_id: str, 
-            api: apigateway_.RestApi, 
-            layers: list, 
-            environment: dict, 
-            app_environment: AppEnvironment, 
-            vpc:  ec2_.Vpc,
-            vpc_subnets: ec2_.SubnetSelection,
-            security_groups: list[ec2_.SecurityGroup],
-            **kwargs
-        ) -> None:
+        self, scope: Construct,
+        construct_id: str,
+        api: apigateway_.RestApi,
+        layers: list,
+        environment: dict,
+        app_environment: AppEnvironment,
+        vpc:  ec2_.Vpc,
+        vpc_subnets: ec2_.SubnetSelection,
+        security_groups: list[ec2_.SecurityGroup],
+        **kwargs
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
@@ -50,12 +50,13 @@ class ConserviceStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Add a resource to the base API and configure CORS options for the resource
-        api = api.add_resource("conservice",
-                               default_cors_preflight_options=apigateway_.CorsOptions(
-                                   allow_methods=allow_methods,
-                                   allow_origins=apigateway_.Cors.ALL_ORIGINS
-                               ),
-                               )
+        api = api.add_resource(
+            "conservice",
+            default_cors_preflight_options=apigateway_.CorsOptions(
+                allow_methods=allow_methods,
+                allow_origins=apigateway_.Cors.ALL_ORIGINS
+            ),
+        )
 
         # --------------------------------------------------------------------
         # Create a Lambda integration instance
