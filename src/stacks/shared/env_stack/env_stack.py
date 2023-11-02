@@ -59,6 +59,7 @@ class EnvStack(NestedStack):
         # --------------------------------------------------------------------
         # Create a dict with the environment variables depending of integration
         custom_domain_name = app_environment.get_api_domain_config()["custom_domain_name"]
+        all_params["ACL_HOST"] = all_params["ACL_HOST_INTERNAL"] #TODO: Remove this line when ACL_HOST is updated in SSM
 
         environment_dict = {
             "placepay": {
