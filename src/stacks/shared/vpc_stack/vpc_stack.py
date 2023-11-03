@@ -130,7 +130,7 @@ class VpcStack(NestedStack):
         # --------------------------------------------------------------------
         # Add a GET method to endpoint
         endpoint.add_method(
-            'POST',
+            'GET',
             endpoint_lambda_integration,
             request_parameters={},
             method_responses=[
