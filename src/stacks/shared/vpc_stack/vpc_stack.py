@@ -5,8 +5,6 @@ from aws_cdk import (
     aws_lambda as lambda_,
     aws_apigateway as apigateway_,
     Duration,
-    aws_iam as iam_,
-    Fn,
 )
 from src.utils.enums.app_environment import AppEnvironment
 
@@ -24,8 +22,22 @@ class VpcStack(NestedStack):
     def security_groups(self):
         return self._security_groups
 
-    def __init__(self, scope: Construct, construct_id: str, layers: list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs) -> None:
+    def __init__(
+        self, scope: Construct, 
+        construct_id: str, 
+        layers: list, 
+        api: apigateway_.RestApi,
+        environment: dict[str, str], 
+        app_environment: AppEnvironment, 
+        **kwargs,
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        # -----------------------------------------------------------------------
+        # Constants
+        timeout = Duration.seconds(900)
+        allow_methods = ['OPTIONS', 'GET']
+
 
         # --------------------------------------------------------------------
         # Read VPC by id
@@ -78,7 +90,7 @@ class VpcStack(NestedStack):
             description="This Lambda is responsible to test VPC",
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
-            timeout=Duration.seconds(30),
+            timeout=timeout,
             code=lambda_.Code.from_asset("./src/lambdas/v1/vpc"),
             handler="lambda_function.lambda_handler",
             layers=layers,
@@ -86,4 +98,47 @@ class VpcStack(NestedStack):
             vpc=vpc,
             vpc_subnets=vpc_subnets,
             security_groups=[security_group],
+        )
+
+        # --------------------------------------------------------------------
+        # Resource to test VPC (GET)
+        endpoint = api.add_resource(
+            "vpc",
+            default_cors_preflight_options=apigateway_.CorsOptions(
+                allow_methods=allow_methods,
+                allow_origins=apigateway_.Cors.ALL_ORIGINS
+            ),
+        )
+
+        # --------------------------------------------------------------------
+        # Create a Lambda integration instance
+        # GET
+        endpoint_lambda_integration = apigateway_.LambdaIntegration(
+            lambda_function,
+            proxy=True,
+            integration_responses=[
+                apigateway_.IntegrationResponse(
+                    status_code="200",
+                    response_templates={"application/json": ""},
+                    response_parameters={
+                        'method.response.header.Access-Control-Allow-Origin': "'*'"
+                    }
+                ),
+            ],
+        )
+
+        # --------------------------------------------------------------------
+        # Add a GET method to endpoint
+        endpoint.add_method(
+            'POST',
+            endpoint_lambda_integration,
+            request_parameters={},
+            method_responses=[
+                apigateway_.MethodResponse(
+                    status_code="200",
+                    response_parameters={
+                        'method.response.header.Access-Control-Allow-Origin': True
+                    }
+                )
+            ],
         )

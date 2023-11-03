@@ -1,4 +1,3 @@
-import json
 from aws_cdk import Stack
 from constructs import Construct
 from src.utils.enums.app_environment import AppEnvironment
@@ -68,24 +67,6 @@ class RootStack(Stack):
         salesforce_layer = layer_stack.get_salesforce_layer
         jira_layer = layer_stack.get_jira_layer
 
-        # --------------------------------------------------------------------
-        # [Shared] VPC Stack
-        # --------------------------------------------------------------------
-        vpc_stack = VpcStack(
-            self, 
-            f"{app_env.get_stage_name()}-{server_name}-vpc-stack",
-            app_environment=app_env,
-            environment=environment["placepay"],
-            layers=[
-                shared_layer,
-                pip_packages_layer,
-            ],
-        )
-        vpc = vpc_stack.vpc
-        vpc_subnets = vpc_stack.vpc_subnets
-        security_groups = vpc_stack.security_groups
-
-
 
         # --------------------------------------------------------------------
         # [Shared] API Stack
@@ -123,6 +104,25 @@ class RootStack(Stack):
         salesforce_resource_v2 = api_v2["salesforce"]
         onetime_link_resource_v2 = api_v2["security"]
         rent_dynamics_resource_v2 = api_v2["rentdynamics"]
+
+
+        # --------------------------------------------------------------------
+        # [Shared] VPC Stack
+        # --------------------------------------------------------------------
+        vpc_stack = VpcStack(
+            self, 
+            f"{app_env.get_stage_name()}-{server_name}-vpc-stack",
+            app_environment=app_env,
+            api=general_resource_v1,
+            environment=environment["placepay"],
+            layers=[
+                shared_layer,
+                pip_packages_layer,
+            ],
+        )
+        vpc = vpc_stack.vpc
+        vpc_subnets = vpc_stack.vpc_subnets
+        security_groups = vpc_stack.security_groups
 
 
         # --------------------------------------------------------------------
