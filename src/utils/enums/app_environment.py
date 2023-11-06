@@ -139,7 +139,7 @@ class AppEnvironment(Enum):
         elif self == AppEnvironment.RC:
             return "vpc-026831c28ea2b50a9" 
         elif self == AppEnvironment.PROD:
-            return "vpc-026831c28ea2b50a9" #TODO: Set correct vpc id for prod
+            return "vpc-0bf8136aac8201bd0" 
         else:
             raise ValueError(f"Unknown stage [get_vpc_id()]: {self.value}")
         
@@ -151,10 +151,10 @@ class AppEnvironment(Enum):
         elif self == AppEnvironment.QA:
             return "sg-0d2c9d0899d2d8c28"
         elif self == AppEnvironment.STAGE:
-            return "sg-0d2c9d0899d2d8c28" #TODO: Set correct security group id
+            return "sg-042123e18be9316f9"
         elif self == AppEnvironment.RC:
-            return "sg-0d2c9d0899d2d8c28" #TODO: Set correct security group id
+            return "sg-042123e18be9316f9" 
         elif self == AppEnvironment.PROD:
-            return "sg-0d2c9d0899d2d8c28" #TODO: Set correct security group id
+            return "sg-042123e18be9316f9" #TODO: Set correct security group id for prod
         else:
             raise ValueError(f"Unknown stage [get_security_group_id()]: {self.value}")
