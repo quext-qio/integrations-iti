@@ -66,7 +66,6 @@ Enjoy!
 ## Deploy specific stage:
 
 Supoorted options:
-- local
 - dev
 - qa
 - stage

@@ -28,7 +28,7 @@ class CommunitiesStack(NestedStack):
         allow_methods = ['OPTIONS', 'POST']
 
         # --------------------------------------------------------------------
-        # Create lambda function instance for (# POST /placepay/new-account)
+        # Create lambda function instance for (# POST /general/communities)
         lambda_function = lambda_.Function(
             self,
             f"{app_environment.get_stage_name()}-auth-get-communities",
