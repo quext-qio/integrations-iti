@@ -7,22 +7,33 @@ from aws_cdk import (
 from constructs import Construct
 from src.utils.enums.app_environment import AppEnvironment
 
-class GuestcardsStack(NestedStack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs):
+class GuestcardsStack(NestedStack):
+    def __init__(
+        self, scope: Construct,
+        construct_id: str,
+        api: apigateway_.RestApi,
+        layers: list,
+        environment: dict[str, str],
+        app_environment: AppEnvironment,
+        vpc,
+        vpc_subnets,
+        security_groups,
+        **kwargs,
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
         # Guestcards
-        timeout=Duration.seconds(900)
-        allow_methods=['OPTIONS', 'POST']
+        timeout = Duration.seconds(900)
+        allow_methods = ['OPTIONS', 'POST']
 
         # --------------------------------------------------------------------
         # Create lambda function instance for (# POST /general/guestcards)
         lambda_function = lambda_.Function(
-            self, 
+            self,
             f"{app_environment.get_stage_name()}-guestcards-lambda-function",
-            description="Guestcards Lambda is responsible save prospects information", 
+            description="Guestcards Lambda is responsible save prospects information",
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
             timeout=timeout,
@@ -30,6 +41,9 @@ class GuestcardsStack(NestedStack):
             handler="lambda_function.lambda_handler",
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-guestcards-lambda-function",
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
         )
 
         # --------------------------------------------------------------------
@@ -40,7 +54,7 @@ class GuestcardsStack(NestedStack):
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
                 allow_origins=apigateway_.Cors.ALL_ORIGINS
-            ),    
+            ),
         )
 
         # --------------------------------------------------------------------
@@ -60,11 +74,10 @@ class GuestcardsStack(NestedStack):
             ],
         )
 
-
         # --------------------------------------------------------------------
         # Add a POST method to endpoint
         post_endpoint.add_method(
-            'POST', 
+            'POST',
             endpoint_lambda_integration,
             request_parameters={},
             method_responses=[
@@ -76,5 +89,3 @@ class GuestcardsStack(NestedStack):
                 )
             ],
         )
-
-        

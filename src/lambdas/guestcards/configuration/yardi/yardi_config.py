@@ -9,6 +9,6 @@ config = {
     'database': os.environ['YARDI_DATABASE'],
     'interface_license': os.environ['YARDI_INTERFACE_LICENSE'],
     'leasing_url': os.environ['LEASING_HOST'],
-    'ips_host': os.environ['IPS_HOST'],
+    'ips_host': os.environ['ACL_HOST'],
     'yardi_url': os.environ['YARDI_URL'],
 }
