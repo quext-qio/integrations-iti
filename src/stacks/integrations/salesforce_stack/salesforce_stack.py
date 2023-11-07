@@ -44,6 +44,10 @@ class SalesforceStack(NestedStack):
             handler="lambda_function.lambda_handler",
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-salesforce-dynamic-lambda-function",
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
+            allow_public_subnet=True,
         )
 
         # --------------------------------------------------------------------
@@ -105,6 +109,10 @@ class SalesforceStack(NestedStack):
             handler="lambda_function.lambda_handler",
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-salesforce-v2-liftoff-lambda-function",
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
+            allow_public_subnet=True,
         )
 
         # --------------------------------------------------------------------

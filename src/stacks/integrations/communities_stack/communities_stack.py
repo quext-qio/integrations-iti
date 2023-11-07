@@ -43,17 +43,19 @@ class CommunitiesStack(NestedStack):
             vpc=vpc,
             vpc_subnets=vpc_subnets,
             security_groups=security_groups,
+            allow_public_subnet=True,
         )
 
         # --------------------------------------------------------------------
         # Add a resource to the base API and configure CORS options for the resource
         # api = /api/v1/general/communities
-        api = api.add_resource("communities",
-                               default_cors_preflight_options=apigateway_.CorsOptions(
-                                   allow_methods=allow_methods,
-                                   allow_origins=apigateway_.Cors.ALL_ORIGINS
-                               ),
-                               )
+        api = api.add_resource(
+            "communities",
+            default_cors_preflight_options=apigateway_.CorsOptions(
+                allow_methods=allow_methods,
+                allow_origins=apigateway_.Cors.ALL_ORIGINS
+            ),
+        )
 
         # --------------------------------------------------------------------
         # Create a Lambda integration instance

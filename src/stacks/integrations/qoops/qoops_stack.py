@@ -54,7 +54,6 @@ class QoopsStack(NestedStack):
                 role_name=f"{app_environment.get_stage_name()}-role",
                 description="Qoops Role for API Gateway to call SQS",
                 assumed_by=iam_.ServicePrincipal("apigateway.amazonaws.com"),
-                # managed_policies=[iam_.ManagedPolicy.from_aws_managed_policy_name("AmazonSQSFullAccess")]
             )
 
             # Attach a policy granting permissions to send messages to the SQS queue
