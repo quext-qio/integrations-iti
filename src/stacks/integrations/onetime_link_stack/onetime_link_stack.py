@@ -44,6 +44,7 @@ class OneTimeLinkStack(NestedStack):
             vpc=vpc,
             vpc_subnets=vpc_subnets,
             security_groups=security_groups,
+            allow_public_subnet=True,
         )
 
         # --------------------------------------------------------------------

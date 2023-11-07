@@ -44,6 +44,7 @@ class PlacepayStack(NestedStack):
             vpc=vpc,
             vpc_subnets=vpc_subnets,
             security_groups=security_groups,
+            allow_public_subnet=True,
         )
 
         # Create lambda function instance for (# GET /placepay/token?accountId=)
@@ -61,6 +62,7 @@ class PlacepayStack(NestedStack):
             vpc=vpc,
             vpc_subnets=vpc_subnets,
             security_groups=security_groups,
+            allow_public_subnet=True,
         )
 
         # --------------------------------------------------------------------

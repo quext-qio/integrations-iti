@@ -47,6 +47,7 @@ class EngrainStack(NestedStack):
             vpc=vpc,
             vpc_subnets=vpc_subnets,
             security_groups=security_groups,
+            allow_public_subnet=True,
         )
 
         # Create a CloudWatch Event Rule
@@ -82,6 +83,7 @@ class EngrainStack(NestedStack):
             vpc=vpc,
             vpc_subnets=vpc_subnets,
             security_groups=security_groups,
+            allow_public_subnet=True,
         )
 
         # Create lambda function instance for (# PATCH /engrain/status)
@@ -99,6 +101,7 @@ class EngrainStack(NestedStack):
             vpc=vpc,
             vpc_subnets=vpc_subnets,
             security_groups=security_groups,
+            allow_public_subnet=True,
         )
 
         # --------------------------------------------------------------------
