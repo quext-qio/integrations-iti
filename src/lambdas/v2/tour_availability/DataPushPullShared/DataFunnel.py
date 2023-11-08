@@ -33,10 +33,6 @@ class DataFunnel:
 
         # If empty response, return an error
         data = response[FunnelConstants.AVAILABLE_TIMES]
-        if len(data) == 0:
-            logging.warn("Funnel services is not responding or has provided an empty payload.")
-            return [], {"message": "Please contact the leasing office by phone to schedule a tour."}
-
         # Remove T of datetime
         new_data = []
         for date in data:
