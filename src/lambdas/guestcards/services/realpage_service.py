@@ -1,4 +1,4 @@
-import json
+import json, re
 from abstract.service_interface import ServiceInterface
 from constants.realpage_constants import RealpageConstants
 from utils.service_response import ServiceResponse
@@ -54,14 +54,18 @@ class RealPageService(ServiceInterface):
             factory = client.factory
         # Preparing auth details from service request
             _auth = client.factory.create('AuthDTO')
-            _auth.pmcid = pmcid if pmcid != "" else ips_response["platformData"]["foreign_customer_id"]
-            _auth.siteid = siteid if siteid != "" else ips_response["platformData"]["foreign_community_id"]
-            _auth.licensekey = licensekey if licensekey != "" else "b5020fd1-d0ff-4559-973f-84bc7cc8e210"
+            _auth.pmcid = ips_response["platformData"]["foreign_customer_id"] if  "foreign_customer_id" in ips_response["platformData"] else pmcid
+            _auth.siteid = ips_response["platformData"]["foreign_community_id"] if "foreign_community_id" in ips_response["platformData"] else siteid
+            _auth.licensekey = licensekey
 
             # Assuming you have a generated class for PhoneNumber
             _phone_number = factory.create('PhoneNumber')
-            _phone_number.type = "Home"
-            _phone_number.number = customer["phone"]
+            cleaned_phone_number = ''.join(filter(str.isdigit, customer["phone"])) 
+            if len(cleaned_phone_number) == 10:
+                cleaned_phone_number = "1" + cleaned_phone_number
+
+            _phone_number.type = "Mobile"
+            _phone_number.number = self.clean_and_validate_phone_number("+"+cleaned_phone_number)
 
             # Assuming you have a generated class for ArrayOfPhoneNumber
             array_of_phone_number = factory.create('ArrayOfPhoneNumber')
@@ -173,6 +177,7 @@ class RealPageService(ServiceInterface):
                             }
             
             except Exception as e:
+                  logging.warn({"Error trying to insert guestcard to Realpage": f"{e}"})
                   return {
                     'statusCode': "500",
                     'body': json.dumps({
@@ -186,5 +191,25 @@ class RealPageService(ServiceInterface):
                     'isBase64Encoded': False  
                 } 
 
-    
+    def clean_and_validate_phone_number(self, number):
+            """
+            Cleans and validates US phone number using regular expression.
+            Returns cleaned phone number if valid, otherwise returns None.
+            """
+            # Regular expression pattern for US phone numbers
+            pattern = re.compile(r'^(\+1)?[\s-]?\(?(\d{3})\)?[\s-]?(\d{3})[\s-]?(\d{4})$')
+            # Check if the number matches the pattern
+            match = pattern.match(number)
+            if not match:
+                return None
+            # Extract and format the phone number components
+            country_code = match.group(1)
+            area_code = match.group(2)
+            prefix = match.group(3)
+            suffix = match.group(4)
+            # Clean the phone number by removing country code and non-digit characters
+            phone_number = f"{country_code} {area_code}-{prefix}-{suffix}"
+            # Return the cleaned phone number
+            return phone_number
+        
         

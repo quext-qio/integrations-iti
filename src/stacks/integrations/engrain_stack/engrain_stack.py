@@ -9,22 +9,34 @@ from aws_cdk import (
 from constructs import Construct
 from src.utils.enums.app_environment import AppEnvironment
 
+
 class EngrainStack(NestedStack):
-    def __init__(self, scope: Construct, construct_id: str, environment: dict[str, str], api: apigateway_.RestApi, layers:list, app_environment: AppEnvironment, **kwargs) -> None:
+    def __init__(
+        self, scope: Construct,
+        construct_id: str,
+        environment: dict[str, str],
+        api: apigateway_.RestApi,
+        layers: list,
+        app_environment: AppEnvironment,
+        vpc,
+        vpc_subnets,
+        security_groups,
+        **kwargs,
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Set maximun timeout for lambda functions
         # -----------------------------------------------------------------------
         # Constants
-        allow_methods=['OPTIONS', 'PATCH', 'GET']
-        timeout=Duration.minutes(15)
-        
+        allow_methods = ['OPTIONS', 'PATCH', 'GET']
+        timeout = Duration.minutes(15)
+
         # --------------------------------------------------------------------
         # Create a Lambda function for Job Purposes
         lambda_fn = lambda_.Function(
             self,
             f"{app_environment.get_stage_name()}-engrain-job-lambda-function",
-            description="Engrain Job Lambda Function", 
+            description="Engrain Job Lambda Function",
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
             code=lambda_.Code.from_asset("./src/lambdas/v1/engrain"),
@@ -32,6 +44,10 @@ class EngrainStack(NestedStack):
             function_name=f"{app_environment.get_stage_name()}-engrain-job-lambda-function",
             layers=layers,
             timeout=timeout,
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
+            allow_public_subnet=True,
         )
 
         # Create a CloudWatch Event Rule
@@ -51,10 +67,10 @@ class EngrainStack(NestedStack):
 
         # --------------------------------------------------------------------
         # Create a Lambdas functions for [API] purposes
-        
+
         # Create lambda function instance for (# GET /engrain/status)
         get_lambda_function = lambda_.Function(
-            self, 
+            self,
             f"{app_environment.get_stage_name()}-engrain-status-lambda-function",
             description="This endpoint is responsible for providing information on the execution permissions of the job, the date and time of the last execution, and if it is currently running.",
             environment=environment,
@@ -64,11 +80,15 @@ class EngrainStack(NestedStack):
             handler="get_lambda_function.lambda_handler",
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-engrain-status-lambda-function",
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
+            allow_public_subnet=True,
         )
-        
+
         # Create lambda function instance for (# PATCH /engrain/status)
         patch_lambda_function = lambda_.Function(
-            self, 
+            self,
             f"{app_environment.get_stage_name()}-engrain-update-status-lambda-function",
             description="This endpoint is responsible to update the execution permissions of the job.",
             environment=environment,
@@ -78,6 +98,10 @@ class EngrainStack(NestedStack):
             handler="patch_lambda_function.lambda_handler",
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-engrain-update-status-lambda-function",
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
+            allow_public_subnet=True,
         )
 
         # --------------------------------------------------------------------
@@ -89,7 +113,7 @@ class EngrainStack(NestedStack):
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
                 allow_origins=apigateway_.Cors.ALL_ORIGINS
-            ),    
+            ),
         )
 
         # Resource to create update the status of the job (PATCH)
@@ -98,7 +122,7 @@ class EngrainStack(NestedStack):
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
                 allow_origins=apigateway_.Cors.ALL_ORIGINS
-            ), 
+            ),
         )
 
         # --------------------------------------------------------------------
@@ -129,14 +153,14 @@ class EngrainStack(NestedStack):
                     response_parameters={
                         'method.response.header.Access-Control-Allow-Origin': "'*'"
                     }
-                ),  
+                ),
             ],
         )
 
         # --------------------------------------------------------------------
         # Add a GET method to endpoint
         get_endpoint.add_method(
-            'GET', 
+            'GET',
             get_endpoint_lambda_integration,
             request_parameters={},
             method_responses=[
@@ -163,4 +187,3 @@ class EngrainStack(NestedStack):
                 ),
             ]
         )
-

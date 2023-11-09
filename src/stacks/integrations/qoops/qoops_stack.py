@@ -12,22 +12,33 @@ from aws_cdk import (
 from constructs import Construct
 from src.utils.enums.app_environment import AppEnvironment
 
-class QoopsStack(NestedStack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs):
+class QoopsStack(NestedStack):
+    def __init__(
+        self, scope: Construct,
+        construct_id: str,
+        api: apigateway_.RestApi,
+        layers: list,
+        environment: dict[str, str],
+        app_environment: AppEnvironment,
+        vpc,
+        vpc_subnets,
+        security_groups,
+        **kwargs,
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
         # Constants
-        timeout=Duration.seconds(900)
-        #allow_methods=['OPTIONS', 'POST']
+        timeout = Duration.seconds(900)
+        # allow_methods=['OPTIONS', 'POST']
 
         # --------------------------------------------------------------------
-        try: 
+        try:
             # Create the QoopsQueue
             queue = sqs_.Queue(
-                self, 
-                f"{app_environment.get_stage_name()}-queue", 
+                self,
+                f"{app_environment.get_stage_name()}-queue",
                 visibility_timeout=timeout,
                 queue_name=f"{app_environment.get_stage_name()}-queue",
             )
@@ -43,7 +54,6 @@ class QoopsStack(NestedStack):
                 role_name=f"{app_environment.get_stage_name()}-role",
                 description="Qoops Role for API Gateway to call SQS",
                 assumed_by=iam_.ServicePrincipal("apigateway.amazonaws.com"),
-                #managed_policies=[iam_.ManagedPolicy.from_aws_managed_policy_name("AmazonSQSFullAccess")]
             )
 
             # Attach a policy granting permissions to send messages to the SQS queue
@@ -64,7 +74,7 @@ class QoopsStack(NestedStack):
             raise PermissionError(f"Error creating role for SQS: {e}")
 
         # --------------------------------------------------------------------
-        # Create API Integration Response object: 
+        # Create API Integration Response object:
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_apigateway/IntegrationResponse.html
         integration_response = apigateway_.IntegrationResponse(
             status_code="200",
@@ -72,22 +82,25 @@ class QoopsStack(NestedStack):
         )
 
         # --------------------------------------------------------------------
-        # Create API Integration Options object: 
+        # Create API Integration Options object:
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_apigateway/IntegrationOptions.html
         try:
             api_integration_options = apigateway_.IntegrationOptions(
                 credentials_role=rest_api_role,
                 integration_responses=[integration_response],
-                request_templates={"application/json": "Action=SendMessage&MessageBody=$input.body"},
+                request_templates={
+                    "application/json": "Action=SendMessage&MessageBody=$input.body"},
                 passthrough_behavior=apigateway_.PassthroughBehavior.NEVER,
-                request_parameters={"integration.request.header.Content-Type": "'application/x-www-form-urlencoded'"},
+                request_parameters={
+                    "integration.request.header.Content-Type": "'application/x-www-form-urlencoded'"},
             )
         except Exception as e:
             print(f"Error creating API Integration Options: {e}")
-            raise PermissionError(f"Error creating API Integration Options: {e}")
+            raise PermissionError(
+                f"Error creating API Integration Options: {e}")
 
         # --------------------------------------------------------------------
-        # Create AWS Integration Object for SQS: 
+        # Create AWS Integration Object for SQS:
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_apigateway/AwsIntegration.html
         api_resource_sqs_integration = apigateway_.AwsIntegration(
             service="sqs",
@@ -97,7 +110,7 @@ class QoopsStack(NestedStack):
         )
 
         # --------------------------------------------------------------------
-        # Create a Method Response Object: 
+        # Create a Method Response Object:
         # https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_apigateway/MethodResponse.html
         method_response = apigateway_.MethodResponse(status_code="200")
 
@@ -109,12 +122,11 @@ class QoopsStack(NestedStack):
             method_responses=[method_response]
         )
 
-
         # --------------------------------------------------------------------
         # Creating Lambda function that will be triggered by the SQS Queue
         sqs_lambda = lambda_.Function(
             self, f"{app_environment.get_stage_name()}-qoops-lambda",
-            description=f"This lambda is used to report Jira issues using the qoops-queue", 
+            description=f"This lambda is used to report Jira issues using the qoops-queue",
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
             timeout=timeout,
@@ -138,16 +150,16 @@ class QoopsStack(NestedStack):
 
         except Exception as e:
             print(f"Error checking event source mapping: {e}")
-   
+
         # If the event source mapping does not exist, create it
         if not mapping_exists:
-            try: 
+            try:
                 # Create an SQS event source for Lambda
                 sqs_event_source = lambda_event_sources_.SqsEventSource(queue)
             except Exception as e:
                 print(f"Error creating SQS event source: {e}")
                 raise PermissionError(f"Error creating SQS event source: {e}")
-            
+
             try:
                 # Add SQS event source to the Lambda function
                 sqs_lambda.add_event_source(sqs_event_source)

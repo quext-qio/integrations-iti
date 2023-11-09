@@ -7,24 +7,36 @@ from aws_cdk import (
 from constructs import Construct
 from src.utils.enums.app_environment import AppEnvironment
 
-class SalesforceStack(NestedStack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, api_v2: apigateway_.RestApi, layers:list, environment: dict[str, str], app_environment: AppEnvironment, **kwargs):
+class SalesforceStack(NestedStack):
+    def __init__(
+        self, scope: Construct,
+        construct_id: str,
+        api: apigateway_.RestApi,
+        api_v2: apigateway_.RestApi,
+        layers: list,
+        environment: dict[str, str],
+        app_environment: AppEnvironment,
+        vpc,
+        vpc_subnets,
+        security_groups,
+        **kwargs,
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # -----------------------------------------------------------------------
         # Constants
-        timeout=Duration.seconds(900)
-        allow_methods=['OPTIONS', 'GET']
-        
+        timeout = Duration.seconds(900)
+        allow_methods = ['OPTIONS', 'GET']
+
         # --------------------------------------------------------------------
         # Version #1
         # --------------------------------------------------------------------
         # Create lambda function instance for (# GET api/v1/salesforce/liftoff)
         lambda_function = lambda_.Function(
-            self, 
+            self,
             f"{app_environment.get_stage_name()}-salesforce-v1-liftoff-lambda-function",
-            description="Salesforce Lambda is responsible retrieving data from Salesforce using simple_salesforce library.", 
+            description="Salesforce Lambda is responsible retrieving data from Salesforce using simple_salesforce library.",
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_8,
             timeout=timeout,
@@ -32,8 +44,11 @@ class SalesforceStack(NestedStack):
             handler="lambda_function.lambda_handler",
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-salesforce-dynamic-lambda-function",
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
+            allow_public_subnet=True,
         )
-        
 
         # --------------------------------------------------------------------
         # Resource to execute query (GET)
@@ -42,9 +57,8 @@ class SalesforceStack(NestedStack):
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
                 allow_origins=apigateway_.Cors.ALL_ORIGINS
-            ),  
+            ),
         )
-        
 
         # --------------------------------------------------------------------
         # Create a Lambda integration instance
@@ -66,7 +80,7 @@ class SalesforceStack(NestedStack):
         # --------------------------------------------------------------------
         # Add a GET method to endpoint
         get_endpoint.add_method(
-            'GET', 
+            'GET',
             get_endpoint_lambda_integration,
             request_parameters={},
             method_responses=[
@@ -77,7 +91,7 @@ class SalesforceStack(NestedStack):
                     }
                 ),
             ],
-            #api_key_required=True,
+            # api_key_required=True,
         )
 
         # --------------------------------------------------------------------
@@ -85,9 +99,9 @@ class SalesforceStack(NestedStack):
         # --------------------------------------------------------------------
         # Create lambda function instance for (# GET api/v2/salesforce/liftoff)
         lambda_function_v2 = lambda_.Function(
-            self, 
+            self,
             f"{app_environment.get_stage_name()}-salesforce-v2-liftoff-lambda-function",
-            description="Salesforce V2 Lambda is responsible retrieving data from Salesforce using simple_salesforce library.", 
+            description="Salesforce V2 Lambda is responsible retrieving data from Salesforce using simple_salesforce library.",
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_8,
             timeout=timeout,
@@ -95,8 +109,11 @@ class SalesforceStack(NestedStack):
             handler="lambda_function.lambda_handler",
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-salesforce-v2-liftoff-lambda-function",
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
+            allow_public_subnet=True,
         )
-        
 
         # --------------------------------------------------------------------
         # Resource to execute query (GET)
@@ -105,9 +122,8 @@ class SalesforceStack(NestedStack):
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
                 allow_origins=apigateway_.Cors.ALL_ORIGINS
-            ),  
+            ),
         )
-        
 
         # --------------------------------------------------------------------
         # Create a Lambda integration instance
@@ -129,7 +145,7 @@ class SalesforceStack(NestedStack):
         # --------------------------------------------------------------------
         # Add a GET method to endpoint
         get_endpoint_v2.add_method(
-            'GET', 
+            'GET',
             get_endpoint_lambda_integration_v2,
             request_parameters={},
             method_responses=[

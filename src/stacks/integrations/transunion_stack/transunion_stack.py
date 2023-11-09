@@ -3,25 +3,36 @@ from aws_cdk import (
     Duration,
     aws_lambda as lambda_,
     aws_apigateway as apigateway_
-    
+
 )
 from constructs import Construct
 from src.utils.enums.app_environment import AppEnvironment
 
-class TransUnionStack(NestedStack):
 
-    def __init__(self, scope: Construct, construct_id: str, api: apigateway_.RestApi, layers: list, environment: dict, app_environment: AppEnvironment, **kwargs) -> None:
+class TransUnionStack(NestedStack):
+    def __init__(
+        self, scope: Construct,
+        construct_id: str,
+        api: apigateway_.RestApi,
+        layers: list,
+        environment: dict,
+        app_environment: AppEnvironment,
+        vpc,
+        vpc_subnets,
+        security_groups,
+        **kwargs
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        timeout=Duration.seconds(900)
-        allow_methods=["OPTIONS", "POST"]
+        timeout = Duration.seconds(900)
+        allow_methods = ["OPTIONS", "POST"]
 
         # ------------- handles the identity lambda ------------- #
         # Creates lambda function instance for (# POST /transunion/identity)
         identity_lambda_function = lambda_.Function(
-            self, 
+            self,
             f"{app_environment.get_stage_name()}-transunion-identity-lambda-function",
-            description="Handles the verification and evaluation processes with TransUnion", 
+            description="Handles the verification and evaluation processes with TransUnion",
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
             timeout=timeout,
@@ -29,6 +40,10 @@ class TransUnionStack(NestedStack):
             handler="identity_lambda_function.lambda_handler",
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-transunion-identity-lambda-function",
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
+            allow_public_subnet=True,
         )
 
         # Identity
@@ -37,7 +52,7 @@ class TransUnionStack(NestedStack):
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
                 allow_origins=apigateway_.Cors.ALL_ORIGINS
-            ),    
+            ),
         )
 
         # Create a Lambda integration instance
@@ -50,7 +65,7 @@ class TransUnionStack(NestedStack):
                     status_code="200",
                     response_templates={"application/json": ""},
                     response_parameters={
-                        "method.response.header.Access-Control-Allow-Origin":"'*'"
+                        "method.response.header.Access-Control-Allow-Origin": "'*'"
                     }
                 ),
             ],
@@ -58,7 +73,7 @@ class TransUnionStack(NestedStack):
 
         # Add a POST method to endpoint
         identity_endpoint.add_method(
-            "POST", 
+            "POST",
             identity_endpoint_lambda_integration,
             request_parameters={},
             method_responses=[
@@ -74,9 +89,9 @@ class TransUnionStack(NestedStack):
         # ------------- handles the resident screening lambda ------------- #
         # Creates lambda function instance for (# POST /transunion/screening)
         screening_lambda_function = lambda_.Function(
-            self, 
+            self,
             f"{app_environment.get_stage_name()}-transunion-screening-lambda-function",
-            description="Handles the resident screening processes with TransUnion", 
+            description="Handles the resident screening processes with TransUnion",
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
             timeout=timeout,
@@ -84,6 +99,10 @@ class TransUnionStack(NestedStack):
             handler="screening_lambda_function.lambda_handler",
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-transunion-screening-lambda-function",
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
+            allow_public_subnet=True,
         )
 
         # Resident screening
@@ -92,7 +111,7 @@ class TransUnionStack(NestedStack):
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
                 allow_origins=apigateway_.Cors.ALL_ORIGINS
-            ),    
+            ),
         )
 
         # Create a Lambda integration instance
@@ -104,7 +123,7 @@ class TransUnionStack(NestedStack):
                     status_code="200",
                     response_templates={"application/json": ""},
                     response_parameters={
-                        "method.response.header.Access-Control-Allow-Origin":"'*'"
+                        "method.response.header.Access-Control-Allow-Origin": "'*'"
                     }
                 ),
             ],
@@ -112,7 +131,7 @@ class TransUnionStack(NestedStack):
 
         # Add a POST method to endpoint
         screening_endpoint.add_method(
-            "POST", 
+            "POST",
             screening_endpoint_lambda_integration,
             request_parameters={},
             method_responses=[
@@ -128,9 +147,9 @@ class TransUnionStack(NestedStack):
         # ------------- handles the postback lambda ------------- #
         # Creates lambda function instance for (# POST /transunion/postback)
         postback_lambda_function = lambda_.Function(
-            self, 
+            self,
             f"{app_environment.get_stage_name()}-transunion-postback-lambda-function",
-            description="Handles the Postback webhook for TransUnion", 
+            description="Handles the Postback webhook for TransUnion",
             environment=environment,
             runtime=lambda_.Runtime.PYTHON_3_10,
             timeout=timeout,
@@ -138,6 +157,10 @@ class TransUnionStack(NestedStack):
             handler="postback_lambda_function.lambda_handler",
             layers=layers,
             function_name=f"{app_environment.get_stage_name()}-transunion-postback-lambda-function",
+            vpc=vpc,
+            vpc_subnets=vpc_subnets,
+            security_groups=security_groups,
+            allow_public_subnet=True,
         )
 
         # Postback webhook
@@ -146,7 +169,7 @@ class TransUnionStack(NestedStack):
             default_cors_preflight_options=apigateway_.CorsOptions(
                 allow_methods=allow_methods,
                 allow_origins=apigateway_.Cors.ALL_ORIGINS
-            ),    
+            ),
         )
 
         # Create a Lambda integration instance
@@ -158,7 +181,7 @@ class TransUnionStack(NestedStack):
                     status_code="200",
                     response_templates={"application/json": ""},
                     response_parameters={
-                        "method.response.header.Access-Control-Allow-Origin":"'*'"
+                        "method.response.header.Access-Control-Allow-Origin": "'*'"
                     }
                 ),
             ],
@@ -166,7 +189,7 @@ class TransUnionStack(NestedStack):
 
         # Add a POST method to endpoint
         postback_endpoint.add_method(
-            "POST", 
+            "POST",
             postback_endpoint_lambda_integration,
             request_parameters={},
             method_responses=[
@@ -178,4 +201,3 @@ class TransUnionStack(NestedStack):
                 )
             ],
         )
-

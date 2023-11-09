@@ -19,6 +19,7 @@ class SpherexxService:
         first_contact =  True
         tour_information = None
         property_id = ips_response["platformData"]["foreign_community_id"]
+        community_name = ips_response["platformData"]["community_name"]
         move_in_date = body["guestPreference"]["moveInDate"]
 
         if "T" in move_in_date:
@@ -80,7 +81,7 @@ class SpherexxService:
         body_json["LeadManagement"]["Prospects"]["Prospect"]["Customers"]["Customer"].update({
                         "Identification": [
                             {
-                                "@IDValue": "MITS Test Property",
+                                "@IDValue": community_name,
                                 "@IDType": "PropertyName"
                             },
                             {
