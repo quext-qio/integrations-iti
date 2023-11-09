@@ -49,7 +49,8 @@ def lambda_handler(event, context):
         ali = active_letters_of_intent_query_result
 
         # IP Data
-        ip = sc-ic
+        #ip = sc-ic
+        ip = 1319 + sc-ic
 
         # Data to return
         query_result = {
