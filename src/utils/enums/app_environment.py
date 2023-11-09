@@ -155,6 +155,6 @@ class AppEnvironment(Enum):
         elif self == AppEnvironment.RC:
             return "sg-042123e18be9316f9" 
         elif self == AppEnvironment.PROD:
-            return "sg-042123e18be9316f9" #TODO: Set correct security group id for prod
+            return "sg-0999fa42519663246"
         else:
             raise ValueError(f"Unknown stage [get_security_group_id()]: {self.value}")
