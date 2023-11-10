@@ -1,4 +1,6 @@
-import datetime, re
+import datetime
+import re
+
 
 class RentDynamicsMapper:
 
@@ -30,14 +32,15 @@ class RentDynamicsMapper:
                 "isPaid": item["amount"] if (transaction_type != "payment") or is_credit else None
             }
 
-            trans_date = datetime.datetime.strptime(item["post_date"], "%Y-%m-%d %H:%M:%S")
+            trans_date = datetime.datetime.strptime(
+                item["post_date"], "%Y-%m-%d %H:%M:%S")
             expire_date = trans_date + datetime.timedelta(days=30)
             transaction_record['description'] = f"{item['charge_code_name']} for {trans_date} to {expire_date}"
 
             result.append(transaction_record)
 
         return result
-    
+
     @staticmethod
     def setChargeCode(data):
         result = []
@@ -50,7 +53,7 @@ class RentDynamicsMapper:
             result.append(charge_record)
 
         return result
-    
+
     @staticmethod
     def setResidentDetails(data):
         result = []
@@ -86,7 +89,7 @@ class RentDynamicsMapper:
 
         result.extend(list(resident_dict.values()))
         return result
-    
+
     @staticmethod
     def setCustomerEventDetails(data):
         result = []
@@ -110,7 +113,7 @@ class RentDynamicsMapper:
                 "personID": item["persons.id"]
             }
             result.append(event_record)
-        
+
         return result
 
     @staticmethod
@@ -127,7 +130,8 @@ class RentDynamicsMapper:
             unit_is_active = item["is_active"]
 
             if floor_plan_id not in unit_dict:
-                description = str(item["bedrooms"]) + " Bed, " + str(item["bathrooms"]) + " Bath"
+                description = str(item["bedrooms"]) + \
+                    " Bed, " + str(item["bathrooms"]) + " Bath"
                 average_sqft = int(item["square_feet"])
                 unit_dict[floor_plan_id] = {
                     'floorPlanId': floor_plan_id,
@@ -169,7 +173,7 @@ class RentDynamicsMapper:
 
         result.extend(list(unit_dict.values()))
         return result
-    
+
     @staticmethod
     def setPropertyDetails(data):
         result = []
@@ -183,6 +187,6 @@ class RentDynamicsMapper:
                      'zip': item["postal"],
                      'phoneNumber': item["phone"]
                      }
-            
+
             result.append(_data)
         return result
