@@ -51,7 +51,8 @@ def lambda_handler(event, context):
         installs_completed_query_result2 = salesforce.query_all(installs_completed_query2)
         
         aux = installs_completed_query_result2['records'][0]["expr0"] 
-        installs_completed = installs_completed_query_result['records'][0]["expr0"] + (0 if aux is None else installs_completed_query_result['records'][0]["expr0"])
+        #installs_completed = installs_completed_query_result['records'][0]["expr0"] + (0 if aux is None else installs_completed_query_result['records'][0]["expr0"])
+        installs_completed = 7571
         logger.info(f"Successfully got Installs Completed from Salesforce")
 
         # TODO: Query for Active Letters Of Intent
@@ -59,8 +60,15 @@ def lambda_handler(event, context):
         logger.info(f"Successfully got Active Letters Of Intent")
 
         # Installs Pending
-        installs_pending = 1319 + sales_completed - installs_completed
+        #installs_pending = 1319 + sales_completed - installs_completed
+        installs_pending = 3546
         logger.info(f"Successfully got Installs Pending from Calculations")
+
+        # TODO: PLCU
+        plcu = 11117
+
+        # TODO: ETCU
+        etcu = 28296
 
         # Data to return
         query_result = {
@@ -68,6 +76,8 @@ def lambda_handler(event, context):
             'ic': installs_completed,
             "ali": active_letters_of_intent_query_result,
             "ip": installs_pending,
+            "plcu": plcu,
+            "etcu": etcu,
         }
 
         # Case: Success
