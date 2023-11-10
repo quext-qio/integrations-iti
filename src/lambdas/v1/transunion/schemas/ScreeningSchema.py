@@ -10,7 +10,6 @@ class ValidationConstants:
 
 class ScreeningSchema:
     def __init__(self, _data):
-        print(_data)
 
         self.schema_request_post = {
             "application": {

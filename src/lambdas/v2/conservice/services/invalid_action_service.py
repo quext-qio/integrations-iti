@@ -2,8 +2,10 @@ import json
 from abstract.service_interface import ServiceInterface
 from constants.constants import Constants
 
+
 class InvalidActionService(ServiceInterface):
-    def get_data(self, path_parameters: dict, body: dict):
+    def get_data(self, path_parameters: dict, body: dict, logger):
+        logger.warning(f'Invalid action: {path_parameters}, body: {body}')
         return {
             'statusCode': Constants.HTTP_BAD_RESPONSE_CODE,
             'body': json.dumps({
@@ -16,7 +18,7 @@ class InvalidActionService(ServiceInterface):
             }),
             'headers': {
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',  
+                'Access-Control-Allow-Origin': '*',
             },
-            'isBase64Encoded': False  
+            'isBase64Encoded': False
         }

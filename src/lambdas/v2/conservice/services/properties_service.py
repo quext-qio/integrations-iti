@@ -1,9 +1,11 @@
-import json, requests
+import json
+import requests
 from abstract.service_interface import ServiceInterface
 from constants.constants import Constants
 
+
 class PropertiesService(ServiceInterface):
-    def get_data(self, body: dict):
+    def get_data(self, body: dict, logger):
         conservice_outgoing = Constants.HOST + Constants.PATH
         headers = {
             'Content-Type': 'application/json'
@@ -11,12 +13,20 @@ class PropertiesService(ServiceInterface):
 
         try:
             # Call conservice outgoing
-            response = requests.get(conservice_outgoing, headers=headers, params= body)
+            logger.info(
+                f'Calling Conservice endpoint {conservice_outgoing} with payload: {body} to get properties')
+            response = requests.get(
+                conservice_outgoing,
+                headers=headers,
+                params=body
+            )
+            logger.info(
+                f'Conservice response status code: {response.status_code}')
             response_data = {
-                    "properties": [self.exclude_keys(item) for item in json.loads(response.text)[Constants.PROPERTIES]]
-                }
+                "properties": [self.exclude_keys(item) for item in json.loads(response.text)[Constants.PROPERTIES]]
+            }
+            logger.info(f'Conservice response data: {response_data}')
 
-       
             return {
                 'statusCode': Constants.HTTP_GOOD_RESPONSE_CODE,
                 'body': json.dumps({
@@ -25,12 +35,14 @@ class PropertiesService(ServiceInterface):
                 }),
                 'headers': {
                     'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',  
+                    'Access-Control-Allow-Origin': '*',
                 },
-                'isBase64Encoded': False  
+                'isBase64Encoded': False
             }
 
         except Exception as e:
+            logger.error(
+                f"Error trying to call Conservice endpoint {conservice_outgoing}: {e}")
             return {
                 'statusCode': Constants.HTTP_BAD_RESPONSE_CODE,
                 'body': json.dumps({
@@ -43,13 +55,11 @@ class PropertiesService(ServiceInterface):
                 }),
                 'headers': {
                     'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',  
+                    'Access-Control-Allow-Origin': '*',
                 },
-                'isBase64Encoded': False  
+                'isBase64Encoded': False
             }
-    
 
-                
     def exclude_keys(self, d, keys=[Constants.METHODS]):
         """
         Remove the method keys from the input payload 

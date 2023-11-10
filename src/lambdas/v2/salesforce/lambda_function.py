@@ -2,10 +2,16 @@ import json
 from global_config.config import salesforce_config
 from simple_salesforce import Salesforce
 from acl import ACL
+from qoops_logger import Logger
+
+# ----------------------------------------------------------------------------------------
+# Create Logger instance
+logger = Logger().instance(f"(ITI) Salesforce [Lift-off] Lambda")
+
 
 # version: V2
 def lambda_handler(event, context):
-    print(f"Event: {event}, context: {context}")
+    logger.info(f"Executing with event: {event}, context: {context}")
     
     # ---------------------------------------------------------------------------------------------
     # AccessControl
@@ -24,44 +30,48 @@ def lambda_handler(event, context):
         password = salesforce_config['password']
         security_token = salesforce_config['security_token']
         
-        # Salesforce authentication 
+        # Salesforce authentication
+        logger.info(f"Authenticating to Salesforce with username: {username}") 
         salesforce = Salesforce(username=username, password=password, security_token=security_token)
-        
-        # Query for Sales Completed 
+        logger.info(f"Successfully authenticated to Salesforce with username: {username}")
+
+        # Query for Sales Completed
+        logger.info(f"Trying to get Sales Completed from Salesforce") 
         sales_completed_query = "SELECT sum(Total_Units__c) FROM Opportunity where Product_Family__c = 'IoT'  and (not Name like '%test%') and StageName ='Closed Won' group by StageName Having sum(Total_Units__c) > 0"
         sales_completed_query_result = salesforce.query_all(sales_completed_query)
-        sc = sales_completed_query_result['records'][0]["expr0"]
+        sales_completed = sales_completed_query_result['records'][0]["expr0"]
+        logger.info(f"Successfully got Sales Completed from Salesforce")
 
         # Query for Installs Completed
+        logger.info(f"Trying to get Installs Completed from Salesforce")
         installs_completed_query = "select sum(Units__c) from Property__c where IoT__c = true and (not Name like '%test%') and (IoT_Project_Status__c = 'Completed')"
         installs_completed_query2 = "select sum(Number_of_Units_Installed__c) from Property__c where IoT__c = true and (not Name like '%test%') and (IoT_Project_Status__c <> 'Completed')"
         
         installs_completed_query_result = salesforce.query_all(installs_completed_query)
         installs_completed_query_result2 = salesforce.query_all(installs_completed_query2)
         
-
         aux = installs_completed_query_result2['records'][0]["expr0"] 
-        ic = installs_completed_query_result['records'][0]["expr0"] + (0 if aux is None else installs_completed_query_result['records'][0]["expr0"])
-        
-        # TODO: Query for Active Letters Of Intent
-        active_letters_of_intent_query = ""
-        active_letters_of_intent_query_result = 5400
-        ali = active_letters_of_intent_query_result
+        installs_completed = installs_completed_query_result['records'][0]["expr0"] + (0 if aux is None else installs_completed_query_result['records'][0]["expr0"])
+        logger.info(f"Successfully got Installs Completed from Salesforce")
 
-        # IP Data
-        #ip = sc-ic
-        ip = 1319 + sc-ic
+        # TODO: Query for Active Letters Of Intent
+        active_letters_of_intent_query_result = 5400
+        logger.info(f"Successfully got Active Letters Of Intent")
+
+        # Installs Pending
+        installs_pending = 1319 + sales_completed - installs_completed
+        logger.info(f"Successfully got Installs Pending from Calculations")
 
         # Data to return
         query_result = {
-            "sc": sc,
-            'ic': ic,
-            "ali": ali,
-            "ip": ip,
+            "sc": sales_completed,
+            'ic': installs_completed,
+            "ali": active_letters_of_intent_query_result,
+            "ip": installs_pending,
         }
 
-
         # Case: Success
+        logger.info(f"Successfully got data: {query_result}")
         return {
             'statusCode': "200",
             'body': json.dumps({
@@ -77,7 +87,7 @@ def lambda_handler(event, context):
     
     except Exception as e:
         # Case: Internal Server Error
-        print(f"Unhandled exception in [Salesforce flow]: {e}")
+        logger.error(f"Unhandled exception in [Salesforce flow]: {e}")
         return {
             'statusCode': "500",
             'body': json.dumps({

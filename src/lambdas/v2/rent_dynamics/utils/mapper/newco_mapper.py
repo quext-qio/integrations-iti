@@ -1,4 +1,3 @@
-import json
 from decimal import Decimal
 from contextlib import closing
 from controller.query_controller import QueryController

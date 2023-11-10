@@ -1,6 +1,5 @@
 import json
 import requests
-from datetime import datetime
 from configuration.config import trupay_config
 from models.trupay_data import Employee
 from qoops_logger import Logger
