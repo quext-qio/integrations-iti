@@ -16,8 +16,7 @@ class DataController:
         current_time = datetime.now(cst_timezone).strftime("%Y-%m-%d %H:%M:%S")
         
         # Filter dates greater than or equal to the current time
-        available_dates = [date for date in data["data"]["availableTimes"] if date >= current_time]
-
+        available_dates = [date for date in data if date >= current_time]
 
         response = { 
             "data": {   
@@ -25,4 +24,5 @@ class DataController:
             },  
             "error": self.errors    
         }
+        
         return code, response
