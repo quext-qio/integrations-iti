@@ -2,5 +2,5 @@ from abc import ABC, abstractmethod
 
 class ServiceInterface(ABC):
     @abstractmethod
-    def get_data(self, path_parameters: dict, body: dict) -> any:
+    def get_data(self, path_parameters: dict, body: dict, logger) -> any:
         pass

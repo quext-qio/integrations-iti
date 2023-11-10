@@ -2,11 +2,17 @@ import os
 import json
 import requests
 import time
-
 from Utils.Converter import Converter
 from Utils.Constants import constants
+from qoops_logger import Logger
+
+# ----------------------------------------------------------------------------------------
+# Create Logger instance
+logger = Logger().instance(f"(ITI) TransUnion Postback Lambda")
+
 
 def lambda_handler(event, context):
+    logger.info(f"Executing with event: {event}, context: {context}")
     payload = event["body"]
     leasing_host = os.environ["LEASING_HOST"]
     leasing_background_screening_endpoint = os.environ["LEASING_BACKGROUND_SCREENING_ENDPOINT"]
@@ -20,10 +26,11 @@ def lambda_handler(event, context):
 
     # populate the applicants array with the payload data
     for applicant in dict_response["gateway"]["application"]["applicants"]["applicant"]:
-        caution_notes = applicant["scoreResult"]["cautionNotes"] if "cautionNotes" in applicant["scoreResult"] else {}
+        caution_notes = applicant["scoreResult"]["cautionNotes"] if "cautionNotes" in applicant["scoreResult"] else {
+        }
         notes = []
 
-        # creates an array with the cautions notes 
+        # creates an array with the cautions notes
         for key, value in caution_notes.items():
             notes.append(value)
 
@@ -38,8 +45,8 @@ def lambda_handler(event, context):
         }
 
         applicants.append(new_applicant)
-    
-    # gets the application number 
+
+    # gets the application number
     application_number = dict_response["gateway"]["application"]["applicationNumber"]
     household_id = ""
 
@@ -48,22 +55,26 @@ def lambda_handler(event, context):
         iterations = 0
 
         while success == False:
-            response = requests.get(f"{leasing_host}{os.environ['LEASING_FIND_BY_NUMBER']}/{application_number}")
+            response = requests.get(
+                f"{leasing_host}{os.environ['LEASING_FIND_BY_NUMBER']}/{application_number}")
             household_id = response.text
             iterations += 1
-            
+
             if (household_id != "[]" and response.status_code == constants["HTTP_GOOD_RESPONSE_CODE"]) or iterations == constants["BACKGROUND_SCREENING_MAX_ITERATIONS"]:
                 success = True
             else:
                 time.sleep(1)
-            
-        print(f"iterations done: {iterations} - for this application number: {application_number}")
+
+        logger.info(
+            f"iterations done: {iterations} - for this application number: {application_number}")
 
         if household_id == "[]" or response.status_code != constants["HTTP_GOOD_RESPONSE_CODE"]:
-            temp_response = json.loads(household_id) if "{" in household_id else f"Unable to find the house hold id for this application number: {application_number}"
-            
-            print(f"The status response of the get household id (find-by-number) endpoint wasn't successful: {response.status_code}")
-            
+            temp_response = json.loads(
+                household_id) if "{" in household_id else f"Unable to find the house hold id for this application number: {application_number}"
+
+            logger.warning(
+                f"The status response of the get household id (find-by-number) endpoint wasn't successful: {response.status_code}")
+
             return {
                 "statusCode": response.status_code if response.status_code != constants["HTTP_GOOD_RESPONSE_CODE"] else 404,
                 "body": json.dumps({
@@ -72,12 +83,14 @@ def lambda_handler(event, context):
                 }),
                 "headers": {
                     "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",  
+                    "Access-Control-Allow-Origin": "*",
                 },
-                "isBase64Encoded": False  
+                "isBase64Encoded": False
             }
     except Exception as e:
-      return {
+        logger.error(
+            f"Error getting the household id using application number: {application_number} : {e}")
+        return {
             "statusCode": constants["HTTP_ERROR_CODE"],
             "body": json.dumps({
                 "data": [],
@@ -85,9 +98,9 @@ def lambda_handler(event, context):
             }),
             "headers": {
                 "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",  
+                "Access-Control-Allow-Origin": "*",
             },
-            "isBase64Encoded": False  
+            "isBase64Encoded": False
         }
 
     # creates the headers & payload for the background screening update
@@ -106,14 +119,16 @@ def lambda_handler(event, context):
         "transunion_application_number": application_number
     }
 
-    # create the url needed for the leasing endpoint 
+    # create the url needed for the leasing endpoint
     url = f"{leasing_host}{leasing_background_screening_endpoint}/{household_id}"
 
     # call to update the data
     try:
-        leasing_response = requests.patch(url, data=json.dumps(body), headers=headers)
+        leasing_response = requests.patch(
+            url, data=json.dumps(body), headers=headers)
 
         if leasing_response.status_code == constants["HTTP_GOOD_RESPONSE_CODE"]:
+            logger.info(f"Leasing response: {leasing_response.text}")
             return {
                 "statusCode": constants["HTTP_GOOD_RESPONSE_CODE"],
                 "body": json.dumps({
@@ -122,26 +137,28 @@ def lambda_handler(event, context):
                 }),
                 "headers": {
                     "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",  
+                    "Access-Control-Allow-Origin": "*",
                 },
-                "isBase64Encoded": False  
+                "isBase64Encoded": False
             }
         else:
-          # if Leasing/requests returns an error
-          return {
-              "statusCode": leasing_response.status_code,
-              "body": json.dumps({
-                  "data": [],
-                  "errors": json.loads(leasing_response.text)
-              }),
-              "headers": {
-                  "Content-Type": "application/json",
-                  "Access-Control-Allow-Origin": "*",  
-              },
-              "isBase64Encoded": False  
-          }
+            # if Leasing/requests returns an error
+            logger.warning(f"Leasing response error: {leasing_response.text}")
+            return {
+                "statusCode": leasing_response.status_code,
+                "body": json.dumps({
+                    "data": [],
+                    "errors": json.loads(leasing_response.text)
+                }),
+                "headers": {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                },
+                "isBase64Encoded": False
+            }
     except Exception as e:
         # in case an error ocurred while doing the requests
+        logger.error(f"Unhandled error from Leasing: {e}")
         return {
             "statusCode": constants["HTTP_ERROR_CODE"],
             "body": json.dumps({
@@ -150,7 +167,7 @@ def lambda_handler(event, context):
             }),
             "headers": {
                 "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",  
+                "Access-Control-Allow-Origin": "*",
             },
-            "isBase64Encoded": False  
+            "isBase64Encoded": False
         }
