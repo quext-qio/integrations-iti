@@ -91,7 +91,6 @@ class RentDynamicsMapper:
     def setCustomerEventDetails(data):
         result = []
         TextNumberRegex = "([a-zA-Z]+)([0-9]+)"
-        print(data)
         for item in data:
             # Extract the event ID using the regular expression
             match = re.search(TextNumberRegex, item["id"])

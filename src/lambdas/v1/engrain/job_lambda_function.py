@@ -6,18 +6,23 @@ from utils.newco_database import NewcoDatabase
 from config.engrain_job_status import EngrainJob
 from config.config import config
 from constants.queries import engrain_push_newco_query
+from qoops_logger import Logger
+
+# ----------------------------------------------------------------------------------------
+# Create Logger instance
+logger = Logger().instance(f"(ITI) Engrain Job Flow Lambda")
 
 
 def lambda_handler(event, context):
-    print("Engrain Lambda Function")
+    logger.info("Engrain Lambda Function")
     # Validate if Engrain has permisions for run
     engrain_info = EngrainJob()
     job_should_execute = engrain_info.is_running()
     if not job_should_execute:
-        print(f"Engrain Push: The Job is off")
+        logger.info(f"Engrain Push: The Job is off")
         return
 
-    print(f"Engrain Push: Starting Job")
+    logger.info(f"Engrain Push: Starting Job")
     current_dateTime = datetime.now()
     engrain_info.last_execution(current_dateTime)
     engrain_info.currently_executing(True)
@@ -31,7 +36,7 @@ def lambda_handler(event, context):
         list_properties, code = get_newco_properties_ids(sql)
         list_communities = list_properties["data"]
         if code == 500:
-            print(list_properties["errors"][0])
+            logger.info(list_properties["errors"][0])
             list_errors.append({"type":"ERROR", "message":f"Newco database returned an unhandled error, it is necesary for creation of data dynamic", "info": {json.dumps(list_properties["errors"][0])}})
             show_errors(list_errors)
             return
@@ -60,17 +65,17 @@ def lambda_handler(event, context):
                 }
                 properties_list.append(new_item)
 
-        print(f"Engrain Push: Properties list: {len(properties_list)}")
+        logger.info(f"Engrain Push: Properties list: {len(properties_list)}")
         # Fill the "properties_list" (pricingId)
         for item in properties_list:
 
             # Get pricing of asset
             pricing_url_endpoint = f"https://api.sightmap.com/v1/assets/{item['assetId']}/multifamily/pricing"
             pricing_response = requests.request("GET", pricing_url_endpoint,  headers=get_headers())
-            print(f"Engrain Push: Pricing response: {pricing_response.status_code}, pricing_url_endpoint: {pricing_url_endpoint}")
+            logger.info(f"Engrain Push: Pricing response: {pricing_response.status_code}, pricing_url_endpoint: {pricing_url_endpoint}")
             if pricing_response.status_code == 200:
                 pricing_dict = json.loads(pricing_response.text)
-                print(f"Engrain Push: Pricing dict: {pricing_dict}")
+                logger.info(f"Engrain Push: Pricing dict: {pricing_dict}")
 
                 # If outgoing returns empty data   
                 if len(pricing_dict["data"]) == 0:
@@ -88,7 +93,7 @@ def lambda_handler(event, context):
                 # If outgoing don't returns 200, will capture the error
                 list_errors.append({"type":"ERROR", "message":f"Sightmap: {pricing_url_endpoint} used to get pricing process returns status code not equal to 200: {pricing_response}"})
 
-        print(f"Engrain Push: Properties list with pricing: {len(properties_list)}")
+        logger.info(f"Engrain Push: Properties list with pricing: {len(properties_list)}")
         # Here data dynamic is already generated 
         # now going to execute engrain logic to populate sightmap
         update_engrain(properties_list, list_errors)
@@ -114,9 +119,11 @@ def show_errors(list_errors):
             info+=f"\n{index}: {error['message']}"
         index+=1
 
-    print(info)
-    print(warnings)
-    print(f"Errors: {errors}")
+    logger.info(info)
+    if warnings != "WARNINGS:":
+        logger.warning(warnings)
+    if errors != "":
+        logger.error(errors)
 
 
 # ---------------------------------------------------------------------------------------------------    
@@ -198,27 +205,27 @@ def update_engrain(properties_list, list_errors):
                     property_info['transactionId'] = transaction_id
 
                     # Post information
-                    print(f"Engrain Push ({index}): Property Id: {property_info}, Size of items: {len(response_of_database['data'])}")
+                    logger.info(f"Engrain Push ({index}): Property Id: {property_info}, Size of items: {len(response_of_database['data'])}")
                     is_saved = post_transactions(response_of_database['data'], property_info)   
-                    print(f"Engrain Push ({index}): Post Data Correct? {is_saved}, item = {property_info}, info: {json.dumps(transaction_info)}")
+                    logger.info(f"Engrain Push ({index}): Post Data Correct? {is_saved}, item = {property_info}, info: {json.dumps(transaction_info)}")
                     
                     # Close the transaction
                     url_close_transaction = f"https://api.sightmap.com/v1/assets/{property_info['assetId']}/multifamily/pricing/{property_info['pricingId']}/transactions/{transaction_id}/ingest?commit={1}"
                     close_transaction = requests.request("POST", url_close_transaction, headers=get_headers())
                     is_transaction_open = False
-                    print(f"Engrain Push ({index}): First Close Transaction: {close_transaction.status_code}, info: {json.dumps(transaction_info)}, item = {property_info}")
+                    logger.info(f"Engrain Push ({index}): First Close Transaction: {close_transaction.status_code}, info: {json.dumps(transaction_info)}, item = {property_info}")
                     list_errors.append({"type":"INFO", "message":f"First Close Transaction ({index}): {close_transaction.status_code}, item = {property_info}", "info": json.dumps(transaction_info)})
 
 
             except Exception as e:
                 # Save exception error
-                print(f"Engrain Push: Exception, {e}")
+                logger.info(f"Engrain Push: Exception, {e}")
                 list_errors.append({"type":"ERROR", "message":f"Unhandled error in Engrain population flow, Error={e}, item = {property_info['name']}", "info": json.dumps(property_info)})
                 if is_transaction_open:
                     # Close the transaction if is currently open
                     url_close_transaction = f"https://api.sightmap.com/v1/assets/{property_info['assetId']}/multifamily/pricing/{property_info['pricingId']}/transactions/{transaction_id}/ingest?commit={1}"
                     close_transaction = requests.request("POST", url_close_transaction, headers=get_headers())
-                    print(f"Engrain Push ({index}): Close Transaction in Exception: {close_transaction.status_code}, info: {json.dumps(transaction_info)}, item = {property_info}")
+                    logger.info(f"Engrain Push ({index}): Close Transaction in Exception: {close_transaction.status_code}, info: {json.dumps(transaction_info)}, item = {property_info}")
                     list_errors.append({"type":"INFO", "message":f"Close Transaction in Exception ({index}): {close_transaction.status_code}, item = {property_info}", "info": json.dumps(transaction_info)})
 
     # Close all transaction if any is not closed yet
@@ -236,7 +243,7 @@ def update_engrain(properties_list, list_errors):
     
     # Show logs
     show_errors(list_errors)
-    print(f"Engrain Push: Finish Job")
+    logger.info(f"Engrain Push: Finish Job")
 
 
 # ---------------------------------------------------------------------------------------------------
@@ -264,10 +271,10 @@ def get_transaction_id(item):
         dict_transaction_response = json.loads(transaction_url_response.text)
         url_path = dict_transaction_response['transaction_url']
         transaction_id = url_path.split("/")[-1]
-        print(f"Engrain Push: Open Transaction Id: {transaction_id}, URL: {dict_transaction_response['transaction_ingest_url']}")
+        logger.info(f"Engrain Push: Open Transaction Id: {transaction_id}, URL: {dict_transaction_response['transaction_ingest_url']}")
         return transaction_id, {}
     else:
-        print(f"Engrain Push: Transaction pending, code: {transaction_url_response.status_code}, info: {json.dumps(item)}")
+        logger.info(f"Engrain Push: Transaction pending, code: {transaction_url_response.status_code}, info: {json.dumps(item)}")
         return -1, {"type":"ERROR", "message":f"Engrain Push: Error to get the Transaction Id, {json.loads(transaction_url_response.text)}", "info": json.dumps(item)}
 
 # ---------------------------------------------------------------------------------------------------
@@ -340,9 +347,9 @@ def post_transactions(data, property_info):
     try:
         url_post_transactions = f"https://api.sightmap.com/v1/assets/{property_info['assetId']}/multifamily/pricing/{property_info['pricingId']}/transactions/{property_info['transactionId']}/ingest?commit={0}"
         response = requests.request("POST", url_post_transactions, data=body, headers=get_headers())
-        print(f"Engrain Push: Transaction Id {property_info['transactionId']}, Response Code: {response.status_code}, url: {url_post_transactions}")
+        logger.info(f"Engrain Push: Transaction Id {property_info['transactionId']}, Response Code: {response.status_code}, url: {url_post_transactions}")
         return True
 
     except Exception as e:
-        print(f"Engrain Push: Transaction Id, {property_info['transactionId']}, Error: {e}")
+        logger.info(f"Engrain Push: Transaction Id, {property_info['transactionId']}, Error: {e}")
         return False
