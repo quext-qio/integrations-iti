@@ -207,7 +207,6 @@ class EntrataService(ServiceInterface):
             }
         }
         
-        print(param_dict)
         return param_dict
     
 
