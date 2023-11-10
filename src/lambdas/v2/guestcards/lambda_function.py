@@ -65,4 +65,4 @@ def lambda_handler(event, context):
     service_type_name = ips_response["platformData"]["platform"]
     service = ServiceFactory.get_service(service_type_name)
     logger.info(f"Service type name: {service_type_name}")
-    return service.get_data(input, ips_response)
+    return service.get_data(input, ips_response, logger)
