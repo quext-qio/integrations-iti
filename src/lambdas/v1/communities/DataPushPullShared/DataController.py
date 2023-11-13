@@ -8,7 +8,8 @@ class DataController:
 
     def get_communities(self, customer_uuid, wsgi_input):
         errors = []
-        auth_host = os.environ['AUTH_HOST']
+        #auth_host = os.environ['AUTH_HOST']
+        auth_host = "https://api.internal.dev.quext.io"
         url = f'{auth_host}/service/api/v1/customers/{customer_uuid}/communities'
                 
         payload = {}
