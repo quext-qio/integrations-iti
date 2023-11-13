@@ -34,7 +34,7 @@ pipeline {
     agent { label 'jenkins-spot-fleet'}
     options {
         buildDiscarder(logRotator(numToKeepStr: '100'))
-        timeout(time: 20, unit: 'MINUTES')
+        timeout(time: 60, unit: 'MINUTES')
         ansiColor('xterm')
         timestamps()
         disableConcurrentBuilds()
