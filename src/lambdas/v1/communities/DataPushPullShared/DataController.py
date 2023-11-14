@@ -2,6 +2,8 @@ import json
 import requests
 import os
 from AccessControl import AccessUtils as AccessControl
+
+
 class DataController:
     def __init__(self, logger):
         self.logger = logger
@@ -10,34 +12,36 @@ class DataController:
         errors = []
         auth_host = os.environ['AUTH_HOST']
         url = f'{auth_host}/service/api/v1/customers/{customer_uuid}/communities'
-                
+
         payload = {}
         headers = {
-        'accept': 'application/json'
+            'accept': 'application/json'
         }
         # Lógica para obtener los datos de las comunidades utilizando self.outgoing_channel y customer_uuid
-        authChannelResponse = requests.request("GET", url, headers=headers, data=payload)
+        authChannelResponse = requests.request(
+            "GET", url, headers=headers, data=payload)
 
-         # Get credentials
-        res, res_code= AccessControl.check_access_control(wsgi_input)
+        # Get credentials
+        res, res_code = AccessControl.check_access_control(wsgi_input)
         if res_code != 200:
             return res_code, res
 
         # Expect only 200 status codes here, let's do some error handling
         communities = []
         if authChannelResponse.status_code != 200:
-            errors.append({ "status_code": authChannelResponse.status_code, 
-                            "status": "error", 
-                            "message": authChannelResponse.text })
-            response = { "data": { "provenance": [ "auth-service" ], }, "errors": errors }
+            errors.append({"status_code": authChannelResponse.status_code,
+                           "status": "error",
+                           "message": authChannelResponse.text})
+            response = {"data": {"provenance": [
+                "auth-service"], }, "errors": errors}
         else:
             communityJSON = json.loads(authChannelResponse.text)["content"]
 
             for c in communityJSON:
                 if c["deletedAt"] == None:
-                    communities.append({ "customerUUID": customer_uuid,
-                                        "communityUUID": c["id"], 
-                                        "name": c["name"], 
+                    communities.append({"customerUUID": customer_uuid,
+                                        "communityUUID": c["id"],
+                                        "name": c["name"],
                                         "customer": c["ownerName"],
                                         "contactInformation": {
                                             "timezone": c["timezoneId"],
@@ -75,11 +79,11 @@ class DataController:
                                             "imageId": c["communityImageId"],
                                             "image": c["communityImageUrl"],
                                         }
-                                    }
-                )
+                                        }
+                                       )
 
-            response = { "data": { "provenance": [ "auth-service" ], "communities": communities }, "errors": [] }
-
+            response = {"data": {"provenance": [
+                "auth-service"], "communities": communities}, "errors": []}
 
         response = {
             "data": {
