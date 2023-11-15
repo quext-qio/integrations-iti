@@ -121,17 +121,21 @@ class SpherexxService:
 
         # Format response of Spherexx
         is_success = True if "true" in res.text else False
+        status_code = "200" if is_success else "400"
+        error_message = "The Data sent is invalid"
         serviceResponse = ServiceResponse(
             guest_card_id=str(uuid.uuid4()) if is_success else "",
             first_name=body["guest"]["first_name"],
             last_name=body["guest"]["last_name"],
-            message="" if is_success else "The Data sent is invalid",
+            message="" if is_success else error_message,
             result="SUCCESS" if is_success else "FAILURE",
             tour_information=tour_information,
         ).format_response()
 
+        if status_code != "200":
+            logger.error(f"Error from Spherexx Guestcard: {error_message}")
         return {
-            'statusCode': "200",
+            'statusCode': status_code,
             'body': json.dumps({
                 'data': serviceResponse,
                 'errors': []
@@ -142,9 +146,6 @@ class SpherexxService:
             },
             'isBase64Encoded': False
         }
-
-    def get_agents(self):
-        pass
 
     def get_appointment_slots(self, property_id, start_date):
         url = f"{URL}GetOpenSlots.asmx"

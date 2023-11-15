@@ -1,13 +1,11 @@
 import json
 import requests
-import logging
 import os
 from datetime import datetime
 from abstract.service_interface import ServiceInterface
 from utils.mapper.bedroom_mapping import bedroom_mapping
 from utils.service_response import ServiceResponse
 from constants.funnel_constants import *
-
 
 class FunnelService(ServiceInterface):
 
@@ -192,7 +190,7 @@ class FunnelService(ServiceInterface):
             return 200, response[DATA]
 
         except Exception as e:
-            logging.error(f"Error Funnel Guestcard: {e}")
+            logger.error(f"Error Funnel Guestcard: {e}")
             data = {
                "data": {},
                 "error": [f"Error Funnel Guestcard: {e}"],

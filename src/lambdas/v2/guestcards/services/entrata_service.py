@@ -1,5 +1,4 @@
 import json
-import logging
 import requests
 import uuid
 import re
@@ -261,7 +260,7 @@ class EntrataService(ServiceInterface):
         # Checking for Empty list
         response = json.loads(response.text)
         if EntrataConstants.ERROR in response[EntrataConstants.RESPONSE]:
-            logging.info("Got no records for Tour Availability from Entrata")
+            logger.info("Got no records for Tour Availability from Entrata")
             return [], {EntrataConstants.MESSAGE: response[EntrataConstants.RESPONSE][EntrataConstants.ERROR][EntrataConstants.MESSAGE]}
         res = (response[EntrataConstants.RESPONSE][EntrataConstants.RESULT][
             EntrataConstants.PROPERTY_CALENDAR_AVAILABILITY])

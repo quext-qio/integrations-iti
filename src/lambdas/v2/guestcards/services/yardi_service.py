@@ -1,6 +1,5 @@
 import json
 import requests
-import logging
 import re
 from datetime import datetime
 from abstract.service_interface import ServiceInterface
@@ -164,7 +163,7 @@ class YardiService(ServiceInterface):
             customer_id = None
             if "@messageType" in messages:
                 if messages["@messageType"] == "Error":
-                    logging.error(
+                    logger.error(
                         f"Integrations-iti: Error trying to call Yardi outgoing{messages.get('#text', '')}")
                     return {
                         'statusCode': "500",
@@ -205,7 +204,7 @@ class YardiService(ServiceInterface):
             }
 
         except Exception as e:
-            logging.error(
+            logger.error(
                 f"Integrations-iti: Error trying to call Yardi outgoing{e}")
             return {
                 'statusCode': "500",
@@ -276,7 +275,7 @@ class YardiService(ServiceInterface):
             register_response = self.register_partner_id(
                 partner_id, customerUUID, communityUUID, YardiConstants.THING_TYPE, unique_id)
             if register_response:
-                logging.info(
+                logger.info(
                     f"Leasing register new partner_id response: {register_response}")
         # Return the unique ID
         return first_contact, unique_id
@@ -360,7 +359,7 @@ class YardiService(ServiceInterface):
             return unit_id
 
         except Exception as e:
-            logging.error(
+            logger.error(
                 f"Integrations-iti: Yardi UnitAvailability_Login : {e}")
             return {
                 'statusCode': "500",
