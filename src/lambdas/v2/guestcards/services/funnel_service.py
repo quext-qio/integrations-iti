@@ -1,6 +1,5 @@
 import json
 import requests
-import logging
 import os
 from datetime import datetime
 from abstract.service_interface import ServiceInterface
@@ -8,68 +7,67 @@ from utils.mapper.bedroom_mapping import bedroom_mapping
 from utils.service_response import ServiceResponse
 from constants.funnel_constants import *
 
-
 class FunnelService(ServiceInterface):
 
     def get_data(self, body, ips, logger):
         logger.info(f"Getting data from Funnel")
         # Get credentials information
         group_id = ips["platformData"]["foreign_community_id"]
-        prospect = body["guest"]
-        preferences = body["guestPreference"]
+        prospect = body[GUEST]
+        preferences = body[GUEST_PREFERENCE]
         bedroooms_data = []
         available_time = []
         tour_schedule_id = ""
         tour_error = ""
         customer_id = ""
-        headers = {"Authorization": f'Basic {os.environ["FUNNEL_API_KEY"]}'}
+        headers = {"Authorization": f'Basic {os.environ[FUNNEL_API_KEY]}'}
         tour_information = None
         source = body["source"].lower().replace(
-            "dh", "digital human").replace("ws", "website")
+            "dh", DIGITAL_HUMAN).replace("ws", WEBSITE)
 
-        if "desiredBeds" in preferences:
+        if DESIRED_BEDS in preferences:
             # Map string to int using [bedroom_mapping]
-            for i in range(len(preferences["desiredBeds"])):
-                string_beds = preferences["desiredBeds"][i]
+            for i in range(len(preferences[DESIRED_BEDS])):
+                string_beds = preferences[DESIRED_BEDS][i]
                 bedroooms_data.append(bedroom_mapping.get(string_beds, 0))
         bedrooms = str(max(bedroooms_data)) if len(bedroooms_data) > 0 else 0
         bedrooms = bedrooms.replace("1", "1br").replace(
             "2", "2br").replace("3", "3br").replace("4", "4+br")
-        comment = body["guestComment"] if "guestComment" in body else ""
+        comment = body[GUEST_COMMENT] if GUEST_COMMENT in body else ""
         payload = {
             "appointment": {
                 "start": "",
-                "tour_type": "guided",  # TODO: Check if could be empty
+                "tour_type": GUIDED,  
             },
             "client": {
                 "people": [
                     {
-                        "first_name": prospect["first_name"],
-                        "last_name": prospect["last_name"],
-                        "email": prospect["email"],
-                        "phone_1": prospect.get("phone", ""),
+                        FIRST_NAME: prospect[FIRST_NAME],
+                        LAST_NAME: prospect[LAST_NAME],
+                        EMAIL: prospect[EMAIL],
+                        "phone_1": prospect.get(PHONE, ""),
                     }
                 ],
-                "move_in_date": preferences["moveInDate"] if "moveInDate" in preferences else "",
+                "move_in_date": preferences[MOVE_IN_DATE] if MOVE_IN_DATE in preferences else "",
                 "layout": [bedrooms],
-                "price_ceiling": int(preferences["desiredRent"]) if "desiredRent" in preferences else 0,
+                "price_ceiling": int(preferences[DESIRED_RENT]) if DESIRED_RENT in preferences else 0,
                 "lead_source": source,
-                "bathrooms": preferences["desiredBaths"][0] if "desiredBaths" in preferences else 0,
-                "reason_for_move": preferences["moveInReason"] if "moveInReason" in preferences else "",
-                "amenities": preferences["preferredAmenities"] if "preferredAmenities" in preferences else "",
+                "bathrooms": preferences[DESIRED_BATHS][0] if DESIRED_BATHS in preferences else 0,
+                "reason_for_move": preferences[MOVE_REASON] if MOVE_REASON in preferences else "",
+                "amenities": preferences[PREFERRED_AMENITIES] if PREFERRED_AMENITIES in preferences else "",
                 "notes": comment,
             }
         }
 
         if "tourScheduleData" in body:
-            appointment_date = body["tourScheduleData"]["start"]
+            appointment_date = body["tourScheduleData"][START]
             tour_requested = appointment_date
-            payload["appointment"].update(
-                {"start": appointment_date[:appointment_date.index("Z")]})
+            payload[APPOINTMENT].update(
+                {START: appointment_date[:appointment_date.index("Z")]})
             try:
-                payload["client"]["lead_source"] = source
+                payload[CLIENT][LEAD_SOURCE] = source
                 params = {
-                    "group_id": group_id
+                    GROUP_ID: group_id
                 }
 
                 # Call outgoing of funnel
@@ -80,31 +78,31 @@ class FunnelService(ServiceInterface):
                 # If funnel returns an error
                 if outgoing_funnel_response.status_code < 200 or outgoing_funnel_response.status_code >= 300:
                     error_code, funnel_guestcard = self.save_guestcard_funnel(
-                        payload["client"], group_id, headers)
-                    customer_id = funnel_guestcard['client']['id']
+                        payload[CLIENT], group_id, headers)
+                    customer_id = funnel_guestcard[CLIENT][ID]
                     tour_error = json.loads(outgoing_funnel_response.text)[
-                        "errors"]["appointment"]["start"][0]
+                        ERRORS][APPOINTMENT][START][0]
                     available_time = self.get_available_times(
                         group_id, appointment_date, headers)
                 # Success response of funnel
                 else:
                     tour_schedule_id = json.loads(outgoing_funnel_response.text)[
-                        "data"]["appointment"]["id"]
+                        DATA][APPOINTMENT][ID]
                 converted_date = datetime.strptime(tour_requested.replace(
                     "T", " ")[0:tour_requested.index("Z")].strip(), '%Y-%m-%d %H:%M:%S')
                 format_date = converted_date.strftime("%B %d, %Y")
                 hour = f'{converted_date.hour}:{converted_date.minute}'
-                payload["client"].update(
+                payload[CLIENT].update(
                     {"notes": comment + " --TOURS--Tour Scheduled for " + format_date + " at " + hour})
                 error_code, funnel_guestcard = self.save_guestcard_funnel(
-                    payload["client"], group_id, headers)
+                    payload[CLIENT], group_id, headers)
 
                 if error_code != 200:
                     return {
                         'statusCode': error_code,
                         'body': json.dumps({
                             'data': [],
-                            'errors': [{"message": "Error saving guestcard in funnel"}]
+                            'errors': [{MESSAGE: "Error saving guestcard in funnel"}]
                         }),
                         'headers': {
                             'Content-Type': 'application/json',
@@ -113,7 +111,7 @@ class FunnelService(ServiceInterface):
                         'isBase64Encoded': False
                     }
 
-                customer_id = funnel_guestcard['client']['id']
+                customer_id = funnel_guestcard[CLIENT][ID]
                 tour_information = {
                     "availableTimes": available_time,
                     "tourScheduledID": tour_schedule_id,
@@ -126,7 +124,7 @@ class FunnelService(ServiceInterface):
                     'statusCode': "500",
                     'body': json.dumps({
                         'data': [],
-                        'errors': [{"message": f"{e}"}]
+                        'errors': [{MESSAGE: f"{e}"}]
                     }),
                     'headers': {
                         'Content-Type': 'application/json',
@@ -135,13 +133,13 @@ class FunnelService(ServiceInterface):
                     'isBase64Encoded': False
                 }
         error_code, funnel_guestcard = self.save_guestcard_funnel(
-            payload["client"], group_id, headers)
-        customer_id = funnel_guestcard['client']['id']
+            payload[CLIENT], group_id, headers)
+        customer_id = funnel_guestcard[CLIENT][ID]
         if error_code == 200:
             serviceResponse = ServiceResponse(
                 guest_card_id=customer_id,
-                first_name=prospect["first_name"],
-                last_name=prospect["last_name"],
+                first_name=prospect[FIRST_NAME],
+                last_name=prospect[LAST_NAME],
                 tour_information=tour_information,
             ).format_response()
 
@@ -182,19 +180,19 @@ class FunnelService(ServiceInterface):
             outgoing = HOST+GUEST_CARD_PATH
 
             outgoing_response = requests.post(
-                outgoing, json.dumps({"client": body}), headers=headers)
+                outgoing, json.dumps({CLIENT: body}), headers=headers)
             response = json.loads(outgoing_response.text)
             # If errors
             if outgoing_response.status_code < 200 or outgoing_response.status_code >= 300:
-                return outgoing_response.status_code, response["message"]
+                return outgoing_response.status_code, response[MESSAGE]
 
             # Success case
-            return 200, response["data"]
+            return 200, response[DATA]
 
         except Exception as e:
-            logging.error(f"Error Funnel Guestcard: {e}")
+            logger.error(f"Error Funnel Guestcard: {e}")
             data = {
-                "data": {},
+               "data": {},
                 "error": [f"Error Funnel Guestcard: {e}"],
             }
             return 500, data
