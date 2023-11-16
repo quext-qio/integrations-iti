@@ -9,7 +9,7 @@
       "url": "https://onequext.com/"
     }
   },
-  "host": "integrations-api.dev.quext.io",
+  "host": "integrations-api.stage.quext.io",
   "basePath": "/",
   "schemes": [
     "https"
@@ -567,7 +567,7 @@
         }
       }
     },
-    "/api/v1/general/communities":{
+    "/api/v1/general/communities": {
       "post": {
         "tags": [
           "General"
@@ -618,7 +618,7 @@
       }
     },
     "/api/v1/general/customers": {
-      "post":{
+      "post": {
         "tags": [
           "General"
         ],
@@ -682,6 +682,56 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/TourAvailabilityBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        }
+      }
+    },
+    "/api/v2/general/conservice": {
+      "post": {
+        "tags": [
+          "Conservice"
+        ],
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "description": "Endpoint for Conservice",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Conservice Body",
+            "in": "body",
+            "description": "Body Required depending of Action: Add charges [Parameter, charges], Get Properties [Parameter], Charges Codes [Parameter, property_id], Tenants [Parameter, property_id], Lease charges [Parameter, property_id, start_date, end_date], Get recurring transactions [Parameter, property_id]",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ConserviceBody"
             }
           }
         ],
@@ -944,7 +994,7 @@
     },
     "TourAvailabilityBody": {
       "type": "object",
-      "properties":{
+      "properties": {
         "platformData": {
           "type": "object",
           "properties": {
@@ -969,6 +1019,99 @@
             }
           }
         }
+      }
+    },
+    "ConserviceBody": {
+      "type": "object",
+      "properties": {
+        "Parameter": {
+          "type": "string",
+          "enum": [
+            "add-charges",
+            "get-properties",
+            "get-charge-codes",
+            "tenants",
+            "lease-charges",
+            "get-recurring-transactions"
+          ]
+        },
+        "charges": {
+          "$ref": "#/definitions/ChargeItemArray"
+        },
+        "property_id": {
+          "type": "integer"
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "start_date": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": [
+        "Parameter"
+      ]
+    },
+    "ChargeItem": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "integer"
+        },
+        "charge_code_desc": {
+          "type": "integer"
+        },
+        "charge_code_id": {
+          "type": "integer"
+        },
+        "chargeable_desc": {
+          "type": "string"
+        },
+        "chargeable_id": {
+          "type": "integer"
+        },
+        "chargeable_type": {
+          "type": "string"
+        },
+        "due_date": {
+          "type": "string"
+        },
+        "from_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "post_month": {
+          "type": "string",
+          "format": "date"
+        },
+        "through_date": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": [
+        "amount",
+        "charge_code_desc",
+        "charge_code_id",
+        "chargeable_desc",
+        "chargeable_id",
+        "chargeable_type",
+        "due_date",
+        "from_date",
+        "notes",
+        "post_month",
+        "through_date"
+      ]
+    },
+    "ChargeItemArray": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ChargeItem"
       }
     }
   }

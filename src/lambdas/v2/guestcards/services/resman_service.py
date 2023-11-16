@@ -1,6 +1,5 @@
 import json
 import requests
-import logging
 from datetime import datetime
 from abstract.service_interface import ServiceInterface
 from utils.shared.config import config
@@ -199,6 +198,7 @@ class ResManService(ServiceInterface):
             }
 
         except Exception as e:
+            logger.error(f"Error from Resman GuestCard service{e}")
             return {
                 'statusCode': 400,
                 'body': json.dumps({
@@ -253,10 +253,10 @@ class ResManService(ServiceInterface):
                 return response[RESMAN][RESPONSE]
 
             else:
-                logging.error(
+                logger.error(
                     f"Request failed with status code: {response.status_code}")
         except requests.exceptions.RequestException as e:
-            logging.error(f"Error making the request: {e}")
+            logger.error(f"Error making the request: {e}")
 
     def save_prospect(self, payload, ips):
         integration_partner_id = config['Integration_partner_id']
@@ -286,7 +286,7 @@ class ResManService(ServiceInterface):
             if response[RESMAN][STATUS] != "Success":
                 error = response[RESMAN][ERROR_DESCRIPTION]
                 errors = [{"message": error}]
-                logging.warn(
+                logger.warning(
                     f"Unhandled Error in RESMAN Guestcard 295: {error}")
                 return [], errors
 
@@ -294,7 +294,7 @@ class ResManService(ServiceInterface):
             return response, []
 
         except Exception as e:
-            print(f"Unhandled Error in RESMAN Guestcard 306: {e}")
+            logger.warn(f"Unhandled Error in RESMAN Guestcard 306: {e}")
             return {
                 'statusCode': 504,
                 'body': json.dumps({

@@ -52,6 +52,10 @@ class APIStack(NestedStack):
             endpoint_configuration=apigateway_.EndpointConfiguration(
                 types=[apigateway_.EndpointType.REGIONAL],
             ),
+            default_cors_preflight_options=apigateway_.CorsOptions(
+                allow_origins=apigateway_.Cors.ALL_ORIGINS,
+                allow_methods=apigateway_.Cors.ALL_METHODS,
+            ),
         )
 
         # --------------------------------------------------------------------

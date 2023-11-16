@@ -84,7 +84,9 @@ class RealPageILMService(ServiceInterface):
             # Case: RealPage ILM returned error code (Bad Request)
             if response_ilm.status_code < 200 or response_ilm.status_code > 299:
                 errors = {
-                    "message": f"RealPage ILM returned error code {response_ilm.status_code} with message {data['Message']}"}
+                    "message": f"RealPage ILM returned error code {response_ilm.status_code} with message {data['Message']}"
+                    }
+                logger.error(errors)
                 return {
                     'statusCode': "400",
                     'body': json.dumps({
@@ -130,7 +132,7 @@ class RealPageILMService(ServiceInterface):
 
         # Case: Unhandled error in RealPage ILM (Internal Server Error)
         except Exception as e:
-            print(f"Unhandled Error in RealPage ILM: {e}")
+            logger.error(f"Unhandled Error in RealPage ILM: {e}")
             errors = {
                 "message": str(e)
             }
