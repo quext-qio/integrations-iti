@@ -9,7 +9,7 @@
       "url": "https://onequext.com/"
     }
   },
-  "host": "https://integrations-api.stage.quext.io",
+  "host": "integrations-api.stage.quext.io",
   "basePath": "/",
   "schemes": [
     "https"
@@ -710,8 +710,7 @@
     "/api/v2/general/conservice": {
       "post": {
         "tags": [
-          "Conservice",
-          "AddCharges"
+          "Conservice"
         ],
         "security": [
           {
