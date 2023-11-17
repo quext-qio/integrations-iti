@@ -52,7 +52,7 @@ def lambda_handler(event, context):
         
         aux = installs_completed_query_result2['records'][0]["expr0"] 
         #installs_completed = installs_completed_query_result['records'][0]["expr0"] + (0 if aux is None else installs_completed_query_result['records'][0]["expr0"])
-        installs_completed = 7571
+        installs_completed = 8466
         logger.info(f"Successfully got Installs Completed from Salesforce")
 
         # TODO: Query for Active Letters Of Intent
@@ -61,7 +61,7 @@ def lambda_handler(event, context):
 
         # Installs Pending
         #installs_pending = 1319 + sales_completed - installs_completed
-        installs_pending = 3546
+        installs_pending = 2651
         logger.info(f"Successfully got Installs Pending from Calculations")
 
         # TODO: PLCU
