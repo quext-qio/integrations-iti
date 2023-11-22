@@ -7,6 +7,7 @@ from services.resman_service import ResManService
 from services.yardi_service import YardiService
 from services.realpage_ilm_service import RealPageILMService
 from services.spherexx_service import SpherexxService
+from services.mri_service import MRIService
 
 class ServiceFactory:
     @staticmethod
@@ -32,5 +33,8 @@ class ServiceFactory:
             return RealPageILMService()
         elif service_type == ServiceType.SPHEREXX:
             return SpherexxService()
+        elif service_type == ServiceType.MRI:
+            return MRIService()
+
 
         
