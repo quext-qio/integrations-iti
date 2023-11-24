@@ -98,6 +98,8 @@ class EnvStack(NestedStack):
                 #Entrata
                 "ENTRATA_APIKEY" : all_params["ENTRATA_APIKEY"],
                 "ENTRATA_HOST" : all_params["ENTRATA_HOST"],
+                # Mri
+                "MRI_API_KEY": all_params["MRI_API_KEY"],
             },
             "transunion": {
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,

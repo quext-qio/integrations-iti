@@ -9,6 +9,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from services.shared.quext_tour_service import QuextTourService
 from constants.mri_constants import *
+from configuration.mri.mri_config import mri_config
 
 class MRIService(ServiceInterface):
 
@@ -47,9 +48,14 @@ class MRIService(ServiceInterface):
         headers = {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'request': 'application/xml',
-                 'Authorization': f'Basic SUsyNDk5OS9FRFNUX1g1L0VEU1RVU0VSL0ZCQ0QxMUY2RDc0ODI5QUM4QUY3NUIzREU2Q0Y4OTI0RDEwNEU5QUI5RDk3M0ZBNjQ3RjI1ODBFMzRFMzhBQTE6dVk1UDlCMnc=' #TODO save apikey in Param-store
-            }
-        response = requests.request("POST", host, headers=headers, data=transformed_body)
+                 'Authorization': f'Basic {mri_config["mri_api_key"]}'
+        }
+        try:
+            response = requests.request("POST", host, headers=headers, data=transformed_body)
+            logger.info(f"Status Code of Response: {response.status_code}")
+            logger.info(f"Data of Response: {response.text}")
+        except Exception as e:
+            logger.error(f"Error trying to call MRI endpoint: {e}")
 
          # Success case
         tour_information = {
