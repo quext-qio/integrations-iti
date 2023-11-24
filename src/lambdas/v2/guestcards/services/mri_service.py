@@ -5,6 +5,8 @@ from datetime import datetime
 from abstract.service_interface import ServiceInterface
 from utils.mapper.bedroom_mapping import bedroom_mapping
 from utils.service_response import ServiceResponse
+import xml.etree.ElementTree as ET
+from datetime import datetime
 from services.shared.quext_tour_service import QuextTourService
 from constants.mri_constants import *
 
@@ -41,12 +43,45 @@ class MRIService(ServiceInterface):
                         tour_scheduled_id = quext_response["data"]["id"]
                         tour_comment = f' --TOURS--Tour Scheduled for {format_date} at {hour}'
 
-        host = "http://{machineName}/api/applications/Integrations/RM/Leasing/GuestCard"
+        host = "https://mrix5pcapi.partners.mrisoftware.com/MRIAPIServices/api.asp?%24api=MRI_S-PMRM_GuestCardsBySiteID&%24format=xml"
+        headers = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'request': 'application/xml',
+                 'Authorization': f'Basic SUsyNDk5OS9FRFNUX1g1L0VEU1RVU0VSL0ZCQ0QxMUY2RDc0ODI5QUM4QUY3NUIzREU2Q0Y4OTI0RDEwNEU5QUI5RDk3M0ZBNjQ3RjI1ODBFMzRFMzhBQTE6dVk1UDlCMnc=' #TODO save apikey in Param-store
+            }
+        response = requests.request("POST", host, headers=headers, data=transformed_body)
 
-        
+         # Success case
+        tour_information = {
+            "availableTimes": available_times,
+            "tourScheduledID": tour_scheduled_id,
+            "tourRequested": appointment_date,
+            "tourSchedule": True if tour_scheduled_id else False,
+            "tourError": tour_error
+        }
 
-        
-        
+        prospect_id = "1" #TODO extract ID from response
+
+        # Format response to return
+        serviceResponse = ServiceResponse(
+            guest_card_id=prospect_id,
+            first_name=body["guest"]["first_name"],
+            last_name=body["guest"]["last_name"],
+            tour_information=tour_information,
+        ).format_response()
+
+        return {
+            'statusCode': "200",
+            'body': json.dumps({
+                'data': serviceResponse,
+                'errors': {}
+            }),
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+            },
+            'isBase64Encoded': False
+        }
 
 
     def transform_payload(self, payload, ips):
@@ -56,20 +91,45 @@ class MRIService(ServiceInterface):
             visit_date = payload["tourScheduleData"]["start"][: payload["tourScheduleData"]["start"].index("T")]
 
 
-        transformed_data = {
-            "propertyId": ips["platformData"]["foreign_community_id"],
-            "firstName": payload["guest"]["first_name"],
-            "lastName": payload["guest"]["last_name"],
-            "comment": payload["guestComment"],
-            "emailAddress": payload["guest"]["email"],
-            "type": "P",
-            "cellPhoneNumber": payload["guest"]["phone"],
-            "beds": len(payload["guestPreference"]["desiredBeds"]),
-            "baths": payload["guestPreference"]["desiredBaths"][0], 
-            "estimatedMoveInDate": move_in_date[ :move_in_date.index("T")],  # Extracting the date part
-            "totalOccupants": payload["guestPreference"]["noOfOccupants"],
-            "desiredLeaseTerm": payload["guestPreference"]["leaseTermMonths"],
-            "visitDate": visit_date 
-        }
+        root = ET.Element("mri_s-pmrm_guestcardsbysiteid")
+        entry = ET.SubElement(root, "entry")
 
-        return transformed_data
+        # Assuming "guest" is the relevant part of the payload
+        guest_data = payload.get("guest", {})
+        guest_preference = payload.get("guestPreference", {})
+
+        name_id = ET.SubElement(entry, "NameID")
+        first_name = ET.SubElement(entry, "FirstName")
+        last_name = ET.SubElement(entry, "LastName")
+        property_id = ET.SubElement(entry, "PropertyID")
+        notes = ET.SubElement(entry, "Notes")
+        email = ET.SubElement(entry, "Email")
+        phone = ET.SubElement(entry, "Phone")
+
+        name_id.text = ""
+        first_name.text = guest_data.get("first_name", "")
+        last_name.text = guest_data.get("last_name", "")
+        property_id.text = ""  # You can replace this with the actual property ID
+        notes.text = payload.get("guestComment", "")
+        email.text = guest_data.get("email", "")
+        phone.text = guest_data.get("phone", "")
+
+        p_type = ET.SubElement(entry, "Type")
+        prospective_tenant = ET.SubElement(p_type, "ProspectiveTenant")
+        tenant_entry = ET.SubElement(prospective_tenant, "entry")
+
+        beds = ET.SubElement(tenant_entry, "Beds")
+        baths = ET.SubElement(tenant_entry, "Baths")
+        move_in_date = ET.SubElement(tenant_entry, "DesiredMoveInDate")
+        total_occupants = ET.SubElement(tenant_entry, "TotalOccupants")
+        desired_lease_term = ET.SubElement(tenant_entry, "DesiredLeaseTerm")
+        visit_date = ET.SubElement(tenant_entry, "VisitDate")
+
+        beds.text = "0.00"
+        baths.text = guest_preference.get("desiredBaths")[0]
+        move_in_date.text = guest_preference.get("moveInDate")[:guest_preference.get("moveInDate").index("T")]
+        total_occupants.text = str(payload.get("guestPreference", {}).get("noOfOccupants", 0))
+        desired_lease_term.text = guest_preference("leaseTermMonths", 0)
+        visit_date.text = visit_date
+
+        return ET.tostring(root, encoding="unicode")
