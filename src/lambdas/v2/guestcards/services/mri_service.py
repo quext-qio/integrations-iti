@@ -78,10 +78,12 @@ class MRIService(ServiceInterface):
         # Convert response from xml to json
         converter = Converter(response.text)
         response_as_json = converter.xml_to_json()
+        response_as_dict = converter.json_to_dict(response_as_json)
 
         # Check if response is valid [Endpoint returns 200 even if there is an error]
         # If exists an error, return error message
-        entry_response = response_as_json["mri_s-pmrm_guestcardsbysiteid"]["entry"]
+        print(response_as_json)
+        entry_response = response_as_dict["mri_s-pmrm_guestcardsbysiteid"]["entry"]
         if "Error" in entry_response:
             return {
                 'statusCode': "400",
