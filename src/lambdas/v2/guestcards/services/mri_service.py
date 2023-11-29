@@ -7,7 +7,7 @@ from utils.service_response import ServiceResponse
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from services.shared.quext_tour_service import QuextTourService
-from constants.mri_constants import *
+from constants.mri_constants import MRIConstants
 from configuration.mri.mri_config import mri_config
 from Converter import Converter
 
@@ -43,7 +43,7 @@ class MRIService(ServiceInterface):
                         body["platformData"], body["tourScheduleData"]["start"], "Quext", headers)
                 else:
                     tour_scheduled_id = quext_response["data"]["id"]
-                    tour_comment = f' --TOURS--Tour Scheduled for {format_date} at {hour}'
+                    tour_comment = f' -TOUR- {format_date} at {hour}'
 
         
         # Call MRI endpoint
@@ -66,7 +66,6 @@ class MRIService(ServiceInterface):
         except Exception as e:
             logger.error(f"Error trying to call MRI endpoint: {e}")
 
-         # Success case
         tour_information = {
             "availableTimes": available_times,
             "tourScheduledID": tour_scheduled_id,
@@ -82,9 +81,8 @@ class MRIService(ServiceInterface):
 
         # Check if response is valid [Endpoint returns 200 even if there is an error]
         # If exists an error, return error message
-        print(response_as_json)
-        entry_response = response_as_dict["mri_s-pmrm_guestcardsbysiteid"]["entry"]
-        if "Error" in entry_response:
+        entry_response = response_as_dict[MRIConstants.MRI_PMRM_GUESTCARDSBYSITEID][MRIConstants.ENTRY]
+        if MRIConstants.ERROR in entry_response:
             return {
                 'statusCode': "400",
                 'body': json.dumps({
@@ -101,7 +99,7 @@ class MRIService(ServiceInterface):
             }
 
         # Get prospect ID
-        prospect_id = entry_response["NameID"]
+        prospect_id = entry_response[MRIConstants.NAMEID]
 
         # Format response to return
         serviceResponse = ServiceResponse(
@@ -145,7 +143,8 @@ class MRIService(ServiceInterface):
                 bedroooms_data.append(bedroom_mapping.get(string_beds, 0))
         bedrooms = str(max(bedroooms_data)) if len(bedroooms_data) > 0 else "0"
         move_in_date = payload["guestPreference"]["moveInDate"]
-
+        prospect_note = payload["guestComment"] if len(payload["guestComment"]) < 30 else ""
+        comments = f" {tour_comment}" if tour_comment != "" else prospect_note 
         # Create json body to be converted to xml and send to MRI
         json_body = {
             "mri_s-pmrm_guestcardsbysiteid": {
@@ -154,10 +153,10 @@ class MRIService(ServiceInterface):
                     "FirstName": guest["first_name"],
                     "LastName": guest["last_name"],
                     "PropertyID": ips["platformData"]["foreign_community_id"],
-                    "Notes": payload["guestComment"] + f" {tour_comment}",
+                    "Notes": comments,
                     "Email": guest["email"],
                     "Phone": guest["phone"],
-                    "Type": "P",  # TODO: Move this to a constant
+                    "Type" : MRIConstants.PROSPECT_TYPE, 
                     "ProspectiveTenant": {
                         "entry": {
                             "DidNotLeaseReason": "",
