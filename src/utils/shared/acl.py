@@ -1,10 +1,13 @@
 import json, os, requests
+from host.base_url import BaseUrl
+
+# It handles the host depend of stage
+BaseUrl = BaseUrl(os.environ['CURRENT_ENV'])
 
 class ACL:
     @staticmethod
     def _loadSecurity() -> tuple:
-        host = os.environ['ACL_HOST']
-        url = f'{host}/api/partners/security?redacted=off'
+        url = f'{BaseUrl.get_ips_host()}/api/partners/security?redacted=off'
         print(f"ACL URL: {url}")
         response = requests.get(url)
         if response.status_code == 200:
