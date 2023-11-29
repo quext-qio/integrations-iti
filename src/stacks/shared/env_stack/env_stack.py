@@ -64,12 +64,11 @@ class EnvStack(NestedStack):
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "PLACE_PAY_API_KEY": all_params["PLACE_PAY_API_KEY"],
-                "ACL_HOST": all_params["ACL_HOST_INTERNAL"],
             },
             "guestcards": {
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
-                "ACL_HOST": all_params["ACL_HOST_INTERNAL"],
+                
                 # Realpage
                 "WS_REALPAGE_ILM_APIKEY": all_params["WS_REALPAGE_ILM_APIKEY"],
                 "DH_REALPAGE_ILM_APIKEY": all_params["DH_REALPAGE_ILM_APIKEY"],
@@ -98,6 +97,8 @@ class EnvStack(NestedStack):
                 #Entrata
                 "ENTRATA_APIKEY" : all_params["ENTRATA_APIKEY"],
                 "ENTRATA_HOST" : all_params["ENTRATA_HOST"],
+                # Mri
+                "MRI_API_KEY": all_params["MRI_API_KEY"],
             },
             "transunion": {
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,

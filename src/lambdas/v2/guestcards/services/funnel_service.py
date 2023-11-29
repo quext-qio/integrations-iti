@@ -78,7 +78,7 @@ class FunnelService(ServiceInterface):
                 # If funnel returns an error
                 if outgoing_funnel_response.status_code < 200 or outgoing_funnel_response.status_code >= 300:
                     error_code, funnel_guestcard = self.save_guestcard_funnel(
-                        payload[CLIENT], group_id, headers)
+                        payload[CLIENT], group_id, headers, logger)
                     customer_id = funnel_guestcard[CLIENT][ID]
                     tour_error = json.loads(outgoing_funnel_response.text)[
                         ERRORS][APPOINTMENT][START][0]
@@ -95,7 +95,7 @@ class FunnelService(ServiceInterface):
                 payload[CLIENT].update(
                     {"notes": comment + " --TOURS--Tour Scheduled for " + format_date + " at " + hour})
                 error_code, funnel_guestcard = self.save_guestcard_funnel(
-                    payload[CLIENT], group_id, headers)
+                    payload[CLIENT], group_id, headers, logger)
 
                 if error_code != 200:
                     return {
@@ -133,7 +133,7 @@ class FunnelService(ServiceInterface):
                     'isBase64Encoded': False
                 }
         error_code, funnel_guestcard = self.save_guestcard_funnel(
-            payload[CLIENT], group_id, headers)
+            payload[CLIENT], group_id, headers, logger)
         customer_id = funnel_guestcard[CLIENT][ID]
         if error_code == 200:
             serviceResponse = ServiceResponse(
@@ -173,7 +173,7 @@ class FunnelService(ServiceInterface):
             formatted_datetime_strings.append(formatted_datetime)
         return formatted_datetime_strings
 
-    def save_guestcard_funnel(self, body, group_id, headers):
+    def save_guestcard_funnel(self, body, group_id, headers, logger):
         try:
             # Call outgoing to save the prospect into funnel
             body.update({"group": group_id})
