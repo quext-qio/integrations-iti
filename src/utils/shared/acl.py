@@ -1,13 +1,13 @@
 import json, os, requests
-from utils.shared.host.url_handler import BaseUrl
+from host.url_handler import UrlHandler
 
 # It handles the host depend of stage
-BaseUrl = BaseUrl(os.environ['CURRENT_ENV'])
+UrlHandler = UrlHandler(os.environ['CURRENT_ENV'])
 
 class ACL:
     @staticmethod
     def _loadSecurity() -> tuple:
-        url = f'{BaseUrl.get_ips_host()}/api/partners/security?redacted=off'
+        url = f'{UrlHandler.get_ips_host()}/api/partners/security?redacted=off'
         print(f"ACL URL: {url}")
         response = requests.get(url)
         if response.status_code == 200:
