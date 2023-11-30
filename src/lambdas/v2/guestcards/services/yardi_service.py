@@ -34,7 +34,7 @@ class YardiService(ServiceInterface):
         event_list = []
 
         first_contact, generated_id = self.generate_unique_id(
-            body.get(YardiConstants.QCONTACTID), community_uuid, customer_uuid)
+            body.get(YardiConstants.QCONTACTID), community_uuid, customer_uuid, logger)
 
         phone = self.clean_and_validate_phone_number(
             "+"+customer_info["phone"])
@@ -252,7 +252,7 @@ class YardiService(ServiceInterface):
         return partner_uuid["uuid"]
 
   # Define function to generate unique ID from three UUIDs
-    def generate_unique_id(self, qContactUUID, communityUUID, customerUUID):
+    def generate_unique_id(self, qContactUUID, communityUUID, customerUUID, logger):
         """
         This function generates a unique 20-character string by concatenating three UUIDs
         and hashing the resulting byte string using SHA-256.
