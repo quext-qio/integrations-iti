@@ -34,7 +34,7 @@ class YardiService(ServiceInterface):
         event_list = []
 
         first_contact, generated_id = self.generate_unique_id(
-            body.get(YardiConstants.QCONTACTID), community_uuid, customer_uuid)
+            body.get(YardiConstants.QCONTACTID), community_uuid, customer_uuid, logger)
 
         phone = self.clean_and_validate_phone_number(
             "+"+customer_info["phone"])
@@ -94,7 +94,7 @@ class YardiService(ServiceInterface):
                             "T") + 1: tour_requested.index("Z")], "%H:%M:%S")
                         formatted_time = input_time.strftime("%H:%M:%S")
                         unit_id = self.get_unit_id(desired_rent, max(bedroooms_data) if len(
-                            bedroooms_data) > 0 else 0, property_id, is_qa)
+                            bedroooms_data) > 0 else 0, property_id, is_qa, logger)
                         unit_id = "2310" if unit_id is None else unit_id
                         if unit_id is None:
                             event_list = self.get_events(event_object=event_object, date_tour=tour_requested[0: tour_requested.index(
@@ -252,7 +252,7 @@ class YardiService(ServiceInterface):
         return partner_uuid["uuid"]
 
   # Define function to generate unique ID from three UUIDs
-    def generate_unique_id(self, qContactUUID, communityUUID, customerUUID):
+    def generate_unique_id(self, qContactUUID, communityUUID, customerUUID, logger):
         """
         This function generates a unique 20-character string by concatenating three UUIDs
         and hashing the resulting byte string using SHA-256.
@@ -304,7 +304,7 @@ class YardiService(ServiceInterface):
 
      # search for Unit ID  in Unified Data model data base
 
-    def get_unit_id(self, desired_rent, num_bedrooms, propertyID, is_qa):
+    def get_unit_id(self, desired_rent, num_bedrooms, propertyID, is_qa, logger):
         url = yardiConfig["yardi_url_demo"] if is_qa else yardiConfig["yardi_url"]
         yardi_payload = {
             "@xmlns": YardiConstants.XMLNS,
