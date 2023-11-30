@@ -2,6 +2,10 @@ import json
 import requests
 import os
 from AccessControl import AccessUtils as AccessControl
+from host.url_handler import UrlHandler
+
+# It handles the host depend of stage
+UrlHandler = UrlHandler(os.environ['CURRENT_ENV'])
 
 class DataController:
     def __init__(self, logger):
@@ -9,7 +13,7 @@ class DataController:
 
     def get_customers(self, customer_uuid, wsgi_input):
         errors = []
-        auth_host = os.environ['AUTH_HOST']
+        auth_host = UrlHandler.get_auth_host()
         url = f'{auth_host}/service/api/v1/customers/{customer_uuid}'  
         payload = {}
         headers = {
