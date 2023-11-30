@@ -1,8 +1,8 @@
 import os
-from host.base_url import BaseUrl
+from host.url_handler import UrlHandler
 
 # It handles the host depend of stage
-BaseUrl = BaseUrl(os.environ['CURRENT_ENV'])
+UrlHandler = UrlHandler(os.environ['CURRENT_ENV'])
 
 # Config for Yardi
 config = {
@@ -12,6 +12,6 @@ config = {
     'database': os.environ['YARDI_DATABASE'],
     'interface_license': os.environ['YARDI_INTERFACE_LICENSE'],
     'leasing_url': os.environ['LEASING_HOST'],
-    'ips_host': BaseUrl.get_ips_host(),
+    'ips_host': UrlHandler.get_ips_host(),
     'yardi_url': os.environ['YARDI_URL'],
 }

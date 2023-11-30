@@ -1,5 +1,5 @@
 import json, os, requests
-from host.base_url import BaseUrl
+from utils.shared.host.url_handler import BaseUrl
 
 # It handles the host depend of stage
 BaseUrl = BaseUrl(os.environ['CURRENT_ENV'])
