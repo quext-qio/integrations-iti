@@ -5,16 +5,18 @@ import time
 from Utils.Converter import Converter
 from Utils.Constants import constants
 from qoops_logger import Logger
+from host.url_handler import UrlHandler
 
 # ----------------------------------------------------------------------------------------
 # Create Logger instance
 logger = Logger().instance(f"(ITI) TransUnion Postback Lambda")
-
+# It handles the host depend of stage
+UrlHandler = UrlHandler(os.environ['CURRENT_ENV'])
 
 def lambda_handler(event, context):
     logger.info(f"Executing with event: {event}, context: {context}")
     payload = event["body"]
-    leasing_host = os.environ["LEASING_HOST"]
+    leasing_host = UrlHandler.get_leasing_host()
     leasing_background_screening_endpoint = os.environ["LEASING_BACKGROUND_SCREENING_ENDPOINT"]
 
     # convert xml to dict

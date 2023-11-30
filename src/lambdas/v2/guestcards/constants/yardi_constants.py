@@ -42,5 +42,4 @@ class YardiConstants:
   YARDI_PLATFORM= "SQL Server"
   YARDI_INTERFACE_ENTITY = "Quext"
   SOURCE = "Quext"
-  YARDI_URL= "https://www.yardipcv.com/8223tp7s7dev/webservices/itfilsguestcard.asmx"
   
