@@ -83,9 +83,7 @@ class EnvStack(NestedStack):
                 "YARDI_SERVER_NAME": all_params["YARDI_SERVER_NAME"],
                 "YARDI_DATABASE": all_params["YARDI_DATABASE"],
                 "YARDI_INTERFACE_LICENSE": all_params["YARDI_INTERFACE_LICENSE"],
-                "LEASING_HOST": all_params["LEASING_HOST"],
                 "IPS_HOST": all_params["IPS_HOST"],
-                "YARDI_URL": all_params["YARDI_URL"],
                 # Resman
                 "RESMAN_INTEGRATION_PARTNER_ID": all_params["RESMAN_INTEGRATION_PARTNER_ID"],
                 "RESMAN_ACCOUNT_ID": all_params["RESMAN_ACCOUNT_ID"],
@@ -117,7 +115,6 @@ class EnvStack(NestedStack):
                 "TRANSUNION_POST_BACK_URL": all_params["TRANSUNION_POST_BACK_URL"],
                 "TRANSUNION_REPORT_HOST": all_params["TRANSUNION_REPORT_HOST"],
                 # Postback
-                "LEASING_HOST": all_params["LEASING_HOST"],
                 "LEASING_BACKGROUND_SCREENING_ENDPOINT": all_params["LEASING_BACKGROUND_SCREENING_ENDPOINT"],
                 "LEASING_FIND_BY_NUMBER": all_params["LEASING_FIND_BY_NUMBER"],
             },
