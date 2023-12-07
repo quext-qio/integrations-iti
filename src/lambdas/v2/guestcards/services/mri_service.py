@@ -30,7 +30,7 @@ class MRIService(ServiceInterface):
                 converted_date = datetime.strptime(appointment_date.replace(
                     "T", " ")[0:appointment_date.index("Z")].strip(), '%Y-%m-%d %H:%M:%S')
                 format_date = converted_date.strftime("%B %d, %Y")
-                hour = converted_date.strftime("%I:%M:%S %p")
+                hour = converted_date.strftime("%I:%M%p")
                 code, quext_response = QuextTourService.save_quext_tour(
                     body)
                 if code != 200:
@@ -43,7 +43,7 @@ class MRIService(ServiceInterface):
                         body["platformData"], body["tourScheduleData"]["start"], "Quext", headers)
                 else:
                     tour_scheduled_id = quext_response["data"]["id"]
-                    tour_comment = f' -TOUR- {format_date} at {hour}'
+                    tour_comment = f'TOUR {format_date},{hour}'
 
         
         # Call MRI endpoint
@@ -145,6 +145,13 @@ class MRIService(ServiceInterface):
         move_in_date = payload["guestPreference"]["moveInDate"]
         prospect_note = payload["guestComment"] if len(payload["guestComment"]) < 30 else ""
         comments = f" {tour_comment}" if tour_comment != "" else prospect_note 
+
+        #Phone number cleaner
+        cleaned_phone_number = ''.join(filter(str.isdigit,guest["phone"])) 
+        if len(cleaned_phone_number) == 10:
+            cleaned_phone_number = "1" + cleaned_phone_number
+        phone_number = self.clean_and_validate_phone_number("+"+cleaned_phone_number)     
+        
         # Create json body to be converted to xml and send to MRI
         json_body = {
             "mri_s-pmrm_guestcardsbysiteid": {
@@ -155,7 +162,7 @@ class MRIService(ServiceInterface):
                     "PropertyID": ips["platformData"]["foreign_community_id"],
                     "Notes": comments,
                     "Email": guest["email"],
-                    "Phone": guest["phone"],
+                    "Phone": phone_number,
                     "Type" : MRIConstants.PROSPECT_TYPE, 
                     "ProspectiveTenant": {
                         "entry": {
@@ -175,3 +182,25 @@ class MRIService(ServiceInterface):
         # Convert json to xml
         converter = Converter(json_body)
         return converter.json_to_xml()
+
+
+    def clean_and_validate_phone_number(self, number):
+            """
+            Cleans and validates US phone number using regular expression.
+            Returns cleaned phone number if valid, otherwise returns None.
+            """
+            # Regular expression pattern for US phone numbers
+            pattern = re.compile(
+                r'^(\+1)?[\s-]?\(?(\d{3})\)?[\s-]?(\d{3})[\s-]?(\d{4})$')
+            # Check if the number matches the pattern
+            match = pattern.match(number)
+            if not match:
+                return None
+            # Extract and format the phone number components
+            area_code = match.group(2)
+            prefix = match.group(3)
+            suffix = match.group(4)
+            # Clean the phone number by removing country code and non-digit characters
+            phone_number = f"{area_code}-{prefix}-{suffix}"
+            # Return the cleaned phone number
+            return phone_number

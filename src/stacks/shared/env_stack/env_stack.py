@@ -135,13 +135,11 @@ class EnvStack(NestedStack):
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST_INTERNAL"],
-                "AUTH_HOST": all_params["AUTH_HOST_INTERNAL"],
             },
             "customers": {
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST_INTERNAL"],
-                "AUTH_HOST": all_params["AUTH_HOST_INTERNAL"],
             },
             "residents": {
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,
