@@ -1,4 +1,4 @@
-import json
+import json, re
 import requests
 from datetime import datetime
 from abstract.service_interface import ServiceInterface
