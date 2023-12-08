@@ -4,7 +4,7 @@ class IPSController:
 
     def get_platform_data(self, community_id:str, customer_id:str, purpose:str):
         try:
-            ips_host = os.environ['IPS_HOST']
+            ips_host = os.environ['ACL_HOST']
             url = f'{ips_host}/api/read-configuration/{customer_id}/{community_id}/{purpose}'
             headers = {
                 'Content-Type': 'application/json'
@@ -17,7 +17,7 @@ class IPSController:
     
     def get_list_partners(self, community_id):
         try:
-            ips_host = os.environ['IPS_HOST']
+            ips_host = os.environ['ACL_HOST']
             url = f'{ips_host}/api/community/{community_id}/partners'
             payload = {}
             headers = {

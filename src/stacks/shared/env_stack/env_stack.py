@@ -64,11 +64,12 @@ class EnvStack(NestedStack):
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "PLACE_PAY_API_KEY": all_params["PLACE_PAY_API_KEY"],
+                "ACL_HOST": all_params["ACL_HOST_INTERNAL"],
             },
             "guestcards": {
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
-                
+                "ACL_HOST": all_params["ACL_HOST_INTERNAL"],
                 # Realpage
                 "WS_REALPAGE_ILM_APIKEY": all_params["WS_REALPAGE_ILM_APIKEY"],
                 "DH_REALPAGE_ILM_APIKEY": all_params["DH_REALPAGE_ILM_APIKEY"],
@@ -83,7 +84,6 @@ class EnvStack(NestedStack):
                 "YARDI_SERVER_NAME": all_params["YARDI_SERVER_NAME"],
                 "YARDI_DATABASE": all_params["YARDI_DATABASE"],
                 "YARDI_INTERFACE_LICENSE": all_params["YARDI_INTERFACE_LICENSE"],
-                "IPS_HOST": all_params["IPS_HOST"],
                 # Resman
                 "RESMAN_INTEGRATION_PARTNER_ID": all_params["RESMAN_INTEGRATION_PARTNER_ID"],
                 "RESMAN_ACCOUNT_ID": all_params["RESMAN_ACCOUNT_ID"],
@@ -168,7 +168,6 @@ class EnvStack(NestedStack):
                 "ACL_HOST": all_params["ACL_HOST_INTERNAL"],
                 "FUNNEL_API_KEY": all_params["FUNNEL_API_KEY"],
                 "QXT_CALENDAR_TOUR_HOST": all_params["QXT_CALENDAR_TOUR_HOST"],
-                "IPS_HOST": all_params["IPS_HOST"],
                 "WS_REALPAGE_ILM_APIKEY": all_params["WS_REALPAGE_ILM_APIKEY"],
                 "DH_REALPAGE_ILM_APIKEY": all_params["DH_REALPAGE_ILM_APIKEY"],
                 "WS_REALPAGE_L2L_APIKEY": all_params["WS_REALPAGE_L2L_APIKEY"],
@@ -184,7 +183,6 @@ class EnvStack(NestedStack):
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST_INTERNAL"],
-                "IPS_HOST": all_params["IPS_HOST"],
             },
             "salesforce": {
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,
@@ -203,13 +201,12 @@ class EnvStack(NestedStack):
             "onetimelink": {
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
-                "IPS_HOST": all_params["IPS_HOST"],
+                "ACL_HOST": all_params["ACL_HOST_INTERNAL"],
             },
             "rentdynamics": {
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST_INTERNAL"],
-                "IPS_HOST": all_params["IPS_HOST"],
                 # Newco
                 "NEWCO_DB_HOST": all_params["NEWCO_DB_HOST"],
                 "NEWCO_DB_PASSWORD": all_params["NEWCO_DB_PASSWORD"],
