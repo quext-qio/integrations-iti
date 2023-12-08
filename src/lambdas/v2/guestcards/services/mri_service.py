@@ -48,6 +48,18 @@ class MRIService(ServiceInterface):
         
         # Call MRI endpoint
         transformed_body = self.transform_payload_to_xml(body, ips, tour_comment)
+        # Parse the XML string
+        root = ET.fromstring(transformed_body)
+
+        # Find the DesiredMoveInDate element
+        desired_move_in_date_element = root.find(".//DesiredMoveInDate")
+
+        # Update the content of DesiredMoveInDate
+        if desired_move_in_date_element is not None:
+            desired_move_in_date_element.text = desired_move_in_date_element.text.split("T")[0]
+
+        # Convert the updated XML back to a string
+        updated_xml_string = ET.tostring(root, encoding="unicode")
         host = "https://mrix5pcapi.partners.mrisoftware.com/MRIAPIServices/api.asp?%24api=MRI_S-PMRM_GuestCardsBySiteID&%24format=xml" #TODO: Move this to a constant
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -59,7 +71,7 @@ class MRIService(ServiceInterface):
                 "POST", 
                 host, 
                 headers=headers, 
-                data=transformed_body,
+                data=updated_xml_string,
             )
             logger.info(f"Status Code of Response: {response.status_code}")
             logger.info(f"Data of Response: {response.text}")
@@ -126,9 +138,12 @@ class MRIService(ServiceInterface):
     def transform_payload_to_xml(self, payload, ips, tour_comment):
         # Get visit date
         visit_date = ""
+        move_in_date = None
         if "tourScheduleData" in payload:
             visit_date = payload["tourScheduleData"]["start"][:
                                                               payload["tourScheduleData"]["start"].index("T")]
+            move_in_date = payload["guestPreference"]["moveInDate"]
+            move_in_date = move_in_date[:move_in_date.index("T")] if move_in_date != "" else None
 
         # Get guest data
         guest = payload["guest"]
@@ -142,8 +157,7 @@ class MRIService(ServiceInterface):
                 string_beds = guest_preference["desiredBeds"][i]
                 bedroooms_data.append(bedroom_mapping.get(string_beds, 0))
         bedrooms = str(max(bedroooms_data)) if len(bedroooms_data) > 0 else "0"
-        move_in_date = payload["guestPreference"]["moveInDate"]
-        prospect_note = payload["guestComment"] if len(payload["guestComment"]) < 30 else ""
+        prospect_note = payload["guestComment"] if "guestComment" in payload and len(payload["guestComment"]) < 30 else ""
         comments = f" {tour_comment}" if tour_comment != "" else prospect_note 
 
         #Phone number cleaner
@@ -169,7 +183,7 @@ class MRIService(ServiceInterface):
                             "DidNotLeaseReason": "",
                             "Beds": bedrooms,
                             "Baths": guest_preference["desiredBaths"][0],
-                            "DesiredMoveInDate": move_in_date[:move_in_date.index("T")],
+                            "DesiredMoveInDate": move_in_date,
                             "TotalOccupants": f'{guest_preference["noOfOccupants"]}',
                             "DesiredLeaseTerm": f'{guest_preference["leaseTermMonths"]}',
                             "VisitDate": visit_date,
