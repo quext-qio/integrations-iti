@@ -1,7 +1,7 @@
 @Library('quext-shared-library') _
 
 git_repo_creds = [$class: 'UsernamePasswordMultiBinding', credentialsId: 'quext-github', usernameVariable: 'GITHUB_USERNAME', passwordVariable: 'GITHUB_PASSWORD']
-List stop_branches_list = ['stage', 'rc']
+List stop_branches_list = ['prod']
 List envsToBuildAndDeploy = ['dev', 'qa', 'rc', 'stage']
 List envs = envsToBuildAndDeploy + stop_branches_list
 ecr_repository_uri = '273056594042.dkr.ecr.us-east-1.amazonaws.com/integration/api'
