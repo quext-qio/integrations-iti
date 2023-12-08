@@ -53,9 +53,9 @@ class MRIService(ServiceInterface):
 
         # Find the DesiredMoveInDate element
         desired_move_in_date_element = root.find(".//DesiredMoveInDate")
-
+        
         # Update the content of DesiredMoveInDate
-        if desired_move_in_date_element is not None:
+        if desired_move_in_date_element is not None and desired_move_in_date_element.text is not None:
             desired_move_in_date_element.text = desired_move_in_date_element.text.split("T")[0]
 
         # Convert the updated XML back to a string
