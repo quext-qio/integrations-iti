@@ -13,7 +13,7 @@ logger = Logger().instance(f"(ITI) GestCards Lambda")
 def lambda_handler(event, context):
     logger.info(f"Executing with event: {event}, context: {context}")
     input = json.loads(event['body'])
-    is_acl_valid, response_acl = ACL.check_permitions(event)
+    is_acl_valid, response_acl = ACL.check_permissions(event)
     if not is_acl_valid:
         return response_acl
     is_valid, input_errors = SchemaRequestPost(input).is_valid()
