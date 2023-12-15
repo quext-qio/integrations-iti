@@ -83,7 +83,7 @@ def lambda_handler(event, context):
         logger.info(f"Successfully got Pre-Liftoff Units from John McNelly Spreadsheet")
         
         etcu = plcu + hb_preliftoff_units + q_preliftoff_units
-        logger.info(f"Successfully calculated etcu (",etcu,") as plcu (",plcu,") + hb_preliftoff_units (",hb_preliftoff_units,") + q_preliftoff_units (",q_preliftoff_units,")")
+        logger.info(f"Successfully calculated etcu ({etcu}) as plcu ({plcu}) + hb_preliftoff_units ({hb_preliftoff_units}) + q_preliftoff_units ({q_preliftoff_units})")
 
         # Data to return
         query_result = {
