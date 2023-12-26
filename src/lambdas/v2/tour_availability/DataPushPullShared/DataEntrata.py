@@ -1,4 +1,5 @@
 import requests, os, json, uuid, logging
+from datetime import datetime, timedelta
 from Utils.Convert import Convert
 from Utils.Config.Config import config
 from Utils.Constants.TourIntegrationConstants import Tour_Integration_Constants
@@ -15,6 +16,14 @@ class DataEntrata:
         _headers = headers
 
         # Getting parameter from payload
+        toDate_original = data["timeData"]["toDate"]
+
+        toDate_datetime = datetime.strptime(toDate_original, "%Y-%m-%d")
+
+        toDate = toDate_datetime - timedelta(days=1)
+
+        data["timeData"]["toDate"]  = toDate.strftime("%Y-%m-%d")
+
         _body = {
             EntrataConstants.PROPERTYID: ips["platformData"]["foreign_community_id"],
             EntrataConstants.FROM_DATE: Convert.format_date(data["timeData"]["fromDate"],
