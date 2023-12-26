@@ -81,8 +81,20 @@ class DataEntrata:
             endtime = items[EntrataConstants.DATE] + 'T' + items[EntrataConstants.END_TIME]
             time_slot.append({EntrataConstants.START_TIME: starttime, EntrataConstants.END_TIME: endtime })
             availableTimes = Convert.generate_time_slots(time_slot)
+        
+        # Convert all dates to military time format
+        military_time_dates = [convert_to_military_time(date) for date in availableTimes]
 
-        return availableTimes, {}
+        return military_time_dates, {}
+    
+    # Function to convert to military time format
+def convert_to_military_time(date_str):
+    # Convert the date string to a datetime object
+    date_datetime =  datetime.strptime(date_str, "%Y-%m-%d %I:%M:%S")
+    # Format the date in military time format
+    military_time_date = date_datetime.strftime("%Y-%m-%d %H:%M:%S")
+    return military_time_date
+
 
 
 
