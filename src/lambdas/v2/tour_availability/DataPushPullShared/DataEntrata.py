@@ -83,14 +83,14 @@ class DataEntrata:
             availableTimes = Convert.generate_time_slots(time_slot)
         
         # Convert all dates to military time format
-        military_time_dates = [convert_to_military_time(date) for date in availableTimes]
+        military_time_dates = [convert_to_military_time(date) for date in availableTimes if 8 <= int(date.split()[1].split(":")[0]) < 17]
 
         return military_time_dates, {}
     
     # Function to convert to military time format
 def convert_to_military_time(date_str):
     # Convert the date string to a datetime object
-    date_datetime =  datetime.strptime(date_str, "%Y-%m-%d %I:%M:%S")
+    date_datetime =  datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
     # Format the date in military time format
     military_time_date = date_datetime.strftime("%Y-%m-%d %H:%M:%S")
     return military_time_date
