@@ -94,7 +94,7 @@ class ResManService(ServiceInterface):
             resman_params.update({"Xml": xml})
 
             # Call the outgoing
-            response, errors = self.save_prospect(xml, ips)
+            response, errors = self.save_prospect(xml, ips, logger)
             # If the response is not success, start testing all scenarios
             if len(errors) != 0:
 
@@ -102,7 +102,7 @@ class ResManService(ServiceInterface):
                 resman_params.update({"email": body["guest"]["email"]})
                 new_event = event
                 # Consult if prospect exists by email
-                get_response = self.search_prospects(resman_params)
+                get_response = self.search_prospects(resman_params, logger)
 
                 # If the email was found, build a new xml add the new event to the found prospect
                 if get_response[LEADMANAGEMENT][PROSPECTS] != None:
@@ -150,7 +150,7 @@ class ResManService(ServiceInterface):
                         available_times = [] if message != "" else available_times
 
                     xml = Converter(new_xml).json_to_xml()
-                    prospect_updated, errors = self.save_prospect(xml, ips)
+                    prospect_updated, errors = self.save_prospect(xml, ips, logger)
                     if len(errors) != 0:
                         new_xml["LeadManagement"]["Prospects"]["Prospect"]["Customers"]["Customer"]["Phone"] = ""
 
@@ -159,7 +159,7 @@ class ResManService(ServiceInterface):
                         event.update(
                             {"Comments": event['Comments'] if "Comments" in new_event else "" + tour_comment})
                         xml = Converter(new_xml).json_to_xml()
-                        response, errors = self.save_prospect(xml, ips)
+                        response, errors = self.save_prospect(xml, ips, logger)
                         response = errors
                     else:
                         response = prospect_updated
@@ -232,7 +232,7 @@ class ResManService(ServiceInterface):
 
         return is_new, event, message
 
-    def search_prospects(self, payload):
+    def search_prospects(self, payload, logger):
 
         # API endpoint URL
         url = "https://api.myresman.com/MITS/SearchProspects"
@@ -258,7 +258,7 @@ class ResManService(ServiceInterface):
         except requests.exceptions.RequestException as e:
             logger.error(f"Error making the request: {e}")
 
-    def save_prospect(self, payload, ips):
+    def save_prospect(self, payload, ips, logger):
         integration_partner_id = config['Integration_partner_id']
         api_key = config['ApiKey']
         account_id = config["resman_account_id"]
