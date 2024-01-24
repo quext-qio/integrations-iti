@@ -1,13 +1,13 @@
 import json, os, requests
-from host.url_handler import UrlHandler
 
-# It handles the host depend of stage
-UrlHandler = UrlHandler(os.environ['CURRENT_ENV'])
+# It gets the IPS host for the current env
+IPS_HOST = os.environ['IPS_HOST']
+
 
 class ACL:
     @staticmethod
-    def _loadSecurity() -> tuple:
-        url = f'{UrlHandler.get_ips_host()}/api/partners/security?redacted=off'
+    def load_security() -> tuple:
+        url = f'{IPS_HOST}/api/v2/partner/partner-security/security-v1'
         print(f"ACL URL: {url}")
         response = requests.get(url)
         if response.status_code == 200:
@@ -16,7 +16,7 @@ class ACL:
             return False, response
 
     @staticmethod
-    def check_permitions(event, check_endpoints=True):
+    def check_permissions(event, check_endpoints=True):
         
         # Case: No API key in header or empty
         if 'x-api-key' not in event['headers'] or event['headers']['x-api-key'] == "":
@@ -40,7 +40,7 @@ class ACL:
         api_key = event['headers']['x-api-key']
 
         # Load security from ACL
-        is_ok, response = ACL._loadSecurity()
+        is_ok, response = ACL.load_security()
         if not is_ok:
             print(f"Bad Gateway from ACL endpoint: {response}")
             # Case: ACL endpoint not available or has error
@@ -58,7 +58,7 @@ class ACL:
             }
         
         # Case: Success response from ACL endpoint
-        for i in json.loads(response.text)["content"]:
+        for i in response.json():
             security_item = i["security"]
             if "apiKey" in security_item:
                 if security_item["apiKey"] == api_key:

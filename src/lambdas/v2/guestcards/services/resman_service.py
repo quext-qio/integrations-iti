@@ -9,10 +9,15 @@ from constants.resman_constants import *
 from Converter import Converter
 from utils.service_response import ServiceResponse
 
+from qoops_logger import Logger
+
+# Create Logger instance
+logger = Logger().instance(f"(ITI) GuestCards Resman service")
+
 
 class ResManService(ServiceInterface):
 
-    def get_data(self, body, ips, logger):
+    def get_data(self, body, ips):
 
         logger.info(f"Getting data from ResMan")
         # Get credentials information
@@ -30,7 +35,7 @@ class ResManService(ServiceInterface):
                 "IntegrationPartnerID": f"{integration_partner_id}",
                 "APIKey": f"{api_key}",
                 "AccountID": f"{account_id}",
-                "PropertyID": f"{ips['platformData']['foreign_community_id']}"
+                "PropertyID": f"{ips['foreign_community_id']}"
             }
             headers = {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -232,7 +237,7 @@ class ResManService(ServiceInterface):
 
         return is_new, event, message
 
-    def search_prospects(self, payload, logger):
+    def search_prospects(self, payload):
 
         # API endpoint URL
         url = "https://api.myresman.com/MITS/SearchProspects"
@@ -258,7 +263,7 @@ class ResManService(ServiceInterface):
         except requests.exceptions.RequestException as e:
             logger.error(f"Error making the request: {e}")
 
-    def save_prospect(self, payload, ips, logger):
+    def save_prospect(self, payload, ips):
         integration_partner_id = config['Integration_partner_id']
         api_key = config['ApiKey']
         account_id = config["resman_account_id"]
@@ -269,7 +274,7 @@ class ResManService(ServiceInterface):
                 "IntegrationPartnerID": f"{integration_partner_id}",
                 "APIKey": f"{api_key}",
                 "AccountID": f"{account_id}",
-                "PropertyID": f"{ips['platformData']['foreign_community_id']}",
+                "PropertyID": f"{ips['foreign_community_id']}",
                 "Xml": payload
             }
 

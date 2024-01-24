@@ -9,11 +9,15 @@ from constants.spherexx_constants import *
 from utils.shared.payload_handler import PayladHandler
 from utils.service_response import ServiceResponse
 from Converter import Converter
+from qoops_logger import Logger
+
+# Create Logger instance
+logger = Logger().instance(f"(ITI) GuestCards Spherexx service")
 
 
 class SpherexxService:
 
-    def get_data(self, body: dict, ips_response: dict, logger):
+    def get_data(self, body: dict, ips_response: dict):
         logger.info(f"Getting data from Spherexx")
         prospect_comments = body["guestComment"] if "guestComment" in body else ""
         appointment_date = ""
@@ -22,8 +26,8 @@ class SpherexxService:
         tour_error = ""
         first_contact = True
         tour_information = None
-        property_id = ips_response["platformData"]["foreign_community_id"]
-        community_name = ips_response["platformData"]["community_name"]
+        property_id = ips_response["foreign_community_id"]
+        community_name = ips_response["community_name"]
         move_in_date = body["guestPreference"]["moveInDate"]
 
         if "T" in move_in_date:
@@ -101,7 +105,7 @@ class SpherexxService:
         url = f"{URL}{INSERT_LEAD_PATH}.asmx"
         username = spherexx_config["spherexx_username"]
         password = spherexx_config["spherexx_password"]
-        sourceID = ips_response["platformData"]["sourceID"]
+        sourceID = ips_response["sourceID"]
         payload = f'''<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
                         <soap:Body>
                             <InsertLead xmlns="https://www.iloveleasing.com/">

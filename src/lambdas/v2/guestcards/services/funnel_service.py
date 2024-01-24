@@ -7,12 +7,18 @@ from utils.mapper.bedroom_mapping import bedroom_mapping
 from utils.service_response import ServiceResponse
 from constants.funnel_constants import *
 
+from qoops_logger import Logger
+
+# Create Logger instance
+logger = Logger().instance(f"(ITI) GuestCards Funnel service")
+
+
 class FunnelService(ServiceInterface):
 
-    def get_data(self, body, ips, logger):
+    def get_data(self, body, ips):
         logger.info(f"Getting data from Funnel")
         # Get credentials information
-        group_id = ips["platformData"]["foreign_community_id"]
+        group_id = ips["foreign_community_id"]
         prospect = body[GUEST]
         preferences = body[GUEST_PREFERENCE]
         bedroooms_data = []
@@ -173,7 +179,7 @@ class FunnelService(ServiceInterface):
             formatted_datetime_strings.append(formatted_datetime)
         return formatted_datetime_strings
 
-    def save_guestcard_funnel(self, body, group_id, headers, logger):
+    def save_guestcard_funnel(self, body, group_id, headers):
         try:
             # Call outgoing to save the prospect into funnel
             body.update({"group": group_id})

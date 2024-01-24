@@ -4,7 +4,7 @@ import re
 from datetime import datetime
 from abstract.service_interface import ServiceInterface
 from constants.yardi_constants import YardiConstants
-from Converter import Converter
+from src.utils.shared.Converter import Converter
 from configuration.yardi.yardi_config import config as yardiConfig
 from utils.shared.payload_handler import PayladHandler
 from services.shared.quext_tour_service import QuextTourService
@@ -14,15 +14,20 @@ import xml.etree.ElementTree as ET
 import hashlib
 import base64
 
+from qoops_logger import Logger
+
+# Create Logger instance
+logger = Logger().instance(f"(ITI) GuestCards Yardi service")
+
 
 class YardiService(ServiceInterface):
 
-    def get_data(self, body: dict, ips_response: dict, logger):
+    def get_data(self, body: dict, ips_response: dict):
         logger.info(f"Getting data from Yardi")
-        platform_name = ips_response["platformData"]["platform"]
+        platform_name = ips_response["platform"]
         is_qa = True if platform_name == "Yardi Demo" else False
         tour_information = None
-        property_id = ips_response["platformData"]["foreign_community_id"]
+        property_id = ips_response["foreign_community_id"]
         customer_info = body["guest"]
         guest_preference = body["guestPreference"]
         community_uuid = body["platformData"].get(YardiConstants.COMMUNITYUUID)

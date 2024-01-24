@@ -6,22 +6,26 @@ from DataPushPullShared.ResmanData import DataResman
 from DataPushPullShared.DataSpherexx import DataSpherexx
 from schemas.SchemaRequest import SchemaRequest
 from IPSController import IPSController
+from qoops_logger import Logger
+
+# Create Logger instance
+logger = Logger().instance(f"(ITI) Tour availability data-controller")
 
 import json
 
 
 class DataControllerFactory:
 
-    def create_data_controller(self, input, logger):
+    def create_data_controller(self, input):
         community = input["platformData"]["communityUUID"]
         customer = input["platformData"]["customerUUID"]
         purpose = "tourAvailability"
-        code, ips_response = IPSController().get_platform_data(community, customer, purpose)
-        ips_response = json.loads(ips_response.text)
+        code, ips_response = IPSController().get_platform_data(community, purpose)
+        ips_response = ips_response.json()
         partner = ""
 
-        if "platformData" in ips_response and "platform" in ips_response["platformData"]:
-            partner = ips_response["platformData"]["platform"]
+        if "platform" in ips_response:
+            partner = ips_response["platform"]
             logger.info(f"Partner returned from IPS: {partner}")
         elif code != 200:
             logger.error(

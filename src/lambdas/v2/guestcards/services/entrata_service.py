@@ -10,9 +10,14 @@ from utils.service_response import ServiceResponse
 from configuration.entrata.entrata_config import config as entrata_config
 from utils.mapper.bedroom_mapping import bedroom_mapping
 
+from qoops_logger import Logger
+
+# Create Logger instance
+logger = Logger().instance(f"(ITI) GuestCards Entrata service")
+
 
 class EntrataService(ServiceInterface):
-    def get_data(self, body: dict, ips_response: dict, logger):
+    def get_data(self, body: dict, ips_response: dict):
         logger.info(f"Getting data from Entrata")
 
         headers = {
@@ -148,8 +153,9 @@ class EntrataService(ServiceInterface):
 
         now_date = datetime.now(timezone('MST')).strftime(
             EntrataConstants.ENTRATA_DATE)
-        event_reason_id = ips["platformData"][EntrataConstants.EVENTREASON_ID] if EntrataConstants.EVENTREASON_ID in ips[
-            "platformData"] and ips["platformData"][EntrataConstants.EVENTREASON_ID] != 0 else str(EntrataConstants.EVENT_REASON_ID)
+        event_reason_id = ips[EntrataConstants.EVENTREASON_ID] if (
+                EntrataConstants.EVENTREASON_ID in ips and ips[EntrataConstants.EVENTREASON_ID] != 0) \
+            else str(EntrataConstants.EVENT_REASON_ID)
 
         event = {
             "event": [
@@ -175,11 +181,11 @@ class EntrataService(ServiceInterface):
             }
 
         param_dict = {
-            "propertyId": ips["platformData"]["foreign_community_id"],
+            "propertyId": ips["foreign_community_id"],
             EntrataConstants.PROSPECTS: {
                 EntrataConstants.PROSPECT: {
                     "leadSource": {
-                        "originatingLeadSourceId": ips["platformData"][EntrataConstants.LEADSOURCE_ID]
+                        "originatingLeadSourceId": ips[EntrataConstants.LEADSOURCE_ID]
                     },
                     "createdDate": now_date,
                     "customers": {
@@ -234,7 +240,7 @@ class EntrataService(ServiceInterface):
         output_timestamp = tour_start.strftime("%m/%d/%Y")
         # Getting parameter from payload
         _body = {
-            EntrataConstants.PROPERTYID: ips["platformData"]["foreign_community_id"],
+            EntrataConstants.PROPERTYID: ips["foreign_community_id"],
             EntrataConstants.FROM_DATE: output_timestamp,
             EntrataConstants.TO_DATE: output_timestamp
         }

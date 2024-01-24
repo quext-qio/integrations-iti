@@ -10,7 +10,7 @@ class DataFunnel:
         Get Tour availability information
         """
         _params = {
-            "group_id": ips[FunnelConstants.PLATFORM_DATA][FunnelConstants.FOREIGN_COMMUNITY_ID],
+            "group_id": ips[FunnelConstants.FOREIGN_COMMUNITY_ID],
             "from_date": event[FunnelConstants.TIME_DATA].get(FunnelConstants.FROM_DATE, ""),
             "to_date": event[FunnelConstants.TIME_DATA].get(FunnelConstants.TO_DATE, ""),
         }

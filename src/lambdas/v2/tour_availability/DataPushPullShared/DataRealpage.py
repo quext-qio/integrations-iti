@@ -2,7 +2,6 @@ import datetime, logging
 from datetime import  datetime, timedelta
 from Utils.Constants.RealpageConstants import RealpageConstants
 from configuration.realpage_config import ilm_config
-import suds
 
 
 class DataRealpage:
@@ -26,7 +25,7 @@ class DataRealpage:
         """
         Returns the available times based on the start date and end date
         """
-        partner = ips_response["platformData"]["platform"]  
+        partner = ips_response["platform"]
      
         licensekey = ilm_config[f"dh_realpage_onsite_apikey"]
         client = None
@@ -36,8 +35,8 @@ class DataRealpage:
         factory = client.factory
         # Preparing auth details from service request
         _auth = client.factory.create(RealpageConstants.AUTHDTO)
-        _auth.pmcid = ips_response["platformData"]["foreign_customer_id"]
-        _auth.siteid = ips_response["platformData"]["foreign_community_id"]
+        _auth.pmcid = ips_response["foreign_customer_id"]
+        _auth.siteid = ips_response["foreign_community_id"]
         _auth.licensekey = ilm_config[f"ws_realpage_ilm_apikey"] if partner.lower() in ["realpage_ilm", "realpage_l2l"] else licensekey
         
         date_diff = datetime.strptime(payload[RealpageConstants.TIME_DATA][RealpageConstants.TO_DATE], RealpageConstants.DAYFORMAT) - \

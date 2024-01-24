@@ -12,6 +12,6 @@ config = {
     'database': os.environ['YARDI_DATABASE'],
     'interface_license': os.environ['YARDI_INTERFACE_LICENSE'],
     'leasing_url': UrlHandler.get_leasing_host(),
-    'ips_host': UrlHandler.get_ips_host(),
+    'ips_host': os.environ['IPS_HOST'],
     'yardi_url': UrlHandler.get_yardi_host(),
 }

@@ -10,7 +10,7 @@ logger = Logger().instance(f"(ITI) Tour Availability Lambda")
 def lambda_handler(event, context):
     logger.info(f"Executing with event: {event}, context: {context}")
     input = json.loads(event['body'])
-    code, data = DataControllerFactory().create_data_controller(input, logger)
+    code, data = DataControllerFactory().create_data_controller(input)
     logger.info(f"Response from DataController: code = {code}, data = {data}")
     return {
         'statusCode': code,

@@ -1,6 +1,5 @@
 import json, re
 import requests
-from datetime import datetime
 from abstract.service_interface import ServiceInterface
 from utils.mapper.bedroom_mapping import bedroom_mapping
 from utils.service_response import ServiceResponse
@@ -11,10 +10,15 @@ from constants.mri_constants import MRIConstants
 from configuration.mri.mri_config import mri_config
 from Converter import Converter
 
+from qoops_logger import Logger
+
+# Create Logger instance
+logger = Logger().instance(f"(ITI) GuestCards MRI service")
+
 
 class MRIService(ServiceInterface):
 
-    def get_data(self, body, ips, logger):
+    def get_data(self, body, ips):
         logger.info(f"Getting data from MRI")
 
         available_times = []
@@ -173,7 +177,7 @@ class MRIService(ServiceInterface):
                     "NameID": "",
                     "FirstName": guest["first_name"],
                     "LastName": guest["last_name"],
-                    "PropertyID": ips["platformData"]["foreign_community_id"],
+                    "PropertyID": ips["foreign_community_id"],
                     "Notes": comments,
                     "Email": guest["email"],
                     "Phone": phone_number,
