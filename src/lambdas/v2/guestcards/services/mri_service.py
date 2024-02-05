@@ -173,7 +173,7 @@ class MRIService(ServiceInterface):
                     "NameID": "",
                     "FirstName": guest["first_name"],
                     "LastName": guest["last_name"],
-                    "PropertyID": ips["platformData"]["foreign_community_id"],
+                    "PropertyID": ips["foreign_community_id"],
                     "Notes": comments,
                     "Email": guest["email"],
                     "Phone": phone_number,

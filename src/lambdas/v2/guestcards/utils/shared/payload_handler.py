@@ -87,7 +87,7 @@ class PayladHandler:
             return events
  
     def get_agent_info(self, source, ips):
-        if ips["platformData"]["platform"] == "Spherexx":
+        if ips["partner_name"] == "Spherexx":
             agent_id, first_name, last_name = "", "",""
         agent_id, last_name = "", ""
         if source == "ws":

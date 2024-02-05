@@ -19,10 +19,10 @@ class YardiService(ServiceInterface):
 
     def get_data(self, body: dict, ips_response: dict, logger):
         logger.info(f"Getting data from Yardi")
-        platform_name = ips_response["platformData"]["platform"]
+        platform_name = ips_response["partner_name"]
         is_qa = True if platform_name == "Yardi Demo" else False
         tour_information = None
-        property_id = ips_response["platformData"]["foreign_community_id"]
+        property_id = ips_response["foreign_community_id"]
         customer_info = body["guest"]
         guest_preference = body["guestPreference"]
         community_uuid = body["platformData"].get(YardiConstants.COMMUNITYUUID)

@@ -21,6 +21,21 @@ class UrlHandler(Enum):
         elif self == UrlHandler.PROD:
             return "https://partner-api.internal.prod.quext.io"
 
+    def get_ips_v2_host(self) -> str:
+        """
+            Return IPS v2 host based on the environment
+        """
+        if self == UrlHandler.DEV:
+            return "https://ips-v2.dev.quext.io"
+        elif self == UrlHandler.QA:
+            return "https://ips-v2.qa.quext.io"
+        elif self == UrlHandler.STAGE:
+            return "https://ips-v2.stage.quext.io"
+        elif self == UrlHandler.RC:
+            return "https://ips-v2.stage.quext.io"
+        elif self == UrlHandler.PROD:
+            return "https://ips-v2.prod.quext.io"
+
     # --------------------------------------------------------------------
     # returns Yardi Host depend of stage
     def get_yardi_host(self) -> str:

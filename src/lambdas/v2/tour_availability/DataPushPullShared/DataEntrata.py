@@ -25,7 +25,7 @@ class DataEntrata:
         data["timeData"]["toDate"]  = toDate.strftime("%Y-%m-%d")
 
         _body = {
-            EntrataConstants.PROPERTYID: ips["platformData"]["foreign_community_id"],
+            EntrataConstants.PROPERTYID: ips["foreign_community_id"],
             EntrataConstants.FROM_DATE: Convert.format_date(data["timeData"]["fromDate"],
                                                             EntrataConstants.QUEXT_DATE_FORMAT,
                                                             EntrataConstants.ENTRATA_DATE_FORMAT),

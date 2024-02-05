@@ -36,7 +36,7 @@ class EntrataService(ServiceInterface):
                 format_date = converted_date.strftime("%B %d, %Y")
                 hour = f'{converted_date.hour}:{converted_date.minute}'
                 times, tour_errors = self.get_entrata_available_times(
-                    ips_response, body[EntrataConstants.TOUR_DATA])
+                    ips_response, body[EntrataConstants.TOUR_DATA], logger)
                 available_times = times["availableTimes"] if "availableTimes" in times else [
                 ]
                 if appointment_date.replace("T", " ")[0:appointment_date.index("Z")] not in available_times:
@@ -148,8 +148,9 @@ class EntrataService(ServiceInterface):
 
         now_date = datetime.now(timezone('MST')).strftime(
             EntrataConstants.ENTRATA_DATE)
-        event_reason_id = ips["platformData"][EntrataConstants.EVENTREASON_ID] if EntrataConstants.EVENTREASON_ID in ips[
-            "platformData"] and ips["platformData"][EntrataConstants.EVENTREASON_ID] != 0 else str(EntrataConstants.EVENT_REASON_ID)
+        event_reason_id = ips[EntrataConstants.EVENTREASON_ID] if (
+                EntrataConstants.EVENTREASON_ID in ips and ips[EntrataConstants.EVENTREASON_ID] != 0) \
+            else str(EntrataConstants.EVENT_REASON_ID)
 
         event = {
             "event": [
@@ -175,11 +176,11 @@ class EntrataService(ServiceInterface):
             }
 
         param_dict = {
-            "propertyId": ips["platformData"]["foreign_community_id"],
+            "propertyId": ips["foreign_community_id"],
             EntrataConstants.PROSPECTS: {
                 EntrataConstants.PROSPECT: {
                     "leadSource": {
-                        "originatingLeadSourceId": ips["platformData"][EntrataConstants.LEADSOURCE_ID]
+                        "originatingLeadSourceId": ips[EntrataConstants.LEADSOURCE_ID]
                     },
                     "createdDate": now_date,
                     "customers": {
@@ -223,7 +224,7 @@ class EntrataService(ServiceInterface):
 
         return param_dict
 
-    def get_entrata_available_times(self, ips, date_tour):
+    def get_entrata_available_times(self, ips, date_tour, logger):
         headers = {
             "Content-Type": "application/json",
             "Authorization": f'Basic {entrata_config[EntrataConstants.APIKEY]}'
@@ -234,7 +235,7 @@ class EntrataService(ServiceInterface):
         output_timestamp = tour_start.strftime("%m/%d/%Y")
         # Getting parameter from payload
         _body = {
-            EntrataConstants.PROPERTYID: ips["platformData"]["foreign_community_id"],
+            EntrataConstants.PROPERTYID: ips["foreign_community_id"],
             EntrataConstants.FROM_DATE: output_timestamp,
             EntrataConstants.TO_DATE: output_timestamp
         }

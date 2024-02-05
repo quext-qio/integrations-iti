@@ -28,7 +28,7 @@ class DataRealpage:
         Returns the available times based on the start date and end date
         """
         outgoingIPSPartnerChannelResponse = partners
-        partner = ips_response["platformData"]["platform"]  
+        partner = ips_response["partner_name"]
         ips_partner_response = outgoingIPSPartnerChannelResponse
         partner_uuid = ips_partner_response[RealpageConstants.CONTENT][0]['uuid']  and len(
             ips_partner_response.get(RealpageConstants.CONTENT)) > 0 if "content" in ips_partner_response else ""
@@ -64,8 +64,8 @@ class DataRealpage:
         factory = client.factory
         # Preparing auth details from service request
         _auth = client.factory.create(RealpageConstants.AUTHDTO)
-        _auth.pmcid = pmcid if pmcid != "" else ips_response["platformData"]["foreign_customer_id"]
-        _auth.siteid = siteid if siteid != "" else ips_response["platformData"]["foreign_community_id"]
+        _auth.pmcid = pmcid if pmcid != "" else ips_response["foreign_customer_id"]
+        _auth.siteid = siteid if siteid != "" else ips_response["foreign_community_id"]
         _auth.licensekey = ilm_config[f"ws_realpage_ilm_apikey"] if partner in ["realpage_ilm", "realpage_l2l"] else licensekey
         
         date_diff = datetime.strptime(payload[RealpageConstants.TIME_DATA][RealpageConstants.TO_DATE], RealpageConstants.DAYFORMAT) - \

@@ -2,7 +2,7 @@ import json
 from schemas.schema_request_post import SchemaRequestPost
 from factory.service_factory import ServiceFactory
 from acl import ACL
-from IPSController import IPSController
+from IPSController import IpsV2Controller
 from qoops_logger import Logger
 
 # ----------------------------------------------------------------------------------------
@@ -54,11 +54,11 @@ def lambda_handler(event, context):
     customerUUID = path_parameters['customerUUID']
     purpose = "unitAvailability"
 
-    code, ips_response = IPSController().get_platform_data(
-        communityUUID, customerUUID, purpose)
-    ips_response = json.loads(ips_response.text)
+    code, ips_response = IpsV2Controller().get_platform_data(
+        communityUUID, purpose)
+    ips_response = ips_response.json()
 
-    if "platformData" not in ips_response:
+    if not ips_response:
         logger.warning(f"IPS response does not contain platformData")
         return {
             "statusCode": "400",
@@ -78,8 +78,7 @@ def lambda_handler(event, context):
         }
 
     # Add community_id to body
-    body["community_id"] = int(ips_response.get(
-        "platformData").get('communityID'))
+    body["community_id"] = int(ips_response.get('communityID'))
 
     # Factory based on action
     return ServiceFactory.get_service(action, logger).get_data(path_parameters, body, logger)

@@ -3,13 +3,21 @@ from host.url_handler import UrlHandler
 
 # It handles the host depend of stage
 UrlHandler = UrlHandler(os.environ['CURRENT_ENV'])
+API_KEY = os.environ['API_KEY']
+CONSUMER_ID = os.environ['CONSUMER_ID']
+
 
 class ACL:
     @staticmethod
     def _loadSecurity() -> tuple:
-        url = f'{UrlHandler.get_ips_host()}/api/partners/security?redacted=off'
+        url = f'{UrlHandler.get_ips_v2_host()}/api/v2/partner/partner-security/security-v1'
         print(f"ACL URL: {url}")
-        response = requests.get(url)
+        headers = {
+            'Content-Type': 'application/json',
+            'apikey': API_KEY,
+            'x-ips-consumer-id': CONSUMER_ID
+        }
+        response = requests.get(url, headers=headers)
         if response.status_code == 200:
             return True, response
         else:
@@ -58,7 +66,7 @@ class ACL:
             }
         
         # Case: Success response from ACL endpoint
-        for i in json.loads(response.text)["content"]:
+        for i in response.json():
             security_item = i["security"]
             if "apiKey" in security_item:
                 if security_item["apiKey"] == api_key:
