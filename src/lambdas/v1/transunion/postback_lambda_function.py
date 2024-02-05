@@ -126,7 +126,7 @@ def lambda_handler(event, context):
     }
 
     # create the url needed for the leasing endpoint
-    url = f"{leasing_host}{leasing_background_screening_endpoint}/{household_id}"
+    url = f"{leasing_host}{leasing_background_screening_endpoint}{household_id}"
 
     # call to update the data
     try:
