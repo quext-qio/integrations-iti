@@ -61,4 +61,4 @@ class UrlHandler(Enum):
         elif self == UrlHandler.RC:
             return "https://leasing.stage.quext.io"
         elif self == UrlHandler.PROD:
-            return "https://leasing.stage.quext.io"
+            return "https://leasing.prod.quext.io"
