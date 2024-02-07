@@ -9,23 +9,28 @@ import os
 import suds
 import requests
 import xml.etree.ElementTree as ET
-from IPSController import IPSController
+from IPSController import IpsV2Controller
 from services.shared.realpage_times import DataRealpage
+
+from env_reader import EnvReader
+
+env_instance = EnvReader.get_instance().get_ips_envs()
 
 
 class RealPageService(ServiceInterface):
     def get_data(self, body: dict, ips_response: dict, logger):
         logger.info(f"Getting data from RealPage")
-        code, partners = IPSController().get_list_partners(
+        code, partners = IpsV2Controller().get_list_partners(
             body["platformData"]["communityUUID"])
-        partners = json.loads(partners.text)
+        partners = partners.json()
         customer = body["guest"]
         preferences = body["guestPreference"]
         today_date = datetime.now().strftime("%Y-%m-%d")
         tour_information = None
         ips_partner_response = partners
-        partner_uuid = ips_partner_response['content'][0]['uuid'] if ips_partner_response.get('content', "") and len(
-            ips_partner_response.get('content')) > 0 else ""
+        partner_uuid = ips_partner_response[0]['partner']['partnerId'] if (ips_partner_response and
+                                                                           len(ips_partner_response) > 0 and
+                                                                           ips_partner_response[0]) else ""
 
         api_creds = ""
         outgoingIPSSecurityResponse = ""
@@ -34,14 +39,13 @@ class RealPageService(ServiceInterface):
         licensekey = ""
         client = None
         if partner_uuid:
-            host = os.environ['ACL_HOST']
             outgoingIPSSecurityResponse = requests.get(
-                f'{host}/api/partners/security/{partner_uuid}?redacted=off')
-            security_response = json.loads(outgoingIPSSecurityResponse.text)
+                f'{env_instance["ips_host"]}/api/v2/partner/partner-security/security-v1/{partner_uuid}')
+            security_response = outgoingIPSSecurityResponse.json()
 
             # CREATING CLIENT CONNECTION WITH API CREDENTIALS RETURNED FROM SECURITY RESPONSE
-            if len(security_response[RealpageConstants.CONTENT]) > 0:
-                for i in security_response[RealpageConstants.CONTENT]:
+            if len(security_response) > 0:
+                for i in security_response:
                     if i[RealpageConstants.PARTNER_NAME] == RealpageConstants.REALPAGE:
                         # getting api credentials
                         api_creds = i[RealpageConstants.SECURITY][RealpageConstants.CREDENTIALS][0][RealpageConstants.BODY][RealpageConstants.DH]
@@ -63,8 +67,8 @@ class RealPageService(ServiceInterface):
         factory = client.factory
     # Preparing auth details from service request
         _auth = client.factory.create('AuthDTO')
-        _auth.pmcid = ips_response["platformData"]["foreign_customer_id"] if "foreign_customer_id" in ips_response["platformData"] else pmcid
-        _auth.siteid = ips_response["platformData"]["foreign_community_id"] if "foreign_community_id" in ips_response["platformData"] else siteid
+        _auth.pmcid = ips_response["params"]["foreign_customer_id"] if "foreign_customer_id" in ips_response["params"] else pmcid
+        _auth.siteid = ips_response["params"]["foreign_community_id"] if "foreign_community_id" in ips_response["params"] else siteid
         _auth.licensekey = licensekey
 
         # Assuming you have a generated class for PhoneNumber

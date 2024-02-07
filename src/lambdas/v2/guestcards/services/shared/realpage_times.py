@@ -5,6 +5,10 @@ from constants.realpage_constants import RealpageConstants
 from configuration.realpage.realpage_config import ilm_config
 import suds
 
+from env_reader import EnvReader
+
+env_instance = EnvReader.get_instance().get_ips_envs()
+
 
 class DataRealpage:
         
@@ -28,10 +32,11 @@ class DataRealpage:
         Returns the available times based on the start date and end date
         """
         outgoingIPSPartnerChannelResponse = partners
-        partner = ips_response["platformData"]["platform"]  
+        partner = ips_response["purpose"]["guestCards"]["partner_name"]
         ips_partner_response = outgoingIPSPartnerChannelResponse
-        partner_uuid = ips_partner_response[RealpageConstants.CONTENT][0]['uuid']  and len(
-            ips_partner_response.get(RealpageConstants.CONTENT)) > 0 if "content" in ips_partner_response else ""
+        partner_uuid = ips_partner_response[0]['partner']['partnerId'] if (ips_partner_response and
+                                                                           len(ips_partner_response) > 0 and
+                                                                           ips_partner_response[0]) else ""
 
         api_creds = ""
         outgoingIPSSecurityResponse = ""
@@ -40,13 +45,13 @@ class DataRealpage:
         licensekey = ""
         client = None
         if partner_uuid != "":  
-                host = os.environ['ACL_HOST']
-                outgoingIPSSecurityResponse = requests.get(f'{host}/api/partners/security/{partner_uuid}?redacted=off')
-                security_response = json.loads(outgoingIPSSecurityResponse.text)
+                outgoingIPSSecurityResponse = requests.get(
+                    f'{env_instance["ips_host"]}/api/v2/partner/partner-security/security-v1/{partner_uuid}')
+                security_response = outgoingIPSSecurityResponse.json()
 
                 #CREATING CLIENT CONNECTION WITH API CREDENTIALS RETURNED FROM SECURITY RESPONSE
-                if len(security_response[RealpageConstants.CONTENT]) > 0:
-                    for i in security_response[RealpageConstants.CONTENT]:
+                if len(security_response) > 0:
+                    for i in security_response:
                         if i[RealpageConstants.PARTNER_NAME] == RealpageConstants.REALPAGE:
                             api_creds = i[RealpageConstants.SECURITY][RealpageConstants.CREDENTIALS][0][RealpageConstants.BODY][RealpageConstants.DH] # getting api credentials
                             imp = suds.xsd.doctor.Import(RealpageConstants.IMPORT_HOST, location=RealpageConstants.IMPORT_LOCATION)
@@ -64,8 +69,8 @@ class DataRealpage:
         factory = client.factory
         # Preparing auth details from service request
         _auth = client.factory.create(RealpageConstants.AUTHDTO)
-        _auth.pmcid = pmcid if pmcid != "" else ips_response["platformData"]["foreign_customer_id"]
-        _auth.siteid = siteid if siteid != "" else ips_response["platformData"]["foreign_community_id"]
+        _auth.pmcid = pmcid if pmcid != "" else ips_response["params"]["foreign_customer_id"]
+        _auth.siteid = siteid if siteid != "" else ips_response["params"]["foreign_community_id"]
         _auth.licensekey = ilm_config[f"ws_realpage_ilm_apikey"] if partner in ["realpage_ilm", "realpage_l2l"] else licensekey
         
         date_diff = datetime.strptime(payload[RealpageConstants.TIME_DATA][RealpageConstants.TO_DATE], RealpageConstants.DAYFORMAT) - \

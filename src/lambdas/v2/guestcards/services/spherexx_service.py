@@ -22,8 +22,8 @@ class SpherexxService:
         tour_error = ""
         first_contact = True
         tour_information = None
-        property_id = ips_response["platformData"]["foreign_community_id"]
-        community_name = ips_response["platformData"]["community_name"]
+        property_id = ips_response["params"]["foreign_community_id"]
+        community_name = ips_response["community"]["community_name"]
         move_in_date = body["guestPreference"]["moveInDate"]
 
         if "T" in move_in_date:
@@ -101,7 +101,7 @@ class SpherexxService:
         url = f"{URL}{INSERT_LEAD_PATH}.asmx"
         username = spherexx_config["spherexx_username"]
         password = spherexx_config["spherexx_password"]
-        sourceID = ips_response["platformData"]["sourceID"]
+        sourceID = ips_response["params"]["sourceID"]
         payload = f'''<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
                         <soap:Body>
                             <InsertLead xmlns="https://www.iloveleasing.com/">

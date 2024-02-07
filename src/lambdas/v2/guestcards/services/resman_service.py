@@ -30,7 +30,7 @@ class ResManService(ServiceInterface):
                 "IntegrationPartnerID": f"{integration_partner_id}",
                 "APIKey": f"{api_key}",
                 "AccountID": f"{account_id}",
-                "PropertyID": f"{ips['platformData']['foreign_community_id']}"
+                "PropertyID": f"{ips['params']['foreign_community_id']}"
             }
             headers = {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -138,7 +138,7 @@ class ResManService(ServiceInterface):
 
                         # If the Events in the result is a list is going to append the new event
                         if type(data_to_update) == list:
-                            data_to_update.append(new_event)
+                            new_xml["LeadManagement"]["Prospects"]["Prospect"]["Events"]["Event"] = [new_event]
                         # if not, transform the dict to List (adding the new event)
                         else:
                             new_list = [data_to_update, new_event]
@@ -269,7 +269,7 @@ class ResManService(ServiceInterface):
                 "IntegrationPartnerID": f"{integration_partner_id}",
                 "APIKey": f"{api_key}",
                 "AccountID": f"{account_id}",
-                "PropertyID": f"{ips['platformData']['foreign_community_id']}",
+                "PropertyID": f"{ips['params']['foreign_community_id']}",
                 "Xml": payload
             }
 
