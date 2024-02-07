@@ -1,7 +1,7 @@
 import json
 from factory.service_factory import ServiceFactory
 from schemas.schema_request_post import SchemaRequestPost
-from IPSController import IPSController
+from IPSController import IpsV2Controller
 from acl import ACL
 from qoops_logger import Logger
 
@@ -39,9 +39,9 @@ def lambda_handler(event, context):
     communityUUID = platformData["communityUUID"]
     customerUUID = platformData["customerUUID"]
     purpose = "guestCards"
-    code, ips_response = IPSController().get_platform_data(
-        communityUUID, customerUUID, purpose)
-    ips_response = json.loads(ips_response.text)
+    code, ips_response = IpsV2Controller().get_platform_data(
+        communityUUID, purpose)
+    ips_response = ips_response.json()
 
     # Validate status code
     if code != 200:
@@ -49,20 +49,15 @@ def lambda_handler(event, context):
         logger.error(msg)
         raise Exception(msg)
 
-    # Validate if platformData in response
-    if "platformData" not in ips_response:
-        msg = f"IPS response does not contain PlatformData for community {communityUUID}, customer {customerUUID}"
-        logger.error(msg)
-        raise Exception(msg)
-
-    # Validate if platform in PlatformData
-    if "platform" not in ips_response["platformData"]:
+    # Validate if platform data available in IPS response
+    if ('purpose' not in ips_response or 'guestCards' not in ips_response['purpose'] or
+            'partner_name' not in ips_response['purpose']['guestCards']):
         msg = f"IPS response does not contain platform for community {communityUUID}, customer {customerUUID}"
         logger.error(msg)
         raise Exception(msg)
 
     # Get service type name from IPS response
-    service_type_name = ips_response["platformData"]["platform"]
+    service_type_name = ips_response['purpose']['guestCards']['partner_name']
     service = ServiceFactory.get_service(service_type_name)
     logger.info(f"Factory response: {service_type_name}")
     return service.get_data(input, ips_response, logger)

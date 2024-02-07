@@ -49,3 +49,6 @@ class EntrataConstants:
     PREFERRED_AMENITIES = "preferredAmenities"
     HOST = "host"
     APIKEY = "api_key"
+    PARAMS = "params"
+    FOREIGN_COMMUNITY_ID = "foreign_community_id"
+    GUEST_CARDS = "guestCards"

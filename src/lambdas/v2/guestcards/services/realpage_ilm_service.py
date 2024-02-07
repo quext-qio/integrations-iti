@@ -45,20 +45,20 @@ class RealPageILMService(ServiceInterface):
 
         # Get values of [realpage_property, realpage_id] depend of RealPage Type
         realpage_property = "Lead2Lease Property Id" if ips_response[
-            "platformData"]["platform"] == "Realpage_L2L" else "ILM Property Id"
-        realpage_id = ips_response["platformData"]["property_id"]
+            "purpose"]["guestCards"]["partner_name"] == "Realpage_L2L" else "ILM Property Id"
+        realpage_id = ips_response["params"]["property_id"]
 
         # Create headers for RealPage L2L
         _headers = {
             'Content-Type': 'application/json',
             'apikey': ilm_config[f"{body['source']}_realpage_l2l_apikey"],
-            "x-model-version": ips_response["platformData"]["x-model-version"],
+            "x-model-version": ips_response["params"]["x-model-version"],
         }
 
         # Update headers for RealPage ILM
-        if ips_response["platformData"]["platform"] == "RealPage_ILM":
+        if ips_response["purpose"]["guestCards"]["partner_name"] == "RealPage_ILM":
             _headers.update(
-                {"x-routing-key": ips_response["platformData"]["x-routing-key"]})
+                {"x-routing-key": ips_response["params"]["x-routing-key"]})
             _headers.update(
                 {"apikey": ilm_config[f"{body['source']}_realpage_ilm_apikey"], })
 
