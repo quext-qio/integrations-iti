@@ -12,7 +12,7 @@ class FunnelService(ServiceInterface):
     def get_data(self, body, ips, logger):
         logger.info(f"Getting data from Funnel")
         # Get credentials information
-        group_id = ips["platformData"]["foreign_community_id"]
+        group_id = ips[PARAMS][FOREIGN_COMMUNITY_ID]
         prospect = body[GUEST]
         preferences = body[GUEST_PREFERENCE]
         bedroooms_data = []

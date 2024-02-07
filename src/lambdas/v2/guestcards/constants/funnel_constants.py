@@ -28,5 +28,8 @@ GUEST_COMMENT = "guestComment"
 DIGITAL_HUMAN = "digital human"
 WEBSITE = "website"
 GUIDED = "guided"
+PARAMS = "params"
+FOREIGN_COMMUNITY_ID = "foreign_community_id"
+GUEST_CARDS = "guestCards"
 
 
