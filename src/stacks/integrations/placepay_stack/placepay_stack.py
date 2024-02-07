@@ -95,8 +95,6 @@ class PlacepayStack(NestedStack):
                     status_code="200",
                     response_templates={"application/json": ""},
                     response_parameters={
-                        'method.response.header.Access-Control-Allow-Headers': "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
-                        'method.response.header.Access-Control-Allow-Methods': "'OPTIONS,POST,GET'",
                         'method.response.header.Access-Control-Allow-Origin': "'*'"
                     }
                 ),
