@@ -4,3 +4,7 @@ class MRIConstants:
     ENTRY = "entry"
     NAMEID = "NameID"
     ERROR = "Error"
+    PARAMS = "params"
+    FOREIGN_COMMUNITY_ID = "foreign_community_id"
+    GUEST_CARDS = "guestCards"
+
