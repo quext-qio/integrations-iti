@@ -67,6 +67,9 @@ class EnvStack(NestedStack):
                 "ACL_HOST": all_params["ACL_HOST_INTERNAL"],
             },
             "guestcards": {
+                "IPS_HOST": all_params["IPS_HOST"],
+                "CONSUMER_ID": all_params["CONSUMER_ID"],
+                "API_KEY": all_params["API_KEY"],
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST_INTERNAL"],
@@ -163,6 +166,9 @@ class EnvStack(NestedStack):
                 "NEWCO_DB_USER": all_params["NEWCO_DB_USER"],
             },
             "touravailability": {
+                "IPS_HOST": all_params["IPS_HOST"],
+                "CONSUMER_ID": all_params["CONSUMER_ID"],
+                "API_KEY": all_params["API_KEY"],
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST_INTERNAL"],
@@ -204,6 +210,9 @@ class EnvStack(NestedStack):
                 "ACL_HOST": all_params["ACL_HOST_INTERNAL"],
             },
             "rentdynamics": {
+                "IPS_HOST": all_params["IPS_HOST"],
+                "CONSUMER_ID": all_params["CONSUMER_ID"],
+                "API_KEY": all_params["API_KEY"],
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST_INTERNAL"],
