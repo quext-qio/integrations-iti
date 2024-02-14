@@ -26,6 +26,10 @@ def lambda_handler(event, context):
     # creates the applicants array
     applicants = []
 
+    # checks if the applicant is an dict (to verify if there's only 1 applicant)
+    if isinstance(dict_response["gateway"]["application"]["applicants"]["applicant"], dict):
+        dict_response["gateway"]["application"]["applicants"]["applicant"] = [dict_response["gateway"]["application"]["applicants"]["applicant"]]
+
     # populate the applicants array with the payload data
     for applicant in dict_response["gateway"]["application"]["applicants"]["applicant"]:
         caution_notes = applicant["scoreResult"]["cautionNotes"] if "cautionNotes" in applicant["scoreResult"] else {
@@ -106,7 +110,7 @@ def lambda_handler(event, context):
         }
 
     # creates the headers & payload for the background screening update
-    score_result = dict_response["gateway"]["scoreResult"]
+    score_result = dict_response["gateway"]["application"]["scoreResult"]
     headers = {
         "Content-Type": "application/json"
     }
@@ -122,7 +126,7 @@ def lambda_handler(event, context):
     }
 
     # create the url needed for the leasing endpoint
-    url = f"{leasing_host}{leasing_background_screening_endpoint}/{household_id}"
+    url = f"{leasing_host}{leasing_background_screening_endpoint}{household_id}"
 
     # call to update the data
     try:
