@@ -23,7 +23,7 @@ class FunnelService(ServiceInterface):
         headers = {"Authorization": f'Basic {os.environ[FUNNEL_API_KEY]}'}
         tour_information = None
         source = body["source"].lower().replace(
-            "dh", DIGITAL_HUMAN).replace("ws", WEBSITE)
+            "dh", DIGITAL_HUMAN).replace("ws", WEBSITE).replace("spa", DIGITAL_HUMAN)
 
         if DESIRED_BEDS in preferences:
             # Map string to int using [bedroom_mapping]

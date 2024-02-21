@@ -11,7 +11,7 @@ class QuextTourService:
             'Access-Control-Allow-Origin': '*',
             'Content-Type': 'application/json'
         }
-        source = body["source"].lower().replace("dh", "digital human").replace("ws", "websites")
+        source = body["source"].lower().replace("dh", "digital human").replace("ws", "websites").replace("spa", "digital human")
         preference = body['guestPreference']
         prospect = body['guest']
         
