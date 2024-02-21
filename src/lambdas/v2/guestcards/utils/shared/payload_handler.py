@@ -92,7 +92,7 @@ class PayladHandler:
         agent_id, last_name = "", ""
         if source == "ws":
             last_name = GuestcardsConstants.WEBSITES
-        elif source == "dh":
+        elif source in ("dh", "spa"):
             last_name = GuestcardsConstants.DIGITAL_HUMAN
         body = { 
             "PropertyID": config["resman_property_id"],
