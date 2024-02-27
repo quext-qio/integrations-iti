@@ -1,0 +1,4 @@
+class YardiConstants:
+    APPLICANT = "applicant"
+
+

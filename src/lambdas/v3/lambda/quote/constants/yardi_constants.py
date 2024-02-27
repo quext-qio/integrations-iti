@@ -1,0 +1,2 @@
+class YardiConstants:
+    QUOTE = 'quote'
