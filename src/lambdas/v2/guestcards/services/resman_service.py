@@ -50,6 +50,7 @@ class ResManService(ServiceInterface):
                     prospectSourceId = prospect["ID"]
 
             if "tourScheduleData" in body:
+                logger.info(f"tourScheduleData is available in the payload")
                 appointment_date = body["tourScheduleData"]["start"]
                 if appointment_date != "":
                     converted_date = datetime.strptime(appointment_date.replace(
@@ -97,14 +98,25 @@ class ResManService(ServiceInterface):
             response, errors = self.save_prospect(xml, ips, logger)
             # If the response is not success, start testing all scenarios
             if len(errors) != 0:
+                logger.warn(f"Error while saving prospect: {errors}")
 
                 del resman_params["Xml"]
                 resman_params.update({"email": body["guest"]["email"]})
                 new_event = event
+                logger.info(f"Searching Prospect with Email")
                 # Consult if prospect exists by email
                 get_response = self.search_prospects(resman_params, logger)
 
-                # If the email was found, build a new xml add the new event to the found prospect
+                # QIN-5468: If the email was not found, search with phone
+                if get_response[LEADMANAGEMENT][PROSPECTS] == None:
+                    logger.info(f"Email address does not exists, searching with phone number")
+                    del resman_params["email"]
+                    resman_params.update({"phone": body["guest"]["phone"]})
+
+                    # Consult if prospect exists by email
+                    get_response = self.search_prospects(resman_params, logger)
+
+                # If the prospect was found, build a new xml add the new event to the found prospect
                 if get_response[LEADMANAGEMENT][PROSPECTS] != None:
                     new_xml = get_response
                     data_to_update = new_xml["LeadManagement"]["Prospects"]["Prospect"]["Events"]["Event"]
@@ -123,18 +135,26 @@ class ResManService(ServiceInterface):
                     # Compare 2 phone numbers
                     if is_new:
 
-                        new_phone_number = body["guest"]["phone"]
+                        new_phone_number = body["guest"].get("phone")
                         phone_number_found = get_response["LeadManagement"][
-                            "Prospects"]["Prospect"]["Customers"]["Customer"]["Phone"]
+                            "Prospects"]["Prospect"]["Customers"]["Customer"].get("Phone")
 
+                        new_email = body["guest"]["email"]
+                        email_found = get_response["LeadManagement"][
+                            "Prospects"]["Prospect"]["Customers"]["Customer"]["Email"]
                         new_event.update({"FirstContact": "false"})
 
                         if new_phone_number != phone_number_found:
                             # add phone number to event, also update
-                            comment += f"Phone: {new_phone_number}"
+                            comment += f"Phone: {new_phone_number} "
+
+                        if new_email != email_found:
+                            # add email address to event, also update
+                            comment += f"Email: {new_email} "
 
                         new_event.update({"Comments": comment})
                         new_xml["LeadManagement"]["Prospects"]["Prospect"]["Customers"]["Customer"]["Phone"] = new_phone_number
+                        new_xml["LeadManagement"]["Prospects"]["Prospect"]["Customers"]["Customer"]["Email"] = new_email
 
                         # If the Events in the result is a list is going to append the new event
                         if type(data_to_update) == list:
@@ -152,6 +172,7 @@ class ResManService(ServiceInterface):
                     xml = Converter(new_xml).json_to_xml()
                     prospect_updated, errors = self.save_prospect(xml, ips, logger)
                     if len(errors) != 0:
+                        logger.warn(f"Error while saving the prospect data: {errors}")
                         new_xml["LeadManagement"]["Prospects"]["Prospect"]["Customers"]["Customer"]["Phone"] = ""
 
                         event = new_xml["LeadManagement"]["Prospects"]["Prospect"]["Events"]["Event"]
