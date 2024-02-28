@@ -75,9 +75,7 @@ class QuextTourService:
             url = f"https://nestiolistings.com/api/v2/appointments/group/{partner['platformData']['communityID']}/available-times/?from_date={date}&to_date={date}"
             funnel_response = requests.get(url=url, data=json.dumps(body_request), headers=headers)
             response = json.loads(funnel_response.text)
-            return {
-                "availableTimes": response["available_times"]
-            }
+            return response["available_times"]
         if partner == "Quext":
             body_request = {
                 "timeData": {
@@ -89,7 +87,5 @@ class QuextTourService:
             environment = ilm_config['environment']
             url = f"https://calendar.{environment}.quext.io/api/v1/time-slots/public"
             quext_response = requests.post(url=url, data=json.dumps(body_request), headers=headers)
-            return {
-                "availableTimes":json.loads(quext_response.text)["available_times"]
-            }
+            return json.loads(quext_response.text)["available_times"]
     
