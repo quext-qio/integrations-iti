@@ -40,6 +40,7 @@ class EntrataService(ServiceInterface):
                 available_times = times["availableTimes"] if "availableTimes" in times else [
                 ]
                 if appointment_date.replace("T", " ")[0:appointment_date.index("Z")] not in available_times:
+                    times = times["availableTimes"]
                     tour_requested = appointment_date
                     tour_error = "Not created. No time slots available for that start time"
                 else:

@@ -4,6 +4,8 @@ import json
 import requests
 import os
 
+EXCLUDED_ENVIRONMENT = ["dev", "qa"]
+
 # ----------------------------------------------------------------------------
 # This class is used to handle errors and critical issues
 # Important: It is used to override a logger but should not be used directly
@@ -12,17 +14,26 @@ class _QoopsLogger(logging.Logger):
     Class to get information about errors ans critical issues
     """
     custom_domain_name = os.environ['CUSTOM_DOMAIN_NAME']
-    stage = os.environ['CURRENT_ENV']
+    environment = os.environ['CURRENT_ENV']
     url = f"https://{custom_domain_name}/api/v2/jira/qoops"
     headers = {'Content-Type': 'application/json'}
 
     def __init__(self, name=inspect.stack()[1][3], level=logging.DEBUG):
         return super(_QoopsLogger, self).__init__(name, level)
 
+    # Decorator to skip ticket creation based on the environment
+    def environment_validation(func):
+        def wrapper(self,msg, payload):
+            if self.environment in EXCLUDED_ENVIRONMENT:
+                return f"{msg}."
+            else:
+                return func(self, msg, payload)
+        return wrapper
+
     # Method to handle errors
     def error(self, msg, *args, **kwargs):
         # Error case:
-        print(f"\nGenerating ticket: {msg}: {self.name} - Environment {self.stage}")
+        print(f"\nGenerating ticket: {msg}: {self.name} - Environment {self.environment}")
         payload = self.create_payload(
             msg,
             issue_type="Bug",
@@ -35,7 +46,7 @@ class _QoopsLogger(logging.Logger):
     # Method to handle critical issues
     def critical(self, msg, *args, **kwargs):
         # Critical case:
-        print(f"\nGenerating ticket: {msg}: {self.name} - Environment {self.stage}")
+        print(f"\nGenerating ticket: {msg}: {self.name} - Environment {self.environment}")
         payload = self.create_payload(
             msg,
             issue_type="Bug",
@@ -55,17 +66,18 @@ class _QoopsLogger(logging.Logger):
     ):
         payload = json.dumps({
             "project_name": project_name,
-            "ticket_summary": f"Issue in Service {self.name} - Environment {self.stage}",
+            "ticket_summary": f"Issue in Service {self.name} - Environment {self.environment}",
             "ticket_description": f"Ticket is automatically generated for issues found in {self.name}",
             "issue_type": issue_type,
             "priority": priority,
-            "labels": ["Qoops", f"{self.name}-{self.stage}", "Jira-Automation", "ITI-Service"],
+            "labels": ["Qoops", f"{self.name}-{self.environment}", "Jira-Automation", "ITI-Service"],
             "list_issues": [msg],
             "testing": "true"
         })
         return payload
 
     # Method to report issues
+    @environment_validation
     def call_jira_endpoint(self, msg, payload):
         information_detail = f"{msg}."
         try:
