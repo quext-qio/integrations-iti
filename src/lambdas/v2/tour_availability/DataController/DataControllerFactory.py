@@ -5,7 +5,7 @@ from DataPushPullShared.DataRealpage import DataRealpage
 from DataPushPullShared.ResmanData import DataResman
 from DataPushPullShared.DataSpherexx import DataSpherexx
 from schemas.SchemaRequest import SchemaRequest
-from IPSController import IPSController
+from IPSController import IpsV2Controller
 
 import json
 
@@ -16,12 +16,14 @@ class DataControllerFactory:
         community = input["platformData"]["communityUUID"]
         customer = input["platformData"]["customerUUID"]
         purpose = "tourAvailability"
-        code, ips_response = IPSController().get_platform_data(community, customer, purpose)
-        ips_response = json.loads(ips_response.text)
+        code, ips_response = IpsV2Controller().get_platform_data(community, purpose)
+        ips_response = ips_response.json()
         partner = ""
 
-        if "platformData" in ips_response and "platform" in ips_response["platformData"]:
-            partner = ips_response["platformData"]["platform"]
+        # Validate if platform data available in IPS response
+        if ('purpose' in ips_response and 'tourAvailability' in ips_response['purpose'] and
+                'partner_name' in ips_response['purpose']['tourAvailability']):
+            partner = ips_response["purpose"]["guestCards"]["partner_name"]
             logger.info(f"Partner returned from IPS: {partner}")
         elif code != 200:
             logger.error(

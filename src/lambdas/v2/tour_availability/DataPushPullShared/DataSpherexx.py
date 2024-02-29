@@ -18,7 +18,7 @@ class DataSpherexx:
                                 <GetOpenAppointmentSlots xmlns="http://www.iloveleasing.com">
                                 <username>{username}</username>
                                 <password>{password}</password>
-                                <property>{ips["platformData"]["foreign_community_id"]}</property>
+                                <property>{ips["params"]["foreign_community_id"]}</property>
                                 <startDate>{event["timeData"]["fromDate"]}</startDate>
                                 </GetOpenAppointmentSlots>
                             </soap:Body>

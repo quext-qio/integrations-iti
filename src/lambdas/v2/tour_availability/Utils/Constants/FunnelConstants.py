@@ -12,5 +12,6 @@ class FunnelConstants:
     FUNNEL_PATH = '/api/v2/appointments/group/'
     AVAILABLE_TIMES = 'available_times'
     ERRORS = 'errors'
+    PARAMS = 'params'
 
 

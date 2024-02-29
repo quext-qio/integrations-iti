@@ -9,14 +9,14 @@ import os
 import suds
 import requests
 import xml.etree.ElementTree as ET
-from IPSController import IPSController
+from IPSController import IpsV2Controller
 from services.shared.realpage_times import DataRealpage
 
 
 class RealPageService(ServiceInterface):
     def get_data(self, body: dict, ips_response: dict, logger):
         logger.info(f"Getting data from RealPage")
-        code, partners = IPSController().get_list_partners(
+        code, partners = IpsV2Controller().get_list_partners(
             body["platformData"]["communityUUID"])
         partners = json.loads(partners.text)
         customer = body["guest"]
@@ -63,8 +63,8 @@ class RealPageService(ServiceInterface):
         factory = client.factory
     # Preparing auth details from service request
         _auth = client.factory.create('AuthDTO')
-        _auth.pmcid = ips_response["platformData"]["foreign_customer_id"] if "foreign_customer_id" in ips_response["platformData"] else pmcid
-        _auth.siteid = ips_response["platformData"]["foreign_community_id"] if "foreign_community_id" in ips_response["platformData"] else siteid
+        _auth.pmcid = ips_response["params"]["foreign_customer_id"] if "foreign_customer_id" in ips_response["params"] else pmcid
+        _auth.siteid = ips_response["params"]["foreign_community_id"] if "foreign_community_id" in ips_response["params"] else siteid
         _auth.licensekey = licensekey
 
         # Assuming you have a generated class for PhoneNumber

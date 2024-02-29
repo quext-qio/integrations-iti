@@ -30,7 +30,7 @@ class ResManService(ServiceInterface):
                 "IntegrationPartnerID": f"{integration_partner_id}",
                 "APIKey": f"{api_key}",
                 "AccountID": f"{account_id}",
-                "PropertyID": f"{ips['platformData']['foreign_community_id']}"
+                "PropertyID": f"{ips['params']['foreign_community_id']}"
             }
             headers = {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -269,7 +269,7 @@ class ResManService(ServiceInterface):
                 "IntegrationPartnerID": f"{integration_partner_id}",
                 "APIKey": f"{api_key}",
                 "AccountID": f"{account_id}",
-                "PropertyID": f"{ips['platformData']['foreign_community_id']}",
+                "PropertyID": f"{ips['params']['foreign_community_id']}",
                 "Xml": payload
             }
 
