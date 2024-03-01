@@ -61,7 +61,7 @@ class RealpageConstants:
     DATE_CONTACT = 'datecontact'
     DAYS_ADD = 3
     FACTORY_DATA_STRUCTURE = "ns0"
-    TIMEFORMAT = "%Y-%m-%dT%H:%M:%S"
+    TIMEFORMAT = "%Y-%m-%dT%H:%M:%SZ"
     DAYFORMAT = "%Y-%m-%d"
     PROPERTY_NUMBER_ID = "PropertyNumberID"
     FLOOR_PLAN = "FloorPlan"
@@ -101,4 +101,9 @@ class RealpageConstants:
     CUSTOMER = "Customer"
     HOME = "Home"
     PHONE = "Phone"
+    TIME_DATA = "timeData"
+    TO_DATE = "toDate"
+    FROM_DATE = "fromDate"
+    AVAILABLE_DATES = "availabledates"
+    AVAILABLE_DATE = "availabledate"
 

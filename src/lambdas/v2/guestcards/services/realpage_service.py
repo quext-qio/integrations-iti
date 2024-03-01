@@ -39,27 +39,29 @@ class RealPageService(ServiceInterface):
         licensekey = ""
         client = None
         if partner_uuid:
+            headers = {
+                'Content-Type': 'application/json',
+                'apikey': env_instance['api_key'],
+                'x-ips-consumer-id': env_instance['consumer_id']
+            }
             outgoingIPSSecurityResponse = requests.get(
-                f'{env_instance["ips_host"]}/api/v2/partner/partner-security/security-v1/{partner_uuid}')
+                f'{env_instance["ips_host"]}/api/v2/partner/partner-security/security-v1/{partner_uuid}', headers=headers)
             security_response = outgoingIPSSecurityResponse.json()
 
             # CREATING CLIENT CONNECTION WITH API CREDENTIALS RETURNED FROM SECURITY RESPONSE
-            if len(security_response) > 0:
-                for i in security_response:
-                    if i[RealpageConstants.PARTNER_NAME] == RealpageConstants.REALPAGE:
-                        # getting api credentials
-                        api_creds = i[RealpageConstants.SECURITY][RealpageConstants.CREDENTIALS][0][RealpageConstants.BODY][RealpageConstants.DH]
-                        imp = suds.xsd.doctor.Import(
-                            RealpageConstants.IMPORT_HOST, location=RealpageConstants.IMPORT_LOCATION)
-                        imp.filter.add(RealpageConstants.XML_SOAP)
-                        doctor = suds.xsd.doctor.ImportDoctor(imp)
-                        # creating client connection
-                        client = suds.Client(
-                            api_creds[RealpageConstants.WSDL], doctor=doctor)
-                        pmcid = api_creds[RealpageConstants.PMCID]
-                        siteid = api_creds[RealpageConstants.SITEID]
-                        licensekey = api_creds[RealpageConstants.LICENSE_KEY]
-
+            if isinstance(security_response, dict) and security_response and security_response.get(RealpageConstants.PARTNER_NAME) == RealpageConstants.REALPAGE:
+                    # getting api credentials
+                    api_creds = security_response[RealpageConstants.SECURITY][RealpageConstants.CREDENTIALS][0][RealpageConstants.BODY][RealpageConstants.DH]
+                    imp = suds.xsd.doctor.Import(RealpageConstants.IMPORT_HOST, location=RealpageConstants.IMPORT_LOCATION)
+                    imp.filter.add(RealpageConstants.XML_SOAP)
+                    doctor = suds.xsd.doctor.ImportDoctor(imp)
+                    # creating client connection
+                    client = suds.Client(
+                        api_creds[RealpageConstants.WSDL], doctor=doctor)
+                    c = api_creds[RealpageConstants.WSDL]
+                    pmcid = api_creds[RealpageConstants.PMCID]
+                    siteid = api_creds[RealpageConstants.SITEID]
+                    licensekey = api_creds[RealpageConstants.LICENSE_KEY]
         if not client:
             # creating client connection
             client = suds.client.Client(RealpageConstants.DHWSDL)
@@ -112,7 +114,7 @@ class RealPageService(ServiceInterface):
         _guestcard.statusisactive = True
         _guestcard.statusisleased = False
         _guestcard.statusislost = False
-        _guestcard.moveinreason = preferences["moveInReason"]
+        _guestcard.moveinreason = preferences.get("moveInReason", "")
         _guestcard.skipduplicatecheck = False
         _guestcard.daysbackduplicatecheck = 91
         _guestcard.prospectcomment = body["guestComment"]
@@ -152,16 +154,14 @@ class RealPageService(ServiceInterface):
             if res["InsertProspectResponse"]["Guestcard"]["Status"] != "Success":
                 if appointment_data:
                     payload = {
-                        {
                             "timeData": {
                                 "fromDate": appointment_date,
                                 "toDate": appointment_date
                             },
                             "platformData": body["platformData"]
-                        }
                     }
                     tour_information = {
-                        "availableTimes": DataRealpage.get_tour_availability(partners, payload, ips_response),
+                        "availableTimes": DataRealpage().get_tour_availability(partners, payload, ips_response),
                         "tourScheduledID": customer_id,
                         "tourRequested": appointment_date,
                         "tourSchedule": True if customer_id else False,
