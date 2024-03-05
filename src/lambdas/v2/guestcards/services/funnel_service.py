@@ -54,7 +54,7 @@ class FunnelService(ServiceInterface):
                     }
                 ],
                 "move_in_date": preferences[MOVE_IN_DATE] if MOVE_IN_DATE in preferences else "",
-                "layout": [bedrooms],
+                "layout": [bedrooms] if bedrooms != '0' else [],
                 "price_ceiling": int(preferences[DESIRED_RENT]) if DESIRED_RENT in preferences else 0,
                 "lead_source": source,
                 "bathrooms": preferences[DESIRED_BATHS][0] if DESIRED_BATHS in preferences else 0,
