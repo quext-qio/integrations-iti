@@ -29,7 +29,12 @@ class FunnelService(ServiceInterface):
             # Map string to int using [bedroom_mapping]
             for i in range(len(preferences[DESIRED_BEDS])):
                 string_beds = preferences[DESIRED_BEDS][i]
-                bedroooms_data.append(bedroom_mapping.get(string_beds, 0))
+                beds = bedroom_mapping.get(string_beds, 0)
+
+                # Funnel supports only upto 4 bedrooms
+                if not beds in range(5):
+                    beds = 4
+                bedroooms_data.append(beds)
         bedrooms = str(max(bedroooms_data)) if len(bedroooms_data) > 0 else 0
         bedrooms = bedrooms.replace("1", "1br").replace(
             "2", "2br").replace("3", "3br").replace("4", "4+br")
