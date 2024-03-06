@@ -4,6 +4,7 @@ import re
 from datetime import datetime
 from abstract.service_interface import ServiceInterface
 from constants.yardi_constants import YardiConstants
+from IPSController import IpsV2Controller
 from Converter import Converter
 from configuration.yardi.yardi_config import config as yardiConfig
 from utils.shared.payload_handler import PayladHandler
@@ -20,6 +21,7 @@ class YardiService(ServiceInterface):
     def get_data(self, body: dict, ips_response: dict, logger):
         logger.info(f"Getting data from Yardi")
         platform_name = ips_response["purpose"]["guestCards"]["partner_name"]
+        partner_id = ips_response["purpose"]["guestCards"]["partner_id"]
         is_qa = True if platform_name == "Yardi Demo" else False
         tour_information = None
         property_id = ips_response["params"]["foreign_community_id"]
@@ -34,8 +36,7 @@ class YardiService(ServiceInterface):
         event_list = []
 
         first_contact, generated_id = self.generate_unique_id(
-            body.get(YardiConstants.QCONTACTID), community_uuid, customer_uuid, logger)
-
+            body.get(YardiConstants.QCONTACTID), community_uuid, customer_uuid, partner_id, logger)
         phone = self.clean_and_validate_phone_number(
             "+"+customer_info["phone"])
         body["guest"]["phone"] = phone
@@ -49,7 +50,7 @@ class YardiService(ServiceInterface):
             "Source": body["source"],
             "EventType": "Webservice",
             "FirstContact": first_contact,
-            "EventDate": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "EventDate": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
             "TransactionSourceid": YardiConstants.SOURCE,
             "UnitID": "",
         }
@@ -104,6 +105,8 @@ class YardiService(ServiceInterface):
                                 "T")] + "T" + formatted_time, tour_comment=tour_comment, unit_id=unit_id)
         else:
             event_list.append(event_object["Event"])
+
+        event_list.append(event_object["Event"]) if not event_list else event_list
 
         tour_information = {
             "availableTimes": available_times,
@@ -221,11 +224,13 @@ class YardiService(ServiceInterface):
 
     # Define function to seach the generated Yardi ID into Leasing Database
 
-    def search_partner_id(self, partnerId, thing_type, partner_use_id):
+    def search_partner_id(self, partnerId, thing_type, partner_use_id, communityUUID, customerUUID):
 
         headers = {
             'accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            "X-Quext-Community-Id": communityUUID,
+            "X-Quext-Customer-Id": customerUUID
         }
 
         payload = json.dumps({
@@ -236,7 +241,7 @@ class YardiService(ServiceInterface):
             ]
         })
         response = requests.post(
-            f'{yardiConfig["leasing_url"]}/api/v1/partner-id-translation/lookup', headers=headers, data=payload)
+            f'{yardiConfig["leasing_url"]}/service/api/v1/partner-id-translation/lookup', headers=headers, data=payload)
 
         return True if len(json.loads(response.text)) > 0 else False
 
@@ -252,7 +257,7 @@ class YardiService(ServiceInterface):
         return partner_uuid["uuid"]
 
   # Define function to generate unique ID from three UUIDs
-    def generate_unique_id(self, qContactUUID, communityUUID, customerUUID, logger):
+    def generate_unique_id(self, qContactUUID, communityUUID, customerUUID, partner_id, logger):
         """
         This function generates a unique 20-character string by concatenating three UUIDs
         and hashing the resulting byte string using SHA-256.
@@ -265,10 +270,9 @@ class YardiService(ServiceInterface):
 
         # Encode hash value using base64 and convert to UTF-8 string
         unique_id = base64.urlsafe_b64encode(hash_value).decode('utf-8')
-        partner_id = self.get_yardi_partner_id()
         first_contact = "false"
         exists_id = self.search_partner_id(
-            partner_id, YardiConstants.THING_TYPE, unique_id)
+            partner_id, YardiConstants.THING_TYPE, unique_id, communityUUID, customerUUID)
 
         if not exists_id:
             first_contact = "true"
@@ -419,16 +423,15 @@ class YardiService(ServiceInterface):
 
     # Search for a purpose in IPS
     def search_purpose(self, purpose, communityUUID):
-        response = requests.get(
-            f'{yardiConfig["ips_host"]}/api/community/{communityUUID}/purposes')
-        partners_info = response.json()
+        code, ips_response = IpsV2Controller().get_platform_data(
+        communityUUID, purpose)
+        ips_response = ips_response.json()
 
-        # Search if the  porpuse exists for this community
-        purpose_names = [item["purpose"]["name"] for item in partners_info]
-        if purpose in purpose_names:
+        if code != 200 or ('purpose' not in ips_response or purpose not in ips_response['purpose'] or
+                'partner_name' not in ips_response['purpose'][purpose]):
+            return False            
+        else :
             return True
-
-        return False
 
     def register_partner_id(self, partner_id, customer_id, business_id, thing_type, partner_use_id):
         payload = json.dumps({
@@ -442,9 +445,11 @@ class YardiService(ServiceInterface):
 
         headers = {
             'accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            "X-Quext-Community-Id": business_id,
+            "X-Quext-Customer-Id": customer_id
         }
         response = requests.post(
-            f'{yardiConfig["leasing_url"]}/api/v1/partner-id-translation/register-partner-id', headers=headers, data=payload)
+            f'{yardiConfig["leasing_url"]}/service/api/v1/partner-id-translation/register-partner-id', headers=headers, data=payload)
 
         return response.text

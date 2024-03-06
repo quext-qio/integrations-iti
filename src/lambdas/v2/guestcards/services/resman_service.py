@@ -153,7 +153,7 @@ class ResManService(ServiceInterface):
                             comment += f"Email: {new_email} "
 
                         new_event.update({"Comments": comment})
-                        new_xml["LeadManagement"]["Prospects"]["Prospect"]["Customers"]["Customer"]["Phone"] = new_phone_number
+                        new_xml["LeadManagement"]["Prospects"]["Prospect"]["Customers"]["Customer"]["Phone"] = {'PhoneNumber': new_phone_number}
                         new_xml["LeadManagement"]["Prospects"]["Prospect"]["Customers"]["Customer"]["Email"] = new_email
 
                         # If the Events in the result is a list is going to append the new event
