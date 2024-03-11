@@ -3,7 +3,7 @@ import requests
 import os
 from datetime import datetime
 from abstract.service_interface import ServiceInterface
-from utils.mapper.bedroom_mapping import bedroom_mapping
+from utils.mapper.bedroom_mapping import funnel_bedroom_mapping
 from utils.service_response import ServiceResponse
 from constants.funnel_constants import *
 
@@ -25,19 +25,8 @@ class FunnelService(ServiceInterface):
         source = body["source"].lower().replace(
             "dh", DIGITAL_HUMAN).replace("ws", WEBSITE).replace("spa", DIGITAL_HUMAN)
 
-        if DESIRED_BEDS in preferences:
-            # Map string to int using [bedroom_mapping]
-            for i in range(len(preferences[DESIRED_BEDS])):
-                string_beds = preferences[DESIRED_BEDS][i]
-                beds = bedroom_mapping.get(string_beds, 0)
-
-                # Funnel supports only upto 4 bedrooms
-                if not beds in range(5):
-                    beds = 4
-                bedroooms_data.append(beds)
-        bedrooms = str(max(bedroooms_data)) if len(bedroooms_data) > 0 else 0
-        bedrooms = bedrooms.replace("1", "1br").replace(
-            "2", "2br").replace("3", "3br").replace("4", "4+br")
+        if DESIRED_BEDS in preferences and isinstance(preferences[DESIRED_BEDS], list):
+            bedroooms_data = [funnel_bedroom_mapping[preference] for preference in preferences[DESIRED_BEDS] if preference in funnel_bedroom_mapping]
         comment = body[GUEST_COMMENT] if GUEST_COMMENT in body else ""
         payload = {
             "appointment": {
@@ -54,7 +43,7 @@ class FunnelService(ServiceInterface):
                     }
                 ],
                 "move_in_date": preferences[MOVE_IN_DATE] if MOVE_IN_DATE in preferences else "",
-                "layout": [bedrooms] if bedrooms != '0' else [],
+                "layout": bedroooms_data,
                 "price_ceiling": int(preferences[DESIRED_RENT]) if DESIRED_RENT in preferences else 0,
                 "lead_source": source,
                 "bathrooms": preferences[DESIRED_BATHS][0] if DESIRED_BATHS in preferences else 0,
