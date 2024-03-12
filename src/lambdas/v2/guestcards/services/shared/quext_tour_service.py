@@ -23,7 +23,7 @@ class QuextTourService:
                     "phone": "" if not "phone" in prospect else prospect["phone"],
                     "layout": preference["desiredBeds"],
                     "priceCeiling": preference["desiredRent"] if "desiredRent" in preference else 0,
-                    "moveInDate": preference["moveInDate"].split("T")[0] if "moveInDate" in preference else "",
+                    "moveInDate": preference["moveInDate"].split("T")[0] if "moveInDate" in preference and preference["moveInDate"] else "",
                     "notes": body["guestComment"],
                     "start": body["tourScheduleData"]["start"],
                     "source": source

@@ -46,7 +46,8 @@ class SchemaRequestPost(IValidator):
                     "phone": {
                         'required': False,
                         'type': 'string',
-                        'empty': False
+                        'empty': True,
+                        'nullable': True
                     },
                     "email": {
                         'required': True,

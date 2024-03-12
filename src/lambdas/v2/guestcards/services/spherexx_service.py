@@ -24,11 +24,12 @@ class SpherexxService:
         tour_information = None
         property_id = ips_response["params"]["foreign_community_id"]
         community_name = ips_response["community"]["community_name"]
-        move_in_date = body["guestPreference"]["moveInDate"]
-
-        if "T" in move_in_date:
+        move_in_date = body["guestPreference"].get("moveInDate")
+        if move_in_date and "T" in move_in_date:
             body["guestPreference"]["moveInDate"] = move_in_date[0:move_in_date.index(
                 "T")]
+        else:
+            body["guestPreference"]["moveInDate"] = None
 
         event = {
             "Source": body["source"],

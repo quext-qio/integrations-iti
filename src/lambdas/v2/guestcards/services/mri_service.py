@@ -142,8 +142,9 @@ class MRIService(ServiceInterface):
         if "tourScheduleData" in payload:
             visit_date = payload["tourScheduleData"]["start"][:
                                                               payload["tourScheduleData"]["start"].index("T")]
-            move_in_date = payload["guestPreference"]["moveInDate"]
-            move_in_date = move_in_date[:move_in_date.index("T")] if move_in_date != "" else None
+        move_in_date = payload["guestPreference"].get("moveInDate")
+        if move_in_date:
+            move_in_date = move_in_date[:move_in_date.index("T")]
 
         # Get guest data
         guest = payload["guest"]
@@ -161,11 +162,27 @@ class MRIService(ServiceInterface):
         comments = f" {tour_comment}" if tour_comment != "" else prospect_note 
 
         #Phone number cleaner
-        cleaned_phone_number = ''.join(filter(str.isdigit,guest["phone"])) 
+        phone = guest.get("phone") if guest.get("phone") else ""
+        cleaned_phone_number = ''.join(filter(str.isdigit, phone)) 
         if len(cleaned_phone_number) == 10:
             cleaned_phone_number = "1" + cleaned_phone_number
         phone_number = self.clean_and_validate_phone_number("+"+cleaned_phone_number)     
+
+        prospective_tenant = {
+                "entry": {
+                    "DidNotLeaseReason": "",
+                    "Beds": bedrooms,
+                    "Baths": guest_preference["desiredBaths"][0],
+                    "DesiredMoveInDate": move_in_date,
+                    "TotalOccupants": f'{guest_preference["noOfOccupants"]}',
+                    "VisitDate": visit_date,
+                }
+            }
         
+        lease_term_months = guest_preference.get("leaseTermMonths")
+        if lease_term_months:
+            prospective_tenant["entry"]["DesiredLeaseTerm"] = f'{lease_term_months}'
+            
         # Create json body to be converted to xml and send to MRI
         json_body = {
             "mri_s-pmrm_guestcardsbysiteid": {
@@ -178,17 +195,7 @@ class MRIService(ServiceInterface):
                     "Email": guest["email"],
                     "Phone": phone_number,
                     "Type" : MRIConstants.PROSPECT_TYPE, 
-                    "ProspectiveTenant": {
-                        "entry": {
-                            "DidNotLeaseReason": "",
-                            "Beds": bedrooms,
-                            "Baths": guest_preference["desiredBaths"][0],
-                            "DesiredMoveInDate": move_in_date,
-                            "TotalOccupants": f'{guest_preference["noOfOccupants"]}',
-                            "DesiredLeaseTerm": f'{guest_preference["leaseTermMonths"]}',
-                            "VisitDate": visit_date,
-                        }
-                    }
+                    "ProspectiveTenant": prospective_tenant
                 }
             }
         }

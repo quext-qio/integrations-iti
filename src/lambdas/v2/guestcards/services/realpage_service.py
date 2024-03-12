@@ -75,7 +75,8 @@ class RealPageService(ServiceInterface):
 
         # Assuming you have a generated class for PhoneNumber
         _phone_number = factory.create('PhoneNumber')
-        cleaned_phone_number = ''.join(filter(str.isdigit, customer["phone"]))
+        phone = customer.get("phone") if customer.get("phone") else ""
+        cleaned_phone_number = ''.join(filter(str.isdigit, phone))
         if len(cleaned_phone_number) == 10:
             cleaned_phone_number = "1" + cleaned_phone_number
 
@@ -103,7 +104,9 @@ class RealPageService(ServiceInterface):
         _preferences.dateneeded = today_date
         _preferences.occupants = str(preferences["noOfOccupants"])
         _preferences.desiredrent = str(preferences["desiredRent"])
-        _preferences.leasetermmonths = str(preferences["leaseTermMonths"])
+
+        if preferences.get("leaseTermMonths"):
+            _preferences.leasetermmonths = str(preferences["leaseTermMonths"])
 
         appointment_data = None
         _guestcard = client.factory.create('GuestCard')
