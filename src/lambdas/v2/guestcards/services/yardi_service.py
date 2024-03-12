@@ -38,7 +38,7 @@ class YardiService(ServiceInterface):
         first_contact, generated_id = self.generate_unique_id(
             body.get(YardiConstants.QCONTACTID), community_uuid, customer_uuid, partner_id, logger)
         phone = self.clean_and_validate_phone_number(
-            "+"+customer_info["phone"])
+            "+"+customer_info["phone"] if customer_info.get("phone") else "")
         body["guest"]["phone"] = phone
         bedroooms_data = []
         if "desiredBeds" in guest_preference:

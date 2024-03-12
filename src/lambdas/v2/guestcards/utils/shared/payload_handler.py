@@ -17,6 +17,8 @@ class PayladHandler:
                 string_beds = guest_preference["desiredBeds"][i]
                 bedroooms_data.append(bedroom_mapping.get(string_beds, 0))
 
+        phone_number = guest.get(GuestcardsConstants.PHONE) if guest.get(GuestcardsConstants.PHONE) else ""
+
         builder_payload = {
                 "LeadManagement": {
                     "Prospects": {
@@ -30,7 +32,7 @@ class PayladHandler:
                                     },
                                     "Phone": {
                                         "@Type": "cell",
-                                        "PhoneNumber": guest.get(GuestcardsConstants.PHONE, "")
+                                        "PhoneNumber": phone_number
                                     },
                                     "Email": guest[GuestcardsConstants.EMAIL],
                                 }
