@@ -26,7 +26,21 @@ schemas = {
     },
     'tenants': {
         "Parameter": parameter_schema,
-        "property_id": property_id_schema
+        "property_id": property_id_schema,
+        "start_date": {
+                'required': False,
+                'type': 'string',
+                'empty': True,
+                'regex': ValidationConstants.DATE_YYYY_MM_DD,
+                'meta': {'regex': "The start_date is not valid"}
+            },
+        "end_date": {
+                'required': False,
+                'type': 'string',
+                'empty': True,
+                'regex': ValidationConstants.DATE_YYYY_MM_DD,
+                'meta': {'regex': "The end_date is not valid"}
+            }
     },
     'lease-charges': {
         "Parameter": parameter_schema,
@@ -48,8 +62,21 @@ schemas = {
     },
     'get-recurring-transactions': {
         "Parameter": parameter_schema,
-        "property_id": property_id_schema
-        
+        "property_id": property_id_schema,
+        "start_date": {
+                'required': False,
+                'type': 'string',
+                'empty': True,
+                'regex': ValidationConstants.DATE_YYYY_MM_DD,
+                'meta': {'regex': "The start_date is not valid"}
+            },
+        "end_date": {
+                'required': False,
+                'type': 'string',
+                'empty': True,
+                'regex': ValidationConstants.DATE_YYYY_MM_DD,
+                'meta': {'regex': "The end_date is not valid"}
+            }
     },
     'get-properties': {
        "Parameter": parameter_schema
