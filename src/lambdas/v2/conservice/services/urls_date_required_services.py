@@ -16,10 +16,27 @@ class URLDateRequiredServices(ServiceInterface):
 
         try:
             # Calculate the start_date as no more than 3 months ago
-            if Constants.START_DATE in body:
-                start_date = body[Constants.START_DATE] if body[Constants.START_DATE] else self.calculate_start_date(
-                )
-                body[Constants.START_DATE] = start_date
+            if Constants.START_DATE in body and Constants.END_DATE in body:
+                if not self.validate_duration(body[Constants.START_DATE], body[Constants.END_DATE]):
+                    return {
+                    'statusCode': 400,
+                    'body': json.dumps({
+                        'data': {},
+                        'errors': [
+                            {
+                                'message': f'The duration between start & end dates cannot be more than 2 months'
+                            }
+                        ]
+                    }),
+                    'headers': {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*',
+                    },
+                    'isBase64Encoded': False
+                }
+            else:
+                body[Constants.START_DATE] = self.calculate_start_date()
+                body[Constants.END_DATE] = datetime.today().strftime("%Y-%m-%d")
 
             # Call conservice outgoing
             logger.info(
@@ -102,6 +119,19 @@ class URLDateRequiredServices(ServiceInterface):
         temp_date = datetime.today().replace(day=1)
         start_date = (temp_date - relativedelta(months=2)).strftime("%Y-%m-%d")
         return start_date
+    
+    def validate_duration(self, start_date, end_date):
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+
+        # Calculate the difference in months
+        duration_in_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
+
+        # Check if the duration is less than three months
+        if abs(duration_in_months) < 3:
+            return True
+        else:
+            return False
 
     def filter_current_residents(self, data, tenants):
         residents_key = Constants.LEASES if tenants else Constants.CHARGES

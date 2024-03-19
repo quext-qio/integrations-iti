@@ -16,6 +16,7 @@ class Constants:
     CHARGES = 'charges'
     PARAMETER = 'Parameter'
     START_DATE = 'start_date'
+    END_DATE = 'end_date'
     TENANTS = 'tenants'
     LEASES = 'leases'
     CHARGES = 'charges'
