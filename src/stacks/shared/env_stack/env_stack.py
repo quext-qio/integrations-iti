@@ -192,6 +192,7 @@ class EnvStack(NestedStack):
                 "CUSTOM_DOMAIN_NAME": custom_domain_name,
                 "CURRENT_ENV": all_params["CURRENT_ENV"],
                 "ACL_HOST": all_params["ACL_HOST_INTERNAL"],
+                "MADERA_HOST": all_params["MADERA_HOST"],
             },
             "salesforce": {
                 "IPS_HOST": all_params["IPS_HOST"],
