@@ -1,7 +1,8 @@
+import os
 
 class Constants:
     PATH = '/api/conservice'
-    HOST = 'https://newco.maderaresidential.com'
+    HOST = os.environ.get("MADERA_HOST")
     HTTP_BAD_RESPONSE_CODE = 400
     HTTP_GOOD_RESPONSE_CODE = 200
     OUTGOING_CONNECTION_NAME = 'Conservice_Outgoing_Channel'
