@@ -60,7 +60,7 @@ def lambda_handler(event, context):
 
     # Validate if platform data available in IPS response
     if ('purpose' not in ips_response or 'unitAvailability' not in ips_response['purpose'] or
-            'partner_name' not in ips_response['purpose']['unitAvailability']):
+            'partner_name' not in ips_response['purpose']['unitAvailability']) or "params" not in ips_response or "communityID" not in ips_response["params"]:
         logger.warning(f"IPS response does not contain platformData")
         return {
             "statusCode": "400",
@@ -80,8 +80,7 @@ def lambda_handler(event, context):
         }
 
     # Add community_id to body
-    body["community_id"] = int(ips_response.get(
-        "community").get('community_id'))
+    body["community_id"] = ips_response["params"]["communityID"]
 
     # Factory based on action
     return ServiceFactory.get_service(action, logger).get_data(path_parameters, body, logger)
