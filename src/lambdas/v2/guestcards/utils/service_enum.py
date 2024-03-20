@@ -7,7 +7,10 @@ class ServiceType(Enum):
     REALPAGE = "realpage"
     RESMAN = "resman"
     YARDI = "yardi"
-    REALPAGEILM = "realpage_ilm"
-    REALPAGEL2L = "realpage_l2l"
     SPHEREXX = "spherexx"
     MRI = "mri"
+
+class PartnerSystem(Enum):
+    REALPAGE_ILM = "ilm"
+    REALPAGE_L2L = "l2l"
+    REALPAGE_ONESITE = "onesite"
