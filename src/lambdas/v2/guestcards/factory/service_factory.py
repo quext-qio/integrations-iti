@@ -15,7 +15,7 @@ class ServiceFactory:
         # Validate service type using enum constructor
         try:
             service_type = ServiceType(service_type_name.lower())
-            partner_system = PartnerSystem(partner_system.lower())
+            partner_system = PartnerSystem(partner_system.lower()) if partner_system else None
         except ValueError:
             raise Exception(f"Unsupported service type for GuestCards: {service_type_name}")
         
