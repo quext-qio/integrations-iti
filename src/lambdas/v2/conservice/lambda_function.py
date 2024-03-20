@@ -13,7 +13,7 @@ logger = Logger().instance(f"(ITI) Conservice Lambda")
 def lambda_handler(event, context):
     logger.info(f"Executing with event: {event}, context: {context}")
     # Validate ACL
-    is_acl_valid, response_acl = ACL.check_permitions(
+    is_acl_valid, response_acl = ACL.check_permissions(
         event, check_endpoints=False)
     if not is_acl_valid:
         logger.info(f"ACL not valid: {response_acl}")
