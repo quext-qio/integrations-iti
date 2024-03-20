@@ -7,7 +7,7 @@ from qoops_logger import Logger
 
 # ----------------------------------------------------------------------------------------
 # Create Logger instance
-logger = Logger().instance(f"(ITI) GestCards Lambda")
+logger = Logger().instance(f"(ITI) GuestCards Lambda")
 
 
 def lambda_handler(event, context):

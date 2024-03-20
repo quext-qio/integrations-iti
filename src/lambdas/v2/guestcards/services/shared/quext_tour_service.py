@@ -1,5 +1,7 @@
 import json, requests
+from datetime import datetime
 from configuration.realpage.realpage_config import ilm_config
+from utils.mapper.bedroom_mapping import bedroom_mapping
 
 class QuextTourService:
 
@@ -11,28 +13,37 @@ class QuextTourService:
             'Access-Control-Allow-Origin': '*',
             'Content-Type': 'application/json'
         }
-        source = body["source"].lower().replace("dh", "digital human").replace("ws", "websites")
+        source = body["source"].lower().replace("dh", "DIGITAL_HUMAN").replace("ws", "WEBSITES").replace("spa", "DIGITAL_HUMAN")
         preference = body['guestPreference']
         prospect = body['guest']
+
+        bedroooms_data = []
+        if "desiredBeds" in preference and isinstance(preference["desiredBeds"], list):
+            bedroooms_data = [bedroom_mapping[preference] for preference in preference["desiredBeds"] if preference in bedroom_mapping]
         
         new_body  = {
-                "appointmentData": {
-                    "firstName": prospect["first_name"],
-                    "lastName": prospect["last_name"],
-                    "email": prospect["email"],
-                    "phone": "" if not "phone" in prospect else prospect["phone"],
-                    "layout": preference["desiredBeds"],
-                    "priceCeiling": preference["desiredRent"] if "desiredRent" in preference else 0,
-                    "moveInDate": preference["moveInDate"].split("T")[0] if "moveInDate" in preference else "",
-                    "notes": body["guestComment"],
-                    "start": body["tourScheduleData"]["start"],
-                    "source": source
-                },
-                "platformData": body["platformData"],
-            }
+            "customer_id": body["platformData"]["customerUUID"],
+            "community_id": body["platformData"]["communityUUID"],
+            "activity_source_name": source,
+            "appointment_type_name": "IN_PERSON_TOUR",
+            "desired_number_of_bedrooms": bedroooms_data,
+            "max_budget": preference["desiredRent"] if "desiredRent" in preference else 0,
+            "notes": body.get("guestComment", ""),
+            "move_in_date": preference["moveInDate"].split("T")[0] if "moveInDate" in preference and preference["moveInDate"] else "",    
+            "start_time": datetime.strptime(body["tourScheduleData"]["start"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d %H:%M:%S"),
+            "guest": {
+                "first_name": prospect["first_name"],
+                "last_name": prospect["last_name"],
+                "email": prospect["email"]
+            },
+        }
+
+        if prospect.get("phone"):
+            new_body["guest"]["phone_number"] = ''.join(filter(str.isdigit, prospect["phone"]))
+
         try:
             environment = ilm_config['environment']
-            url = f"https://calendar.{environment}.quext.io/api/v1/appointments/public"
+            url = f"https://calendar.{environment}.quext.io/api/v1/appointments"
             quext_response = requests.post(url=url, data=json.dumps(new_body), headers=headers)
             response =  json.loads(quext_response.text)
             
@@ -75,9 +86,7 @@ class QuextTourService:
             url = f"https://nestiolistings.com/api/v2/appointments/group/{partner['platformData']['communityID']}/available-times/?from_date={date}&to_date={date}"
             funnel_response = requests.get(url=url, data=json.dumps(body_request), headers=headers)
             response = json.loads(funnel_response.text)
-            return {
-                "availableTimes": response["available_times"]
-            }
+            return response["available_times"]
         if partner == "Quext":
             body_request = {
                 "timeData": {
@@ -89,7 +98,5 @@ class QuextTourService:
             environment = ilm_config['environment']
             url = f"https://calendar.{environment}.quext.io/api/v1/time-slots/public"
             quext_response = requests.post(url=url, data=json.dumps(body_request), headers=headers)
-            return {
-                "availableTimes":json.loads(quext_response.text)["available_times"]
-            }
+            return json.loads(quext_response.text)["available_times"]
     

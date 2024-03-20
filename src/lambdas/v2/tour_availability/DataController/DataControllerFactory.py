@@ -23,7 +23,7 @@ class DataControllerFactory:
         # Validate if platform data available in IPS response
         if ('purpose' in ips_response and 'tourAvailability' in ips_response['purpose'] and
                 'partner_name' in ips_response['purpose']['tourAvailability']):
-            partner = ips_response["purpose"]["guestCards"]["partner_name"]
+            partner = ips_response["purpose"]["tourAvailability"]["partner_name"]
             logger.info(f"Partner returned from IPS: {partner}")
         elif code != 200:
             logger.error(

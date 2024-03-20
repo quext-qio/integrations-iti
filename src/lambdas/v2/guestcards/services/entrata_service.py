@@ -40,6 +40,7 @@ class EntrataService(ServiceInterface):
                 available_times = times["availableTimes"] if "availableTimes" in times else [
                 ]
                 if appointment_date.replace("T", " ")[0:appointment_date.index("Z")] not in available_times:
+                    times = available_times
                     tour_requested = appointment_date
                     tour_error = "Not created. No time slots available for that start time"
                 else:
@@ -142,9 +143,10 @@ class EntrataService(ServiceInterface):
         preferred_amenities = customer_preference.get(
             EntrataConstants.PREFERRED_AMENITIES, "")
 
-        move_in_date = datetime.strptime(
-            payload[EntrataConstants.GUEST_PREFERENCE][EntrataConstants.MOVE_IN_DATE], "%Y-%m-%dT%H:%M:%SZ")
-        move_date = move_in_date.strftime(EntrataConstants.ENTRATA_DATE)
+        move_date = payload[EntrataConstants.GUEST_PREFERENCE].get(EntrataConstants.MOVE_IN_DATE, "")
+        if move_date:
+            move_date = datetime.strptime(move_date, "%Y-%m-%dT%H:%M:%SZ")
+            move_date = move_date.strftime(EntrataConstants.ENTRATA_DATE)
 
         now_date = datetime.now(timezone('MST')).strftime(
             EntrataConstants.ENTRATA_DATE)
