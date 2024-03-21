@@ -177,8 +177,9 @@ def update_engrain(properties_list, list_errors):
     for property_info in properties_list:
         index +=1
         # Call newco db to validate if has data
-        parameters = { "newco_property_id": property_info['propertyId'] }  
+        parameters = (property_info['propertyId'], ) 
         response_of_database, code = data_from_newco(engrain_push_newco_query, parameters, property_info)
+        logger.info("response_of_database %s" %response_of_database)
         if len(response_of_database['data']) == 0:
             list_errors.append({"type":"WARNING", "message":f"Engrain Push ({index}): No Data Returned From Newco DB: item = {property_info}", "info": json.dumps(property_info)})
         else:
@@ -283,7 +284,7 @@ def data_from_newco(sql, parameters, item):
     Method to get data from Newco database.
     Args:
         sql (str): This is the query to retrieve data from Newco DB.
-        parameters (dict): This dictionary will have the propertyId used in the SQL query.
+        parameters (tuple): This tuple will have the propertyId used in the SQL query.
         item (dict): This is the information of every item of Zato (key/value) DB.
     Returns:
         tuple: Response of the database and code (success = 200, error = 500).

@@ -22,7 +22,7 @@ class ACL:
             return False, response
 
     @staticmethod
-    def check_permitions(event, check_endpoints=True):
+    def check_permissions(event, check_endpoints=True):
         
         # Case: No API key in header or empty
         if 'x-api-key' not in event['headers'] or event['headers']['x-api-key'] == "":
@@ -40,7 +40,7 @@ class ACL:
                 'isBase64Encoded': False
             }
 
-        # Create values required for [ACL.check_permitions]
+        # Create values required for [ACL.check_permissions]
         endpoint = event['resource']
         method = event["httpMethod"]
         api_key = event['headers']['x-api-key']

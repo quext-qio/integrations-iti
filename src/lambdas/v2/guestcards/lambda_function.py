@@ -13,7 +13,7 @@ logger = Logger().instance(f"(ITI) GuestCards Lambda")
 def lambda_handler(event, context):
     logger.info(f"Executing with event: {event}, context: {context}")
     input = json.loads(event['body'])
-    is_acl_valid, response_acl = ACL.check_permitions(event)
+    is_acl_valid, response_acl = ACL.check_permissions(event)
     if not is_acl_valid:
         return response_acl
     is_valid, input_errors = SchemaRequestPost(input).is_valid()
@@ -56,8 +56,17 @@ def lambda_handler(event, context):
         logger.error(msg)
         raise Exception(msg)
 
+    partner_system = None
+    if ips_response["purpose"]["guestCards"]["partner_name"] == "RealPage":
+        if "ilm" in str(ips_response["purpose"]["guestCards"]["partner_system"]).lower():
+            partner_system = "ilm"
+        elif "l2l" in str(ips_response["purpose"]["guestCards"]["partner_system"]).lower():
+            partner_system = "l2l"
+        elif "onesite" in str(ips_response["purpose"]["guestCards"]["partner_system"]).lower():
+            partner_system = "onesite"
+
     # Get service type name from IPS response
     service_type_name = ips_response['purpose']['guestCards']['partner_name']
-    service = ServiceFactory.get_service(service_type_name)
+    service = ServiceFactory.get_service(service_type_name, partner_system)
     logger.info(f"Factory response: {service_type_name}")
     return service.get_data(input, ips_response, logger)

@@ -44,8 +44,8 @@ class RealPageILMService(ServiceInterface):
                     prospect_comments = prospect_comments + tour_comment
 
         # Get values of [realpage_property, realpage_id] depend of RealPage Type
-        realpage_property = "Lead2Lease Property Id" if ips_response[
-            "purpose"]["guestCards"]["partner_name"] == "Realpage_L2L" else "ILM Property Id"
+        realpage_property = "Lead2Lease Property Id" if "l2l" in ips_response[
+            "purpose"]["guestCards"]["partner_system"].lower() else "ILM Property Id"
         realpage_id = ips_response["params"]["property_id"]
 
         # Create headers for RealPage L2L
@@ -56,7 +56,7 @@ class RealPageILMService(ServiceInterface):
         }
 
         # Update headers for RealPage ILM
-        if ips_response["purpose"]["guestCards"]["partner_name"] == "RealPage_ILM":
+        if "ilm" in ips_response["purpose"]["guestCards"]["partner_system"].lower():
             _headers.update(
                 {"x-routing-key": ips_response["params"]["x-routing-key"]})
             _headers.update(
