@@ -6,6 +6,9 @@ from services.residents_service import ResidentsService
 from services.transactions_service import TransactionsService
 from services.customer_events_service import CustomerEventsService
 from services.invalid_action_service import InvalidActionService
+from services.property_service import PropertyService
+from services.prospect_service import ProspectService
+
 
 class ServiceFactory:
     @staticmethod
@@ -16,7 +19,7 @@ class ServiceFactory:
         except Exception as e:
             logger.error(f"Invalid service type: {service_type_name}")
             service_type = ServiceType.INVALID_ACTION
-            
+
         # Return service
         if service_type == ServiceType.CHARGE_CODES:
             logger.info(f"Factory Response: ChargeCodesService")
@@ -33,9 +36,12 @@ class ServiceFactory:
         elif service_type == ServiceType.CUSTOMER_EVENTS:
             logger.info(f"Factory Response: CustomerEventsService")
             return CustomerEventsService()
+        elif service_type == ServiceType.PROPERTIES:
+            logger.info(f"Factory Response: PropertyService")
+            return PropertyService()
+        elif service_type == ServiceType.PROSPECTS:
+            logger.info(f"Factory Response: ProspectService")
+            return ProspectService()
         else:
             logger.info(f"Factory Response: InvalidActionService")
             return InvalidActionService()
-        
-            
-        

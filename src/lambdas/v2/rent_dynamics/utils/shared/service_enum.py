@@ -8,4 +8,5 @@ class ServiceType(Enum):
     RESIDENTS = "residents"
     TRANSACTIONS = "transactions"
     CUSTOMER_EVENTS = "customerevents"
-    
+    PROPERTIES = "properties"
+    PROSPECTS = "prospects"

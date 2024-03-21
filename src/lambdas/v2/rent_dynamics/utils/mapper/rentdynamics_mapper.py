@@ -190,3 +190,27 @@ class RentDynamicsMapper:
 
             result.append(_data)
         return result
+
+    @staticmethod
+    def set_prospect_details(data):
+        result_dict = {}
+        for prospect in data:
+            if prospect['prospect_id'] not in result_dict:
+                result_dict[prospect['prospect_id']] = {
+                        'prospectId': prospect['prospect_id'],
+                        'firstName': prospect['first_name'],
+                        'middleName': "",
+                        'lastName': prospect['last_name'],
+                        'emailAddress': prospect['email'],
+                        'phone': prospect['phone'],
+                        'address': prospect['address'],
+                        'city': prospect['city'],
+                        'state': prospect['state'],
+                        'zip': prospect['postal'],
+                        'targetMoveInDate': prospect['desired_move_date'],
+                        'desiredBedrooms': prospect['desired_bedrooms'],
+                        'desiredNumberOccupants': prospect['additional_occupants'],
+                        'petInfo': prospect['pets']
+                    }
+        return list(result_dict.values())
+

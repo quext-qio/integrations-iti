@@ -105,8 +105,21 @@ schemas = {
         "customerUUID": customer_schema,
         "action": action_schema,
         "communityUUID": community_schema
+    },
+    'prospects': {
+        "communityUUID": community_schema,
+        "customerUUID": customer_schema,
+        "action": action_schema,
+        "create_date": {
+                    'required': True,
+                    'type': 'string',
+                    'empty': False,
+                    'regex': ValidationConstants.DATE_YYYY_MM_DD,
+                    'meta': {'regex': "The create date is not valid"}
+        }
     }
 }
+
 
 class SchemaRequestPost(IValidator):
     def __init__(self, _data, action):

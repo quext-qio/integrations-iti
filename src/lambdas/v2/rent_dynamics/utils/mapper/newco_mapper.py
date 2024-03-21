@@ -31,8 +31,8 @@ class NewCoMapper:
                 return True, data
         
         except Exception as e:
-            print(f"An error occurred while retrieving data of get charge codes from the database: {str(e)}")
-            return False, [{"message":f"An error occurred while retrieving data of get charge codes from the database: {str(e)}"}]
+            print(f"An error occurred while retrieving data of get properties from the database: {str(e)}")
+            return False, [{"message":f"An error occurred while retrieving data of get properties from the database: {str(e)}"}]
         
     @staticmethod
     def get_chargeCodes_RentDynamics(params: dict):
@@ -162,8 +162,24 @@ class NewCoMapper:
         except Exception as e:
             print(f"An error occurred while retrieving data of get transactions from the database: {str(e)}")
             return False, [{"message":f"An error occurred while retrieving data of get transactions from the database: {str(e)}"}]
-        
 
-        
+    @staticmethod
+    def get_prospect_rent_dynamics(params: dict):
+        try:
+            with closing(db_object.get_db_session()) as session:
+                cursor = session.cursor(dictionary=True)
+                path = "newco_queries/get_prospects.sql"
+                output = db_object.read_query(path, "rent_dynamics", "prospects", 0.0)
+                cursor.execute(output, params)
 
-    
+                # Fetch all rows
+                result = cursor.fetchall()
+                data = RentDynamicsMapper.set_prospect_details(result)
+
+                return True, data
+
+        except Exception as e:
+            print(f"An error occurred while retrieving data of get prospects from the database: {str(e)}")
+            return False, [
+                {
+                    "message": f"An error occurred while retrieving data of get prospects from the database: {str(e)}"}]
